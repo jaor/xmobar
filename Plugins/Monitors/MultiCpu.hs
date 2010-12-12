@@ -16,7 +16,7 @@ module Plugins.Monitors.MultiCpu(multiCpuConfig, runMultiCpu) where
 
 import Plugins.Monitors.Common
 import qualified Data.ByteString.Lazy.Char8 as B
-import Data.List (isPrefixOf,intersperse,transpose)
+import Data.List (isPrefixOf,intersperse,transpose,unfoldr)
 
 multiCpuConfig :: IO MConfig
 multiCpuConfig =
@@ -61,9 +61,10 @@ formatCpu xs
                       ps <- showPercentsWithColors (t:xs)
                       return (b:ps)
 
-splitEvery :: Int -> [a] -> [[a]]
-splitEvery _ [] = []
-splitEvery n l  = (take n l) : splitEvery n (drop n l)
+splitEvery :: (Eq a) => Int -> [a] -> [[a]]
+splitEvery n = unfoldr (\x -> if x == []
+                              then Nothing
+                              else Just $ splitAt n x)
 
 groupData :: [String] -> [[String]]
 groupData = transpose . tail . splitEvery 6
