@@ -124,7 +124,7 @@ readBattery files =
                         (3600 * b / 1000000) -- wattseconds
                         (c / 1000000) -- volts
                         (if c > 0 then (d / c) else -1) -- amperes
-    where grab = fmap (read . B.unpack) . B.readFile
+    where grab f = catch (fmap (read . B.unpack) $ B.readFile f) (\_ -> return 0)
 
 readBatteries :: BattOpts -> [Files] -> IO Result
 readBatteries opts bfs =
