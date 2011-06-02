@@ -677,6 +677,24 @@ Monitors have default aliases.
   distribution can be used to set the given property from the output
   of any other program or script.
 
+`Brightness Args RefreshRate`
+
+- Aliases to `bright`
+- Args: default monitor arguments (see below), plus the following specif ones:
+    - `-D`: directory in `/sys/class/backlight/` with files in it
+       (default: "acpi_video0")
+    - `-C`: file with the current brightness (default:
+       actual_brightness)
+    - `-M`: file with the maximum brightness (default:
+       max_brigtness)
+- Variables that can be used with the `-t`/`--template` argument:
+	    `hbar`, `percent`, `bar`
+- Default template: `<percent>`
+- Example:
+
+       Run Brightness ["-t", "<bar>"] 60
+
+
 [samples/xmonadpropwrite.hs script]: https://github.com/jaor/xmobar/raw/master/samples/xmonadpropwrite.hs
 
 ## Monitor Plugins Commands Arguments
