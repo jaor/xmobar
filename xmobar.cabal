@@ -57,6 +57,10 @@ flag with_alsa
   description: Use alsa-mixer to get the volume from soundcards.
   default: False
 
+flag with_datezone
+  description: Enables localized date support
+  default: False
+
 executable xmobar
     hs-source-dirs:     src
     main-is:            Main.hs
@@ -120,3 +124,8 @@ executable xmobar
        build-depends: alsa-mixer == 0.1.*
        other-modules: Plugins.Monitors.Volume
        cpp-options: -DALSA
+
+    if flag(with_datezone) || flag(all_extensions)
+       build-depends: timezone-olson, timezone-series
+       other-modules: Plugins.DateZone
+       cpp-options: -DDATEZONE

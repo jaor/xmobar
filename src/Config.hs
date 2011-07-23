@@ -38,6 +38,10 @@ import Plugins.Mail
 import Plugins.MBox
 #endif
 
+#ifdef DATEZONE
+import Plugins.DateZone
+#endif
+
 -- $config
 -- Configuration data type and default configuration
 
@@ -111,6 +115,9 @@ infixr :*:
 runnableTypes :: Command :*: Monitors :*: Date :*: PipeReader :*: CommandReader :*: StdinReader :*: XMonadLog :*: EWMH :*:
 #ifdef INOTIFY
                  Mail :*: MBox :*:
+#endif
+#ifdef DATEZONE
+                 DateZone :*:
 #endif
                  ()
 runnableTypes = undefined

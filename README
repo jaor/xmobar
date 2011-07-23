@@ -124,6 +124,10 @@ Otherwise, you'll need to install them yourself.
 :    Support for ALSA sound cards. Enables the Volume plugin. Requires the
      [alsa-mixer] package.
 
+`with_datezone`
+:    Support for localized times. Enables the DateZone plugin. Requires
+     [timezone-olson] and [timezone-series] package.
+
 `all_extensions`
 :    Enables all the extensions above.
 
@@ -845,6 +849,16 @@ can be used in the output template as `%mydate%`
 - Format is a time format string, as accepted by the standard ISO C
   `strftime` function (or Haskell's `formatCalendarTime`).
 - Sample usage: `Run Date "%a %b %_d %Y <fc=#ee9a00>%H:%M:%S</fc>" "date" 10`
+
+`Date Format Alias Zone RefreshRate`
+
+- Format is a time format string, as accepted by the standard ISO C
+  `strftime` function (or Haskell's `formatCalendarTime`).
+- Zone is the name of the TimeZone. Assumes that the tz database is stored in
+  /usr/share/zoneinfo/
+- Sample usage:
+  `Run DateZone "<fc=#ee9a00>%H:%M:%S</fc>" "viennaDate" "Europa/Vienna" 10`
+
 
 `CommandReader "/path/to/program" Alias`
 
