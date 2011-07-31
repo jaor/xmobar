@@ -13,6 +13,7 @@
 -----------------------------------------------------------------------------
 
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE BangPatterns #-}
 
 module Plugins.Monitors.Top (startTop, topMemConfig, runTopMem) where
 
