@@ -75,8 +75,7 @@ instance Exec Command where
 -- is not possible to set a thread delay grater than about 45 minutes.
 -- With a little recursion we solve the problem.
 tenthSeconds :: Int -> IO ()
-tenthSeconds s | s >= x = do threadDelay y
-                             tenthSeconds (x - s)
+tenthSeconds s | s >= x = do threadDelay (x * 100000)
+                             tenthSeconds (s - x)
                | otherwise = threadDelay (s * 100000)
-               where y = maxBound :: Int
-                     x = y `div` 100000
+               where x = (maxBound :: Int) `div` 100000
