@@ -159,7 +159,8 @@ parseConfig = runParser parseConf fields "Config" . stripComments
                      return ("Static {"  ++ p  ++ "}")
       tillFieldEnd = staticPos <|> many (noneOf ",}\n\r")
 
-      commandsEnd  = wrapSkip (string "]") >> oneOf "},"
+      commandsEnd  = wrapSkip (string "]") >> (string "}" <|> notNextRun)
+      notNextRun = do { string ","; notFollowedBy $ wrapSkip $ string "Run"; return ","} 
       readCommands = manyTill anyChar (try commandsEnd) >>= read' commandsErr . flip (++) "]"
 
       strField e n = field e n . between (strDel "start" n) (strDel "end" n) . many $ noneOf "\"\n\r"
