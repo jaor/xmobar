@@ -14,10 +14,12 @@
 
 module Plugins.Monitors.Volume (runVolume, volumeConfig) where
 
+import Prelude hiding ( catch )
 import Control.Monad ( liftM, mplus )
 import Data.Maybe
 import Plugins.Monitors.Common
 import Sound.ALSA.Mixer
+import Sound.ALSA.Exception ( catch )
 import System.Console.GetOpt
 
 volumeConfig :: IO MConfig
@@ -115,7 +117,8 @@ runVolume mixerName controlName argv = do
         maybeNA = maybe (return "N/A")
     (lo, hi) <- io $ getRange volumeControl
     val <- io $ getChannel FrontLeft $ value volumeControl
-    db <- io $ getChannel FrontLeft $ dB volumeControl
+    db <- io $ catch (getChannel FrontLeft $ dB volumeControl)
+                     (\_ -> return $ Just 0)
     sw <- io $ getChannel FrontLeft switchControl
     p <- maybeNA (formatVol lo hi) val
     b <- maybeNA (formatVolBar lo hi) val

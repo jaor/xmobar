@@ -122,6 +122,7 @@ executable xmobar
 
     if flag(with_alsa) || flag(all_extensions)
        build-depends: alsa-mixer == 0.1.*
+       build-depends: alsa-core == 0.5.*
        other-modules: Plugins.Monitors.Volume
        cpp-options: -DALSA
 
