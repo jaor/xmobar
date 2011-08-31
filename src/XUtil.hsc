@@ -28,6 +28,7 @@ module XUtil
     , fi
     , withColors
     , DynPixel(..)
+	, xrrSelectInput
     ) where
 
 import Control.Concurrent
@@ -257,3 +258,8 @@ setupLocale = withCString "" (setlocale $ #const LC_ALL) >> return ()
 setupLocale :: IO ()
 setupLocale = return ()
 #endif
+
+--  XRRSelectInput
+#include <X11/extensions/Xrandr.h>
+foreign import ccall unsafe "X11/extensions/Xrandr.h XRRSelectInput"
+  xrrSelectInput :: Display -> Window -> EventMask -> IO ()

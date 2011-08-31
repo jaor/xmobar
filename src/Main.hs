@@ -42,6 +42,7 @@ import Control.Monad (unless)
 main :: IO ()
 main = do
   d   <- openDisplay ""
+  d'  <- openDisplay ""
   args     <- getArgs
   (o,file) <- getOpts args
   (c,defaultings) <- case file of
@@ -60,7 +61,8 @@ main = do
   cls   <- mapM (parseTemplate conf) (splitTemplate conf)
   vars  <- mapM (mapM startCommand) cls
   (r,w) <- createWin d fs conf
-  eventLoop (XConf d r w fs conf) vars
+  _ <- enableXRandrEventListen d'
+  eventLoop (XConf d d' r w fs conf) vars
 
 -- | Splits the template in its parts
 splitTemplate :: Config -> [String]
