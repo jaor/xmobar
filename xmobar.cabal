@@ -91,6 +91,10 @@ executable xmobar
     if impl (ghc >= 6.12.1)
        ghc-options: -fno-warn-unused-do-bind
 
+    --  for instance declaration in src/Plugins/Monitors/CoreCommon.hs
+    if impl (ghc < 7)
+       cpp-options: -DGHC6
+
     build-depends: X11>=1.3.0, mtl, unix, parsec, filepath, stm, time
 
     if flag(small_base)
