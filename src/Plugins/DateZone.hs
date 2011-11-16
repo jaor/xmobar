@@ -1,3 +1,4 @@
+{-# LANGUAGE DoAndIfThenElse #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Plugins.DateZone
@@ -8,13 +9,13 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- A date plugin with localization support for Xmobar
+-- A date plugin with localization and location support for Xmobar
 --
 -- Based on Plugins.Date
 --
 -- Usage example: in template put
 --
--- > Run DateZone "%H:%M:%S" "utcDate" "UTC" 10
+-- > Run DateZone "%a %H:%M:%S" "de_DE.UTF-8" "UTC" "utcDate" 10
 --
 -----------------------------------------------------------------------------
 
@@ -22,23 +23,50 @@ module Plugins.DateZone (DateZone(..)) where
 
 import Plugins
 
-import System.Locale
+import Localize
+
+import Control.Concurrent.STM
 
 import Data.Time.LocalTime
 import Data.Time.Format
 import Data.Time.LocalTime.TimeZone.Olson
 import Data.Time.LocalTime.TimeZone.Series
 
-data DateZone = DateZone String String String Int
+import System.IO.Unsafe
+import System.Locale (TimeLocale)
+import System.Time
+
+
+
+{-# NOINLINE localeLock #-}
+-- ensures that only one plugin instance sets the locale
+localeLock :: TMVar Bool
+localeLock = unsafePerformIO (newTMVarIO False)
+
+data DateZone = DateZone String String String String Int
     deriving (Read, Show)
 
 instance Exec DateZone where
-    alias (DateZone _ a _ _) = a
-    run   (DateZone f _ z _) = date f z
-    rate  (DateZone _ _ _ r) = r
+    alias (DateZone _ _ _ a _) = a
+    start (DateZone f l z _ r) cb = do
+      lock <- atomically $ takeTMVar localeLock
+      setupTimeLocale l
+      locale <- getTimeLocale
+      atomically $ putTMVar localeLock lock
+      if z /= "" then do
+        timeZone <- getTimeZoneSeriesFromOlsonFile ("/usr/share/zoneinfo/" ++ z)
+        go (dateZone f locale timeZone)
+       else
+        go (date f locale)
 
-date :: String -> String -> IO String
-date format zone = do
-  timeZone <- getTimeZoneSeriesFromOlsonFile ("/usr/share/zoneinfo/" ++ zone)
+      where go func = func >>= cb >> tenthSeconds r >> go func
+
+date :: String -> TimeLocale -> IO String
+date format loc = do
+  t <- toCalendarTime =<< getClockTime
+  return $ formatCalendarTime loc format t
+
+dateZone :: String -> TimeLocale -> TimeZoneSeries -> IO String
+dateZone format loc timeZone = do
   zonedTime <- getZonedTime
-  return $ formatTime defaultTimeLocale format $ utcToLocalTime' timeZone $ zonedTimeToUTC zonedTime
+  return $ formatTime loc format $ utcToLocalTime' timeZone $ zonedTimeToUTC zonedTime

@@ -65,7 +65,7 @@ executable xmobar
     hs-source-dirs:     src
     main-is:            Main.hs
     other-modules:
-      Xmobar, Config, Parsers, Commands, XUtil, StatFS, Runnable,
+      Xmobar, Config, Parsers, Commands, Localize, XUtil, StatFS, Runnable,
       Plugins, Plugins.CommandReader, Plugins.Date, Plugins.EWMH,
       Plugins.PipeReader, Plugins.StdinReader, Plugins.XMonadLog,
       Plugins.Utils, Plugins.Kbd, Plugins.Monitors,

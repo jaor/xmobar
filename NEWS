@@ -6,7 +6,8 @@
 _New features_
 
   - New brightness monitor, courtesy of Martin Perner.
-  - New DateZone plugin, for localized datetimes, also by Martin.
+  - New DateZone plugin, for configurable timezone and localized datetimes, also
+    by Martin.
   - New keyboard layout monitor (Kbd).  Yes, by Martin.
   - Rewrite of the event handling ([issue 53], [issue 57]), also by Martin.
   - Cpu monitor now also reports `iowait` field ([issue 55]).
