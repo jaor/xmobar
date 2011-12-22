@@ -44,6 +44,9 @@ import Plugins.Monitors.MPD
 #ifdef ALSA
 import Plugins.Monitors.Volume
 #endif
+#ifdef MPRIS
+import Plugins.Monitors.Mpris
+#endif
 
 data Monitors = Weather      Station    Args Rate
               | Network      Interface  Args Rate
@@ -71,6 +74,10 @@ data Monitors = Weather      Station    Args Rate
 #endif
 #ifdef ALSA
               | Volume   String     String Args Rate
+#endif
+#ifdef MPRIS
+              | Mpris1   String     Args Rate
+              | Mpris2   String     Args Rate
 #endif
                 deriving (Show,Read,Eq)
 
@@ -112,6 +119,10 @@ instance Exec Monitors where
 #ifdef ALSA
     alias (Volume m c _ _) = m ++ ":" ++ c
 #endif
+#ifdef MPRIS
+    alias (Mpris1 _ _ _) = "mpris1"
+    alias (Mpris2 _ _ _) = "mpris2"
+#endif
     start (Network  i a r) = startNet i a r
     start (Cpu a r) = startCpu a r
     start (MultiCpu a r) = startMultiCpu a r
@@ -139,4 +150,8 @@ instance Exec Monitors where
 #endif
 #ifdef ALSA
     start (Volume m c a r) = runM a volumeConfig (runVolume m c) r
+#endif
+#ifdef MPRIS
+    start (Mpris1 s a r) = runM a mprisConfig (runMPRIS1 s) r
+    start (Mpris2 s a r) = runM a mprisConfig (runMPRIS2 s) r
 #endif

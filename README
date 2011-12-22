@@ -115,6 +115,10 @@ Otherwise, you'll need to install them yourself.
 `with_mpd`
 :    Enables support for the [MPD] daemon. Requires the [libmpd] package.
 
+`with_mpris`
+:    Enables support for MPRIS v1/v2 protocol. 
+     Requires the [dbus-core] and [text] packages.
+
 `with_inotify`
 :    Support for inotify in modern linux kernels. This option is needed
      for the MBox and Mail plugins to work. Requires the [hinotify]
@@ -631,6 +635,24 @@ Monitors have default aliases.
                   "<composer> <title> (<album>) <track>/<plength> <statei> ",
                   "--", "-P", ">>", "-Z", "|", "-S", "><"] 10
 
+`Mpris1 PlayerName Args RefreshRate`
+- Aliases to `mpris1`
+- Requires [dbus-core] and [text] packages. 
+  To activate, pass `--flags="with_mpris"` during compilation.
+- PlayerName: player supporting MPRIS v1 protocol, in lowercase.
+- Args: default monitor arguments.
+- Variables that can be used with the `-t`/`--template` argument:
+            `album`, `artist`, `arturl`, `length`, `title`, `tracknumber`
+- Default template: `<artist> - <title>`
+- Example:
+
+         Run Mpris1 "clementine" ["-t",
+                                  "<artist> - [<tracknumber>] <title>"] 10
+
+`Mpris2 PlayerName Args RefreshRate`
+- Just like Mpris1. 
+  Supposed to be used with mediaplayers which support MPRIS v2.
+
 `Mail Args Alias`
 
 - Args: list of maildirs in form
@@ -1093,6 +1115,8 @@ Copyright &copy; 2010-2011 Jose Antonio Ortega Ruiz
 [iwlib]: http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html
 [hinotify]: http://hackage.haskell.org/package/hinotify/
 [libmpd]: http://hackage.haskell.org/package/libmpd/
+[dbus-core]: http://hackage.haskell.org/package/dbus-core
+[text]: http://hackage.haskell.org/package/text
 [sawfish]: http://sawfish.wikia.com/
 [utf8-string]: http://hackage.haskell.org/package/utf8-string/
 [alsa-core]: http://hackage.haskell.org/package/alsa-core
