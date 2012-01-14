@@ -86,7 +86,7 @@ executable xmobar
     ghc-prof-options:   -prof -auto-all
 
     if true
-       ghc-options: -funbox-strict-fields -Wall -threaded
+       ghc-options: -funbox-strict-fields -Wall
        extra-libraries: Xrandr
 
     -- Use --disable-optimization configure flag
