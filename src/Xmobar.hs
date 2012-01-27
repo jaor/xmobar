@@ -83,7 +83,7 @@ startLoop xcfg@(XConf _ _ w _ _) vs = do
     tv <- atomically $ newTVar []
     sig <- setupSignalHandler
     _ <- forkIO (checker tv [] vs sig `catch` \(SomeException _) -> putStrLn "Thread checker failed" >> return ())
-    _ <- forkIO (eventer sig `catch` \(SomeException _) -> putStrLn "Thread eventer failed" >> return ())
+    _ <- forkOS (eventer sig `catch` \(SomeException _) -> putStrLn "Thread eventer failed" >> return ())
     eventLoop tv xcfg sig
   where
     -- Reacts on events from X
@@ -101,7 +101,7 @@ startLoop xcfg@(XConf _ _ w _ _) vs = do
         xrrEventBase <- peek ptrEventBase
 
         forever $ do
-          nextEvent' dpy e
+          nextEvent dpy e
           ev <- getEvent e
           case ev of
             ConfigureEvent {} -> putMVar signal Reposition
