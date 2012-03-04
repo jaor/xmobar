@@ -34,7 +34,6 @@ import Data.Time.LocalTime.TimeZone.Series
 
 import System.IO.Unsafe
 import System.Locale (TimeLocale)
-import System.Time
 
 
 
@@ -62,11 +61,9 @@ instance Exec DateZone where
       where go func = func >>= cb >> tenthSeconds r >> go func
 
 date :: String -> TimeLocale -> IO String
-date format loc = do
-  t <- toCalendarTime =<< getClockTime
-  return $ formatCalendarTime loc format t
+date format loc = getZonedTime >>= return . formatTime loc format
 
 dateZone :: String -> TimeLocale -> TimeZoneSeries -> IO String
-dateZone format loc timeZone = do
-  zonedTime <- getZonedTime
-  return $ formatTime loc format $ utcToLocalTime' timeZone $ zonedTimeToUTC zonedTime
+dateZone format loc timeZone = getZonedTime >>= return . formatTime loc format . utcToLocalTime' timeZone . zonedTimeToUTC
+--   zonedTime <- getZonedTime
+--   return $ formatTime loc format $ utcToLocalTime' timeZone $ zonedTimeToUTC zonedTime

@@ -114,7 +114,6 @@ executable xmobar
          base == 4.*,
          containers,
          process,
-         old-time,
          old-locale,
          bytestring,
          directory
