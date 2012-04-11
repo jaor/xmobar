@@ -92,32 +92,34 @@ readDefaultConfig = do
 
 data Opts = Help
           | Version
-          | Font     String
-          | BgColor  String
-          | FgColor  String
+          | Font       String
+          | BgColor    String
+          | FgColor    String
           | T
           | B
-          | AlignSep String
-          | Commands String
-          | SepChar  String
-          | Template String
-          | OnScr    String
+          | AlignSep   String
+          | Commands   String
+          | AddCommand String
+          | SepChar    String
+          | Template   String
+          | OnScr      String
        deriving Show
 
 options :: [OptDescr Opts]
 options =
-    [ Option ['h','?' ] ["help"     ] (NoArg  Help                ) "This help"
-    , Option ['V'     ] ["version"  ] (NoArg  Version             ) "Show version information"
-    , Option ['f'     ] ["font"     ] (ReqArg Font     "font name") "The font name"
-    , Option ['B'     ] ["bgcolor"  ] (ReqArg BgColor  "bg color" ) "The background color. Default black"
-    , Option ['F'     ] ["fgcolor"  ] (ReqArg FgColor  "fg color" ) "The foreground color. Default grey"
-    , Option ['o'     ] ["top"      ] (NoArg  T                   ) "Place xmobar at the top of the screen"
-    , Option ['b'     ] ["bottom"   ] (NoArg  B                   ) "Place xmobar at the bottom of the screen"
-    , Option ['a'     ] ["alignsep" ] (ReqArg AlignSep "alignsep" ) "Separators for left, center and right text\nalignment. Default: '}{'"
-    , Option ['s'     ] ["sepchar"  ] (ReqArg SepChar  "char"     ) "The character used to separate commands in\nthe output template. Default '%'"
-    , Option ['t'     ] ["template" ] (ReqArg Template "template" ) "The output template"
-    , Option ['c'     ] ["commands" ] (ReqArg Commands "commands" ) "The list of commands to be executed"
-    , Option ['x'     ] ["screen"   ] (ReqArg OnScr    "screen"   ) "On which X screen number to start"
+    [ Option ['h','?' ] ["help"        ] (NoArg  Help                  ) "This help"
+    , Option ['V'     ] ["version"     ] (NoArg  Version               ) "Show version information"
+    , Option ['f'     ] ["font"        ] (ReqArg Font       "font name") "The font name"
+    , Option ['B'     ] ["bgcolor"     ] (ReqArg BgColor    "bg color" ) "The background color. Default black"
+    , Option ['F'     ] ["fgcolor"     ] (ReqArg FgColor    "fg color" ) "The foreground color. Default grey"
+    , Option ['o'     ] ["top"         ] (NoArg  T                     ) "Place xmobar at the top of the screen"
+    , Option ['b'     ] ["bottom"      ] (NoArg  B                     ) "Place xmobar at the bottom of the screen"
+    , Option ['a'     ] ["alignsep"    ] (ReqArg AlignSep   "alignsep" ) "Separators for left, center and right text\nalignment. Default: '}{'"
+    , Option ['s'     ] ["sepchar"     ] (ReqArg SepChar    "char"     ) "The character used to separate commands in\nthe output template. Default '%'"
+    , Option ['t'     ] ["template"    ] (ReqArg Template   "template" ) "The output template"
+    , Option ['c'     ] ["commands"    ] (ReqArg Commands   "commands" ) "The list of commands to be executed"
+    , Option ['C'     ] ["add-command" ] (ReqArg AddCommand "command"  ) "Add to the list of commands to be executed"
+    , Option ['x'     ] ["screen"      ] (ReqArg OnScr      "screen"   ) "On which X screen number to start"
     ]
 
 getOpts :: [String] -> IO ([Opts], [String])
@@ -150,23 +152,26 @@ doOpts :: Config -> [Opts] -> IO Config
 doOpts conf []     = return conf
 doOpts conf (o:oo) =
     case o of
-      Help       -> putStr   usage >> exitWith ExitSuccess
-      Version    -> putStrLn info  >> exitWith ExitSuccess
-      Font     s -> doOpts (conf {font     = s     }) oo
-      BgColor  s -> doOpts (conf {bgColor  = s     }) oo
-      FgColor  s -> doOpts (conf {fgColor  = s     }) oo
-      T          -> doOpts (conf {position = Top   }) oo
-      B          -> doOpts (conf {position = Bottom}) oo
-      AlignSep s -> doOpts (conf {alignSep = s     }) oo
-      SepChar  s -> doOpts (conf {sepChar  = s     }) oo
-      Template s -> doOpts (conf {template = s     }) oo
-      OnScr    n -> doOpts (conf {position = OnScreen (read n) $ position conf}) oo
-      Commands s -> case readCom s of
-                      Right x -> doOpts (conf { commands = x }) oo
-                      Left e  -> putStr (e ++ usage) >> exitWith (ExitFailure 1)
-    where readCom str =
+      Help         -> putStr   usage >> exitWith ExitSuccess
+      Version      -> putStrLn info  >> exitWith ExitSuccess
+      Font     s   -> doOpts (conf {font     = s     }) oo
+      BgColor  s   -> doOpts (conf {bgColor  = s     }) oo
+      FgColor  s   -> doOpts (conf {fgColor  = s     }) oo
+      T            -> doOpts (conf {position = Top   }) oo
+      B            -> doOpts (conf {position = Bottom}) oo
+      AlignSep s   -> doOpts (conf {alignSep = s     }) oo
+      SepChar  s   -> doOpts (conf {sepChar  = s     }) oo
+      Template s   -> doOpts (conf {template = s     }) oo
+      OnScr    n   -> doOpts (conf {position = OnScreen (read n) $ position conf}) oo
+      Commands s   -> case readCom 'c' s of
+                        Right x -> doOpts (conf { commands = x }) oo
+                        Left e  -> putStr (e ++ usage) >> exitWith (ExitFailure 1)
+      AddCommand s -> case readCom 'C' s of
+                        Right x -> doOpts (conf { commands = commands conf ++ x }) oo
+                        Left e  -> putStr (e ++ usage) >> exitWith (ExitFailure 1)
+    where readCom c str =
               case readStr str of
-	        [x] -> Right x
-	        _   -> Left "xmobar: cannot read list of commands specified with the -c option\n"
+                [x] -> Right x
+                _   -> Left ("xmobar: cannot read list of commands specified with the -" ++ c:" option\n")
           readStr str =
               [x | (x,t) <- reads str, ("","") <- lex t]

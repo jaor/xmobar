@@ -30,17 +30,19 @@ import Foreign.C (CChar)
 import XUtil (nextEvent')
 
 
-data XMonadLog = XMonadLog | XPropertyLog String
+data XMonadLog = XMonadLog | XPropertyLog String | NamedXPropertyLog String String
     deriving (Read, Show)
 
 instance Exec XMonadLog where
     alias XMonadLog = "XMonadLog"
     alias (XPropertyLog atom) = atom
+    alias (NamedXPropertyLog _ name) = name
 
     start x cb = do
         let atom = case x of
-                XMonadLog      -> "_XMONAD_LOG"
-                XPropertyLog a -> a
+                XMonadLog             -> "_XMONAD_LOG"
+                XPropertyLog      a   -> a
+                NamedXPropertyLog a _ -> a
         d <- openDisplay ""
         xlog <- internAtom d atom False
 

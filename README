@@ -271,20 +271,22 @@ xmobar --help):
 
     Usage: xmobar [OPTION...] [FILE]
     Options:
-      -h, -?        --help               This help
-      -V            --version            Show version information
-      -f font name  --font=font name     The font name
-      -B bg color   --bgcolor=bg color   The background color. Default black
-      -F fg color   --fgcolor=fg color   The foreground color. Default grey
-      -o            --top                Place xmobar at the top of the screen
-      -b            --bottom             Place xmobar at the bottom of the screen
-      -a alignsep   --alignsep=alignsep  Separators for left, center and right text
-                                         alignment. Default: '}{'
-      -s char       --sepchar=char       The character used to separate commands in
-                                         the output template. Default '%'
-      -t template   --template=template  The output template
-      -c commands   --commands=commands  The list of commands to be executed
-      -x screen     --screen=screen      On which X screen number to start
+      -h, -?        --help                 This help
+      -V            --version              Show version information
+      -f font name  --font=font name       The font name
+      -B bg color   --bgcolor=bg color     The background color. Default black
+      -F fg color   --fgcolor=fg color     The foreground color. Default grey
+      -o            --top                  Place xmobar at the top of the screen
+      -b            --bottom               Place xmobar at the bottom of the screen
+      -a alignsep   --alignsep=alignsep    Separators for left, center and right text
+                                           alignment. Default: '}{'
+      -s char       --sepchar=char         The character used to separate commands in
+                                           the output template. Default '%'
+      -t template   --template=template    The output template
+      -c commands   --commands=commands    The list of commands to be executed
+      -C command    --add-command=command  Add to the list of commands to be executed
+      -x screen     --screen=screen        On which X screen number to start
+
     Mail bug reports and suggestions to <xmobar@projects.haskell.org>
 
 ## The Output Template
@@ -703,6 +705,10 @@ Monitors have default aliases.
   of any other program or script.
 
 [samples/xmonadpropwrite.hs script]: https://github.com/jaor/xmobar/raw/master/samples/xmonadpropwrite.hs
+
+`NamedXPropertyLog PropName Alias`
+
+- Same as XPropertyLog, but a custom alias can be specified.
 
 `Brightness Args RefreshRate`
 
