@@ -33,6 +33,7 @@ import Prelude hiding (catch)
 import Graphics.X11.Xlib hiding (textExtents, textWidth)
 import Graphics.X11.Xlib.Extras
 import Graphics.X11.Xinerama
+import Graphics.X11.Xrandr
 
 import Control.Arrow ((&&&))
 import Control.Monad.Reader
@@ -88,17 +89,11 @@ startLoop xcfg@(XConf _ _ w _ _) vs = do
   where
     -- Reacts on events from X
     eventer signal =
-      alloca $ \ptrEventBase ->
-      alloca $ \ptrErrorBase ->
       allocaXEvent $ \e -> do
 
         dpy <- openDisplay ""
-        --  keyPressMask is the same value as RRScreenChangeNotifyMask
-        xrrSelectInput    dpy (defaultRootWindow dpy) keyPressMask
+        xrrSelectInput    dpy (defaultRootWindow dpy) rrScreenChangeNotifyMask
         selectInput       dpy w (exposureMask .|. structureNotifyMask)
-
-        _ <- xrrQueryExtension dpy ptrEventBase ptrErrorBase
-        xrrEventBase <- peek ptrEventBase
 
         forever $ do
           nextEvent' dpy e
@@ -106,10 +101,8 @@ startLoop xcfg@(XConf _ _ w _ _) vs = do
           case ev of
             ConfigureEvent {} -> putMVar signal Reposition
             ExposeEvent {} -> putMVar signal Wakeup
-            _ ->
-              --  0 is the value of RRScreenChangeNotify
-              when ( (fromIntegral (ev_event_type ev) - xrrEventBase) == 0)
-                   $ putMVar signal Reposition
+            RRScreenChangeNotifyEvent {} -> putMVar signal Reposition
+            _ -> return ()
 
 -- | Send signal to eventLoop every time a var is updated
 checker :: TVar [String] -> [String] -> [[(Maybe ThreadId, TVar String)]] -> MVar SignalType -> IO ()

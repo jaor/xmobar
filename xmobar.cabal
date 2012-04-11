@@ -104,7 +104,7 @@ executable xmobar
       unix,
       time,
       filepath,
-      X11 == 1.5.*,
+      X11 >= 1.5 && < 1.7,
       mtl == 2.0.*,
       parsec == 3.1.*,
       stm == 2.2.*

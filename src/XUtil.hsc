@@ -28,8 +28,6 @@ module XUtil
     , fi
     , withColors
     , DynPixel(..)
-    , xrrSelectInput
-    , xrrQueryExtension
     ) where
 
 import Control.Concurrent
@@ -45,7 +43,6 @@ import System.Posix.Types (Fd(..))
 import System.IO
 #if defined XFT || defined UTF8
 # if __GLASGOW_HASKELL__ < 612
-import Foreign.C
 import qualified System.IO.UTF8 as UTF8 (readFile,hGetLine)
 # else
 import qualified System.IO as UTF8 (readFile,hGetLine)
@@ -260,12 +257,3 @@ setupLocale = withCString "" (setlocale $ #const LC_ALL) >> return ()
 setupLocale :: IO ()
 setupLocale = return ()
 #endif
-
---  XRRSelectInput
-#include <X11/extensions/Xrandr.h>
-foreign import ccall unsafe "X11/extensions/Xrandr.h XRRSelectInput"
-  xrrSelectInput :: Display -> Window -> EventMask -> IO ()
-
---  XRRQueryExtension
-foreign import ccall unsafe "X11/extensions/Xrandr.h XRRQueryExtension"
-  xrrQueryExtension :: Display -> Ptr CInt -> Ptr CInt -> IO (Bool)
