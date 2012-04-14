@@ -22,10 +22,14 @@ import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 
 import qualified Data.ByteString.Lazy.Char8 as B
 
+data OperState = Up | Down
+    deriving (Eq, Show, Read)
+
 data NetDev = NA
             | ND { netDev :: String
                  , netRx :: Float
                  , netTx :: Float
+                 , netOperState :: OperState
                  } deriving (Eq,Show,Read)
 
 type NetDevRef = IORef (NetDev, UTCTime)
@@ -53,12 +57,26 @@ wordsBy f s = case dropWhile f s of
 readNetDev :: [String] -> NetDev
 readNetDev [] = NA
 readNetDev xs =
-    ND (head xs) (r (xs !! 1)) (r (xs !! 2))
+    ND (head xs) (r (xs !! 1)) (r (xs !! 2)) Down
        where r s | s == "" = 0
                  | otherwise = read s / 1024
 
+
+parseOperState :: String -> OperState
+parseOperState state | state == "down" = Down
+                     | otherwise       = Up
+
+fillOperState :: NetDev -> IO NetDev
+fillOperState (ND d r t _) = do
+        operstate <- B.readFile $ "/sys/class/net/" ++ d ++ "/operstate"
+        return (ND d r t (parseOperState $ (B.unpack . head . B.lines) operstate))
+
+fillOperState NA = return NA
+
 fileNet :: IO [NetDev]
-fileNet = netParser `fmap` B.readFile "/proc/net/dev"
+fileNet = do 
+    devs <- netParser `fmap` B.readFile "/proc/net/dev"
+    mapM fillOperState devs
 
 findNetDev :: String -> IO NetDev
 findNetDev dev = do
@@ -83,10 +101,12 @@ formatNet d = do
 printNet :: NetDev -> Monitor String
 printNet nd =
     case nd of
-         ND d r t -> do (rx, rb) <- formatNet r
-                        (tx, tb) <- formatNet t
-                        parseTemplate [d,rx,tx,rb,tb]
-         NA -> return "N/A"
+         ND d r t o -> case o of
+            Up -> do (rx, rb) <- formatNet r
+                     (tx, tb) <- formatNet t
+                     parseTemplate [d,rx,tx,rb,tb]
+            Down -> return ""
+         NA -> return ""
 
 parseNet :: NetDevRef -> String -> IO NetDev
 parseNet nref nd = do
@@ -99,7 +119,7 @@ parseNet nref nd = do
       netRate f da db = takeDigits 2 $ (f db - f da) / scx'
       diffRate NA _ = NA
       diffRate _ NA = NA
-      diffRate da db = ND nd (netRate netRx da db) (netRate netTx da db)
+      diffRate da db = ND nd (netRate netRx da db) (netRate netTx da db) (netOperState db)
   return $ diffRate n0 n1
 
 runNet :: NetDevRef -> String -> [String] -> Monitor String

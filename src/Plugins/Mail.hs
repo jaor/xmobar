@@ -56,9 +56,6 @@ instance Exec Mail where
                                     | (m, n) <- zip ts ns
                                     , n /= 0 ]
 
-modifyTVar :: TVar a -> (a -> a) -> STM ()
-modifyTVar v f = readTVar v >>= writeTVar v . f
-
 handle :: TVar (Set String) -> Event -> IO ()
 handle v e = atomically $ modifyTVar v $ case e of
     Created  {} -> create
