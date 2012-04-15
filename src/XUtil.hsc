@@ -41,6 +41,7 @@ import Graphics.X11.Xlib.Extras
 import System.Mem.Weak ( addFinalizer )
 import System.Posix.Types (Fd(..))
 import System.IO
+import qualified System.IO.Unsafe as Unsafe
 #if defined XFT || defined UTF8
 # if __GLASGOW_HASKELL__ < 612
 import qualified System.IO.UTF8 as UTF8 (readFile,hGetLine)
@@ -192,7 +193,7 @@ initColor dpy c = (initColor' dpy c) `catch`
 type ColorCache = [(String, Color)]
 {-# NOINLINE colorCache #-}
 colorCache :: IORef ColorCache
-colorCache = unsafePerformIO $ newIORef []
+colorCache = Unsafe.unsafePerformIO $ newIORef []
 
 getCachedColor :: String -> IO (Maybe Color)
 getCachedColor color_name = lookup color_name `fmap` readIORef colorCache

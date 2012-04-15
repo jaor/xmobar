@@ -18,7 +18,7 @@ module Plugins.Kbd where
 import Graphics.X11.Xlib
 import Graphics.X11.Xlib.Extras
 import Foreign
-import Foreign.C.Types (CUInt,CULong,CInt,CUShort,CChar,CUChar)
+import Foreign.C.Types
 import Foreign.C.String
 import Plugins
 import Control.Monad (forever)

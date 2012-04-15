@@ -86,7 +86,10 @@ executable xmobar
     ghc-prof-options:   -prof -auto-all
 
     if true
-       ghc-options: -funbox-strict-fields -Wall
+       -- -threaded is a workaround around 100% CPU busy loop
+       -- in ghc's threadWait: http://hackage.haskell.org/trac/ghc/ticket/4934
+       -- all known ghc versions behave badly
+       ghc-options: -funbox-strict-fields -Wall -threaded
        extra-libraries: Xrandr
 
     -- Use --disable-optimization configure flag
