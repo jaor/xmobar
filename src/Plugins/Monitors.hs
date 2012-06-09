@@ -19,7 +19,7 @@ module Plugins.Monitors where
 
 import Plugins
 
-import Plugins.Monitors.Common ( runM )
+import Plugins.Monitors.Common ( runM, runMB )
 import Plugins.Monitors.Weather
 import Plugins.Monitors.Net
 import Plugins.Monitors.Mem
@@ -71,6 +71,7 @@ data Monitors = Weather      Station    Args Rate
 #endif
 #ifdef LIBMPD
               | MPD      Args       Rate
+              | AutoMPD  Args
 #endif
 #ifdef ALSA
               | Volume   String     String Args Rate
@@ -115,6 +116,7 @@ instance Exec Monitors where
 #endif
 #ifdef LIBMPD
     alias (MPD _ _) = "mpd"
+    alias (AutoMPD _) = "autompd"
 #endif
 #ifdef ALSA
     alias (Volume m c _ _) = m ++ ":" ++ c
@@ -147,6 +149,7 @@ instance Exec Monitors where
 #endif
 #ifdef LIBMPD
     start (MPD a r) = runM a mpdConfig runMPD r
+    start (AutoMPD a) = runMB a mpdConfig runMPD mpdWait
 #endif
 #ifdef ALSA
     start (Volume m c a r) = runM a volumeConfig (runVolume m c) r

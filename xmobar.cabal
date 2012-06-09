@@ -49,6 +49,10 @@ flag with_mpd
   description: MPD support. Needs libmpd installed.
   default: False
 
+flag with_mpd_07
+  description: MPD 0.7.* support.
+  default: False
+
 flag all_extensions
   description: Includes all optional extensions.
   default: False
@@ -146,9 +150,13 @@ executable xmobar
        cpp-options: -DIWLIB
 
     if flag(with_mpd) || flag(all_extensions)
-       build-depends: libmpd == 0.7.*
        other-modules: Plugins.Monitors.MPD
        cpp-options: -DLIBMPD
+       if flag(with_mpd_07)
+          build-depends: libmpd == 0.7.*
+          cpp-options: -DLIBMPD_07
+       else
+          build-depends: libmpd == 0.8.*
 
     if flag(with_alsa) || flag(all_extensions)
        build-depends: alsa-mixer == 0.1.*

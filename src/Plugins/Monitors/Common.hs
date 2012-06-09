@@ -23,6 +23,7 @@ module Plugins.Monitors.Common (
                        , getConfigValue
                        , mkMConfig
                        , runM
+                       , runMB
                        , io
                        -- * Parsers
                        -- $parsers
@@ -207,9 +208,13 @@ doConfigOptions (o:oo) =
 
 runM :: [String] -> IO MConfig -> ([String] -> Monitor String) -> Int
         -> (String -> IO ()) -> IO ()
-runM args conf action r cb = handle (cb . showException) loop
+runM args conf action r = runMB args conf action (tenthSeconds r)
+
+runMB :: [String] -> IO MConfig -> ([String] -> Monitor String)
+         -> IO () -> (String -> IO ()) -> IO ()
+runMB args conf action wait cb = handle (cb . showException) loop
   where ac = doArgs args action
-        loop = conf >>= runReaderT ac >>= cb >> tenthSeconds r >> loop
+        loop = conf >>= runReaderT ac >>= cb >> wait >> loop
 
 showException :: SomeException -> String
 showException = ("error: "++) . show . flip asTypeOf undefined
