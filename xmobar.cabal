@@ -112,7 +112,7 @@ executable xmobar
       time,
       filepath,
       X11 == 1.6.*,
-      mtl == 2.0.*,
+      mtl >= 2.0 && <2.2,
       parsec == 3.1.*,
       stm == 2.3.*
 
