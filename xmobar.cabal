@@ -112,9 +112,9 @@ executable xmobar
       time,
       filepath,
       X11 == 1.6.*,
-      mtl == 2.0.*,
+      mtl >= 2.0 && < 2.2,
       parsec == 3.1.*,
-      stm == 2.3.*
+      stm >= 2.3 && <2.5
 
     if flag(small_base)
        build-depends:
@@ -146,7 +146,7 @@ executable xmobar
        cpp-options: -DIWLIB
 
     if flag(with_mpd) || flag(all_extensions)
-       build-depends: libmpd == 0.7.*
+       build-depends: libmpd >= 0.8 && < 0.9
        other-modules: Plugins.Monitors.MPD
        cpp-options: -DLIBMPD
 

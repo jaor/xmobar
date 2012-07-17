@@ -91,10 +91,10 @@ parseSong (Right Nothing) = return $ repeat ""
 parseSong (Right (Just s)) =
   let join [] = ""
       join (x:xs) = foldl (\a o -> a ++ ", " ++ o) x xs
-      str sel = maybe "" join (M.sgGetTag sel s)
+      str sel = maybe "" (join . map M.toString) (M.sgGetTag sel s)
       sels = [ M.Name, M.Artist, M.Composer, M.Performer
              , M.Album, M.Title, M.Track, M.Genre ]
-      fields = M.sgFilePath s : map str sels
+      fields = M.toString (M.sgFilePath s) : map str sels
   in mapM showWithPadding fields
 
 showTime :: Integer -> String
