@@ -766,7 +766,7 @@ These are the arguments that can be used for internal commands in the
     - Default value: 66
 - `-L` _number_ The low threshold.
     - Numerical values higher than _number_ and lower than the high
-      threshold will be displayed with the color specified by `-m`
+      threshold will be displayed with the color specified by `-n`
       (see below). Values lower than _number_ will use the `-l` color.
     - Long option: `--Low` - Default value: 80
     - Default value: 33
