@@ -768,7 +768,7 @@ These are the arguments that can be used for internal commands in the
     - Numerical values higher than _number_ and lower than the high
       threshold will be displayed with the color specified by `-n`
       (see below). Values lower than _number_ will use the `-l` color.
-    - Long option: `--Low` - Default value: 80
+    - Long option: `--Low`
     - Default value: 33
 - `-h` _color_  High threshold color.
     - Color for displaying values above the high threshold. _color_ can
