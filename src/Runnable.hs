@@ -29,8 +29,9 @@ import Commands
 data Runnable = forall r . (Exec r, Read r, Show r) => Run r
 
 instance Exec Runnable where
-     start (Run a) = start a
-     alias (Run a) = alias a
+     start   (Run a) = start   a
+     alias   (Run a) = alias   a
+     trigger (Run a) = trigger a
 
 instance Show Runnable where
     show (Run x) = show x
