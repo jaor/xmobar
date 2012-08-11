@@ -21,43 +21,50 @@ module Plugins.Monitors.Mpris ( mprisConfig, runMPRIS1, runMPRIS2 ) where
 import Plugins.Monitors.Common
 
 import Text.Printf (printf)
-import qualified DBus.Client.Simple as C
-import DBus.Types
-import DBus.Connection ( ConnectionError )
+
+import DBus
+import qualified DBus.Client as DC
+
 import Data.Maybe ( fromJust )
 import Data.Int ( Int32, Int64 )
 import System.IO.Unsafe (unsafePerformIO)
-import qualified Data.Text as T
 
 import Control.Exception (try)
 
 class MprisVersion a where
-    getProxy :: a -> C.Client -> String -> IO C.Proxy
-    getMetadataReply :: a -> C.Client -> String -> IO [Variant]
+    getMethodCall :: a -> String -> MethodCall
+    getMetadataReply :: a -> DC.Client -> String -> IO [Variant]
+    getMetadataReply mv c p = fmap methodReturnBody (DC.call_ c $ getMethodCall mv p)
     fieldsList :: a -> [String]
 
 data MprisVersion1 = MprisVersion1
 instance MprisVersion MprisVersion1 where
-    getProxy MprisVersion1 c p = do
-        let playerBusName = T.concat ["org.mpris.", T.pack p]
-        C.proxy c (C.busName_ playerBusName) "/Player"
-    getMetadataReply MprisVersion1 c p = do
-        player <- getProxy MprisVersion1 c p
-        C.call player "org.freedesktop.MediaPlayer" "GetMetadata" []
-    fieldsList MprisVersion1 = [ "album", "artist", "arturl", "mtime", "title", "tracknumber" ]
+    getMethodCall MprisVersion1 p = (methodCall objectPath interfaceName memberName)
+        { methodCallDestination = Just busName
+        }
+        where
+        busName       = busName_       $ "org.mpris." ++ p
+        objectPath    = objectPath_    $ "/Player"
+        interfaceName = interfaceName_ $ "org.freedesktop.MediaPlayer"
+        memberName    = memberName_    $ "GetMetadata"
+
+    fieldsList MprisVersion1 = [ "album", "artist", "arturl", "mtime", "title"
+                               , "tracknumber" ]
 
 data MprisVersion2 = MprisVersion2
 instance MprisVersion MprisVersion2 where
-    getProxy MprisVersion2 c p = do
-        let playerBusName = T.concat ["org.mpris.MediaPlayer2.", T.pack p]
-        C.proxy c (C.busName_ playerBusName) "/org/mpris/MediaPlayer2"
-    getMetadataReply MprisVersion2 c p = do
-        player <- getProxy MprisVersion2 c p
-        C.call player "org.freedesktop.DBus.Properties"
-                      "Get"
-                      (map (toVariant::String -> Variant)
-                           ["org.mpris.MediaPlayer2.Player", "Metadata"]
-                      )
+    getMethodCall MprisVersion2 p = (methodCall objectPath interfaceName memberName)
+        { methodCallDestination = Just busName
+        , methodCallBody = arguments
+        }
+        where
+        busName       = busName_       $ "org.mpris.MediaPlayer2." ++ p
+        objectPath    = objectPath_    $ "/org/mpris/MediaPlayer2"
+        interfaceName = interfaceName_ $ "org.freedesktop.DBus.Properties"
+        memberName    = memberName_    $ "Get"
+        arguments     = map (toVariant::String -> Variant)
+                            ["org.mpris.MediaPlayer2.Player", "Metadata"]
+
     fieldsList MprisVersion2 = [ "xesam:album", "xesam:artist", "mpris:artUrl"
                                , "mpris:length", "xesam:title", "xesam:trackNumber"
                                ]
@@ -67,8 +74,8 @@ mprisConfig = mkMConfig "<artist> - <title>"
                 [ "album", "artist", "arturl", "length" , "title", "tracknumber"
                 ]
 
-dbusClient :: C.Client
-dbusClient = unsafePerformIO C.connectSession
+dbusClient :: DC.Client
+dbusClient = unsafePerformIO DC.connectSession
 
 runMPRIS :: (MprisVersion a) => a -> String -> [String] -> Monitor String
 runMPRIS version playerName _ = do
@@ -95,10 +102,10 @@ unpackMetadata xs = ((map (\(k, v) -> (fromVar k, fromVar v))) . unpack . head) 
                             TypeStructure _ -> unpack $ head $ structureItems $ fromVar v
                             _ -> []
 
-getMetadata :: (MprisVersion a) => a -> C.Client -> String -> IO [(String, Variant)]
+getMetadata :: (MprisVersion a) => a -> DC.Client -> String -> IO [(String, Variant)]
 getMetadata version client player = do
     reply <- try (getMetadataReply version client player) ::
-                            IO (Either ConnectionError [Variant])
+                            IO (Either DC.ClientError [Variant])
     return $ case reply of
                   Right metadata -> unpackMetadata metadata;
                   Left _ -> []
