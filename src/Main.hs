@@ -36,6 +36,8 @@ import System.Environment
 import System.Posix.Files
 import Control.Monad (unless)
 
+import Signal (setupSignalHandler)
+
 -- $main
 
 -- | The main entry point
@@ -55,9 +57,10 @@ main = do
   conf  <- doOpts c o
   fs    <- initFont d (font conf)
   cls   <- mapM (parseTemplate conf) (splitTemplate conf)
-  vars  <- mapM (mapM startCommand) cls
+  sig   <- setupSignalHandler
+  vars  <- mapM (mapM $ startCommand sig) cls
   (r,w) <- createWin d fs conf
-  startLoop (XConf d r w fs conf) vars
+  startLoop (XConf d r w fs conf) sig vars
 
 -- | Splits the template in its parts
 splitTemplate :: Config -> [String]

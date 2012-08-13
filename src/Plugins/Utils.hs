@@ -15,7 +15,7 @@
 ------------------------------------------------------------------------------
 
 
-module Plugins.Utils (expandHome, changeLoop) where
+module Plugins.Utils (expandHome, changeLoop, safeHead) where
 
 import Control.Monad
 import Control.Concurrent.STM
@@ -37,3 +37,7 @@ changeLoop s f = atomically s >>= go
             new <- s
             guard (new /= old)
             return new)
+
+safeHead :: [a] -> Maybe a
+safeHead    [] = Nothing
+safeHead (x:_) = Just x

@@ -131,13 +131,15 @@ parseConfig = runParser parseConf fields "Config" . stripComments
               <$?> pFont         <|?> pBgColor
               <|?> pFgColor      <|?> pPosition
               <|?> pBorder       <|?> pBdColor
-              <|?> pLowerOnStart <|?> pCommands
-              <|?> pSepChar      <|?> pAlignSep
-              <|?> pTemplate
+              <|?> pLowerOnStart <|?> pPersistent
+              <|?> pCommands     <|?> pSepChar
+              <|?> pAlignSep     <|?> pTemplate
 
       fields    = [ "font", "bgColor", "fgColor", "sepChar", "alignSep"
                   , "border", "borderColor" ,"template", "position"
-                  , "lowerOnStart", "commands"]
+                  , "lowerOnStart", "persistent", "commands"
+                  ]
+
       pFont     = strField font     "font"
       pBgColor  = strField bgColor  "bgColor"
       pFgColor  = strField fgColor  "fgColor"
@@ -148,6 +150,7 @@ parseConfig = runParser parseConf fields "Config" . stripComments
 
       pPosition     = field position     "position"     $ tillFieldEnd >>= read' "position"
       pLowerOnStart = field lowerOnStart "lowerOnStart" $ tillFieldEnd >>= read' "lowerOnStart"
+      pPersistent   = field persistent   "persistent"   $ tillFieldEnd >>= read' "persistent"
       pBorder       = field border       "border"       $ tillFieldEnd >>= read' "border"
       pCommands     = field commands     "commands"     $ readCommands
 

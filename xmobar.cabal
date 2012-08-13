@@ -65,6 +65,10 @@ flag with_mpris
   description: MPRIS v1, v2 support
   default: False
 
+flag with_dbus
+  description: Publish a Service on the Session Bus for controlling xmobar
+  default: False
+
 flag with_threaded
   description: Use threaded runtime
   default: False
@@ -165,3 +169,8 @@ executable xmobar
        build-depends: dbus >= 0.10
        other-modules: Plugins.Monitors.Mpris
        cpp-options: -DMPRIS
+
+    if flag(with_dbus) || flag(all_extensions)
+       build-depends: dbus >= 0.10
+       other-modules: IPC.DBus
+       cpp-options: -DDBUS
