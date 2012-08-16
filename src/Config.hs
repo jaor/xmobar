@@ -55,6 +55,8 @@ data Config =
            , position       :: XPosition  -- ^ Top Bottom or Static
            , border         :: Border     -- ^ NoBorder TopB BottomB or FullB
            , borderColor    :: String     -- ^ Border color
+           , hideOnStart    :: Bool       -- ^ Hide (Unmap) the window on
+                                          --   initialization
            , lowerOnStart   :: Bool       -- ^ Lower to the bottom of the
                                           --   window stack on initialization
            , persistent     :: Bool       -- ^ Whether automatic hiding should
@@ -97,6 +99,7 @@ defaultConfig =
            , position = Top
            , border = NoBorder
            , borderColor  = "#BFBFBF"
+           , hideOnStart  = False
            , lowerOnStart = True
            , persistent   = False
            , commands = [ Run $ Date "%a %b %_d %Y * %H:%M:%S" "theDate" 10
