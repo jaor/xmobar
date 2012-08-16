@@ -26,9 +26,9 @@ import System.Posix.Signals
 #ifdef DBUS
 import DBus (IsVariant(..))
 import Control.Monad ((>=>))
+#endif
 
 import Plugins.Utils (safeHead)
-#endif
 
 data WakeUp = WakeUp deriving (Show,Typeable)
 instance Exception WakeUp
