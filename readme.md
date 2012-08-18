@@ -492,9 +492,11 @@ Monitors have default aliases.
     - `-o`: string for AC "off" status (default: "Off")
     - `-L`: low power (`watts`) threshold (default: -12)
     - `-H`: high power threshold (default: -10)
-    - `-l`: color to display power lower than the `-L` threshold
-    - `-m`: color to display power lower than the `-H` threshold
-    - `-h`: color to display power highter than the `-H` threshold
+    - `-l`: color to display power lower than the `-L` threshold 
+    - `-m`: color to display power lower than the `-H` threshold (`watts`)
+    - `-n`: color to display power lower than the `-H` threshold (`left`,
+      `leftbar`)
+    - `-h`: color to display power higher than the `-H` threshold
     - `-p`: color to display positive power (battery charging)
     - `-f`: file in `/sys/class/power_supply` with AC info (default:
       "AC/online")
@@ -502,6 +504,8 @@ Monitors have default aliases.
 - Variables that can be used with the `-t`/`--template` argument:
 	    `left`, `leftbar`, `timeleft`, `watts`, `acstatus`
 - Default template: `Batt: <watts>, <left>% / <timeleft>`
+- Regular monitor options: `left`, `leftbar`
+- Battery specific options: `watts`
 - Example (note that you need "--" to separate regular monitor options from
   Battery's specific ones):
 
