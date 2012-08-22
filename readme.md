@@ -339,6 +339,73 @@ An example using the `dbus-send` command line utility:
             org.Xmobar.Control.SendSignal \
             "string:Toggle"
 
+It is also possible to send multiple signals at once:
+
+        # send to another screen, reveal and toggle the persistent flag
+        dbus-send [..] \
+            "string:ChangeScreen" "string:Reveal 0" "string:TogglePersistent"
+
+### Example for using the DBus IPC interface with XMonad
+
+Bind the key which should {,un}map xmobar to a dummy value. This is necessary
+for {,un}grabKey in xmonad.
+
+    ((0, xK_Alt_L   ), return ())
+
+Also, install `avoidStruts` layout modifier from `XMonad.Hooks.ManageDocks`
+
+Finally, install these two event hooks (`handleEventHook` in `XConfig`)
+`myDocksEventHook` is a replacement for `docksEventHook` which reacts on unmap
+events as well (which `docksEventHook` doesn't).
+
+    import qualified XMonad.Util.ExtensibleState as XS
+
+    data DockToggleTime = DTT { lastTime :: Time } deriving (Eq, Show, Typeable)
+
+    instance ExtensionClass DockToggleTime where
+        initialValue = DTT 0
+
+    toggleDocksHook :: Int -> KeySym -> Event -> X All
+    toggleDocksHook to ks ( KeyEvent { ev_event_display = d
+                                     , ev_event_type    = et
+                                     , ev_keycode       = ekc
+                                     , ev_time          = etime
+                                     } ) =
+            io (keysymToKeycode d ks) >>= toggleDocks >> return (All True)
+        where
+        toggleDocks kc
+            | ekc == kc && et == keyPress = do
+                safeSendSignal ["Reveal 0", "TogglePersistent"]
+                XS.put ( DTT etime )
+            | ekc == kc && et == keyRelease = do
+                gap <- XS.gets ( (-) etime . lastTime )
+                safeSendSignal [ "TogglePersistent"
+                               , "Hide " ++ show (if gap < 400 then to else 0)
+                               ]
+            | otherwise = return ()
+
+        safeSendSignal s = catchX (io $ sendSignal s) (return ())
+        sendSignal    = withSession . callSignal
+        withSession mc = connectSession >>= \c -> callNoReply c mc >> disconnect c
+        callSignal :: [String] -> MethodCall
+        callSignal s = ( methodCall
+                         ( objectPath_    "/org/Xmobar/Control" )
+                         ( interfaceName_ "org.Xmobar.Control"  )
+                         ( memberName_    "SendSignal"          )
+                       ) { methodCallDestination = Just $ busName_ "org.Xmobar.Control"
+                         , methodCallBody        = map toVariant s
+                         }
+
+    toggleDocksHook _ _ _ = return (All True)
+
+    myDocksEventHook :: Event -> X All
+    myDocksEventHook e = do
+        when (et == mapNotify || et == unmapNotify) $
+            whenX ((not `fmap` (isClient w)) <&&> runQuery checkDock w) refresh
+        return (All True)
+        where w  = ev_window e
+              et = ev_event_type e
+
 
 ## The Output Template
 

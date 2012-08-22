@@ -60,7 +60,7 @@ instance Exec BufferedPipeReader where
         writer tc ts otb = do
             (to, tg, dt, ntb) <- update
             cb dt
-            when tg $ putMVar signal Reveal
+            when tg $ putMVar signal $ Reveal 0
             when (to /= 0) $ sfork $ reset to tg ts ntb
             writer tc ts ntb
 
@@ -80,5 +80,5 @@ instance Exec BufferedPipeReader where
         reset to tg ts tb = do
             threadDelay ( to * 100 * 1000 )
             readTVarIO tb >>= \b -> when b $ do
-                when tg $ putMVar signal Hide
+                when tg $ putMVar signal $ Hide 0
                 atomically (readTVar ts) >>= maybe (return ()) cb
