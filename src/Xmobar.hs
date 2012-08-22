@@ -75,7 +75,7 @@ runX :: XConf -> X () -> IO ()
 runX xc f = runReaderT f xc
 
 -- | Starts the main event loop and threads
-startLoop :: XConf -> MVar SignalType -> [[(Maybe ThreadId, TVar String)]] -> IO ()
+startLoop :: XConf -> TMVar SignalType -> [[(Maybe ThreadId, TVar String)]] -> IO ()
 startLoop xcfg@(XConf _ _ w _ _) sig vs = do
     tv <- atomically $ newTVar []
     _ <- forkIO (checker tv [] vs sig `catch`
@@ -107,16 +107,16 @@ startLoop xcfg@(XConf _ _ w _ _) sig vs = do
 #endif
           ev <- getEvent e
           case ev of
-            ConfigureEvent {} -> putMVar signal Reposition
-            ExposeEvent {} -> putMVar signal Wakeup
-            RRScreenChangeNotifyEvent {} -> putMVar signal Reposition
+            ConfigureEvent {} -> atomically $ putTMVar signal Reposition
+            ExposeEvent {} -> atomically $ putTMVar signal Wakeup
+            RRScreenChangeNotifyEvent {} -> atomically $ putTMVar signal Reposition
             _ -> return ()
 
 -- | Send signal to eventLoop every time a var is updated
 checker :: TVar [String]
            -> [String]
            -> [[(Maybe ThreadId, TVar String)]]
-           -> MVar SignalType
+           -> TMVar SignalType
            -> IO ()
 checker tvar ov vs signal = do
       nval <- atomically $ do
@@ -124,16 +124,16 @@ checker tvar ov vs signal = do
               guard (nv /= ov)
               writeTVar tvar nv
               return nv
-      putMVar signal Wakeup
+      atomically $ putTMVar signal Wakeup
       checker tvar nval vs signal
     where
       concatV = fmap concat . mapM (readTVar . snd)
 
 
 -- | Continuously wait for a signal from a thread or a interrupt handler
-eventLoop :: TVar [String] -> XConf -> MVar SignalType -> IO ()
+eventLoop :: TVar [String] -> XConf -> TMVar SignalType -> IO ()
 eventLoop tv xc@(XConf d _ w fs cfg) signal = do
-      typ <- takeMVar signal
+      typ <- atomically $ takeTMVar signal
       case typ of
          Wakeup -> do
             runX xc (updateWin tv)
@@ -186,7 +186,7 @@ eventLoop tv xc@(XConf d _ w fs cfg) signal = do
 
 -- | Runs a command as an independent thread and returns its thread id
 -- and the TVar the command will be writing to.
-startCommand :: MVar SignalType
+startCommand :: TMVar SignalType
              -> (Runnable,String,String)
              -> IO (Maybe ThreadId, TVar String)
 startCommand sig (com,s,ss)
@@ -196,7 +196,8 @@ startCommand sig (com,s,ss)
     | otherwise       = do var <- atomically $ newTVar is
                            let cb str = atomically $ writeTVar var (s ++ str ++ ss)
                            h <- forkIO $ start com cb
-                           _ <- forkIO $ trigger com ( maybe (return ()) (putMVar sig) )
+                           _ <- forkIO $ trigger com
+                                       $ maybe (return ()) (atomically . putTMVar sig)
                            return (Just h,var)
     where is = s ++ "Updating..." ++ ss
 

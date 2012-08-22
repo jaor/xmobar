@@ -339,6 +339,11 @@ An example using the `dbus-send` command line utility:
             org.Xmobar.Control.SendSignal \
             "string:Toggle"
 
+It is also possible to send multiple signals at once:
+        # send to another screen, reveal and toggle the persistent flag
+        dbus-send [..] \
+            "string:ChangeScreen" "string:Reveal" "string:TogglePersistent"
+
 
 ## The Output Template
 

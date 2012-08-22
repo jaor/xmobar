@@ -19,7 +19,7 @@
 module Signal where
 
 import Data.Typeable (Typeable)
-import Control.Concurrent
+import Control.Concurrent.STM
 import Control.Exception hiding (handle)
 import System.Posix.Signals
 
@@ -52,19 +52,19 @@ parseSignalType :: String -> Maybe SignalType
 parseSignalType = fmap fst . safeHead . reads
 
 -- | Signal handling
-setupSignalHandler :: IO (MVar SignalType)
+setupSignalHandler :: IO (TMVar SignalType)
 setupSignalHandler = do
-   tid   <- newEmptyMVar
+   tid   <- newEmptyTMVarIO
    installHandler sigUSR2 (Catch $ updatePosHandler tid) Nothing
    installHandler sigUSR1 (Catch $ changeScreenHandler tid) Nothing
    return tid
 
-updatePosHandler :: MVar SignalType -> IO ()
+updatePosHandler :: TMVar SignalType -> IO ()
 updatePosHandler sig = do
-   putMVar sig Reposition
+   atomically $ putTMVar sig Reposition
    return ()
 
-changeScreenHandler :: MVar SignalType -> IO ()
+changeScreenHandler :: TMVar SignalType -> IO ()
 changeScreenHandler sig = do
-   putMVar sig ChangeScreen
+   atomically $ putTMVar sig ChangeScreen
    return ()
