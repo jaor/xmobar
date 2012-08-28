@@ -77,6 +77,7 @@ data XPosition = Top
                | BottomSize Align Int Int
                | Static {xpos, ypos, width, height :: Int}
                | OnScreen Int XPosition
+               | Docked
                  deriving ( Read, Eq )
 
 data Align = L | R | C deriving ( Read, Eq )

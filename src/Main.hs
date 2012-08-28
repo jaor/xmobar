@@ -100,6 +100,7 @@ data Opts = Help
           | FgColor    String
           | T
           | B
+          | D
           | AlignSep   String
           | Commands   String
           | AddCommand String
@@ -117,6 +118,7 @@ options =
     , Option ['F'     ] ["fgcolor"     ] (ReqArg FgColor    "fg color" ) "The foreground color. Default grey"
     , Option ['o'     ] ["top"         ] (NoArg  T                     ) "Place xmobar at the top of the screen"
     , Option ['b'     ] ["bottom"      ] (NoArg  B                     ) "Place xmobar at the bottom of the screen"
+    , Option ['d'     ] ["dock"        ] (NoArg  D                     ) "Place xmobar in the dock"
     , Option ['a'     ] ["alignsep"    ] (ReqArg AlignSep   "alignsep" ) "Separators for left, center and right text\nalignment. Default: '}{'"
     , Option ['s'     ] ["sepchar"     ] (ReqArg SepChar    "char"     ) "The character used to separate commands in\nthe output template. Default '%'"
     , Option ['t'     ] ["template"    ] (ReqArg Template   "template" ) "The output template"
@@ -162,6 +164,7 @@ doOpts conf (o:oo) =
       FgColor  s   -> doOpts (conf {fgColor  = s     }) oo
       T            -> doOpts (conf {position = Top   }) oo
       B            -> doOpts (conf {position = Bottom}) oo
+      D            -> doOpts (conf {position = Docked}) oo
       AlignSep s   -> doOpts (conf {alignSep = s     }) oo
       SepChar  s   -> doOpts (conf {sepChar  = s     }) oo
       Template s   -> doOpts (conf {template = s     }) oo

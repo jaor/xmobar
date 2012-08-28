@@ -66,6 +66,7 @@ setPosition p rs ht =
     BottomSize a i ch  -> (Rectangle (ax a i) (ny' ch) (nw i) (mh ch), True)
     Static cx cy cw ch -> (Rectangle (fi cx) (fi cy) (fi cw) (fi ch), True)
     OnScreen _ p'' -> setPosition p'' [scr] ht
+    Docked -> (Rectangle rx ry rw h, False)
   where
     (scr@(Rectangle rx ry rw rh), p') =
       case p of OnScreen i x -> (fromMaybe (head rs) $ safeIndex i rs, x)
@@ -118,6 +119,7 @@ getStrutValues r@(Rectangle x y w h) p rwh =
     BottomW _ _     -> [0, 0,  0, sb, 0, 0, 0, 0,  0,  0, nx, nw]
     BottomSize   {} -> [0, 0,  0, sb, 0, 0, 0, 0,  0,  0, nx, nw]
     Static       {} -> getStaticStrutValues p rwh
+    Docked          -> getStaticStrutValues p rwh
     where st = fi y + fi h
           sb = rwh - fi y
           nx = fi x
