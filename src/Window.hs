@@ -96,8 +96,11 @@ setProperties r c d w srs = do
   setTextProperty d w "xmobar" wM_CLASS
   setTextProperty d w "xmobar" wM_NAME
 
-  changeProperty32 d w a1 c1 propModeReplace $ map fi $
-    getStrutValues r (position c) (getRootWindowHeight srs)
+  ismapped <- isMapped d w
+  changeProperty32 d w a1 c1 propModeReplace $
+    if ismapped
+        then map fi $ getStrutValues r (position c) (getRootWindowHeight srs)
+        else replicate 12 0
   changeProperty32 d w a2 c2 propModeReplace [fromIntegral v]
 
   getProcessID >>= changeProperty32 d w p c1 propModeReplace . return . fromIntegral
@@ -156,11 +159,16 @@ hideWindow d w = do
     a <- internAtom d "_NET_WM_STRUT_PARTIAL"    False
     c <- internAtom d "CARDINAL"                 False
     changeProperty32 d w a c propModeReplace $ replicate 12 0
-    unmapWindow d w
-    sync d False
+    unmapWindow d w >> sync d False
 
-showWindow :: Display -> Window -> IO ()
-showWindow d w = mapWindow d w >> sync d False
+showWindow :: Rectangle -> Config -> Display -> Window -> IO ()
+showWindow r cfg d w = do
+    srs <- getScreenInfo d
+    a   <- internAtom d "_NET_WM_STRUT_PARTIAL"    False
+    c   <- internAtom d "CARDINAL"                 False
+    changeProperty32 d w a c propModeReplace $ map fi $
+        getStrutValues r (position cfg) (getRootWindowHeight srs)
+    mapWindow d w >> sync d False
 
 isMapped :: Display -> Window -> IO Bool
 isMapped d w = fmap ism $ getWindowAttributes d w

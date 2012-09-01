@@ -132,7 +132,7 @@ checker tvar ov vs signal = do
 
 -- | Continuously wait for a signal from a thread or a interrupt handler
 eventLoop :: TVar [String] -> XConf -> TMVar SignalType -> IO ()
-eventLoop tv xc@(XConf d _ w fs cfg) signal = do
+eventLoop tv xc@(XConf d r w fs cfg) signal = do
       typ <- atomically $ takeTMVar signal
       case typ of
          Wakeup -> do
@@ -148,7 +148,7 @@ eventLoop tv xc@(XConf d _ w fs cfg) signal = do
 
          Hide   t -> hide   (t*100*1000)
          Reveal t -> reveal (t*100*1000)
-         Toggle t -> toggle (t*100*1000)
+         Toggle t -> toggle t
 
          TogglePersistent -> eventLoop
             tv xc { config = cfg { persistent = not $ persistent cfg } } signal
@@ -156,27 +156,27 @@ eventLoop tv xc@(XConf d _ w fs cfg) signal = do
     where
         isPersistent = not $ persistent cfg
 
-        hide t | t == 0    = do
-            when isPersistent $ hideWindow d w
-            eventLoop tv xc signal
-               | otherwise = do
-            void $ forkIO
-                 $ threadDelay t >> atomically (putTMVar signal $ Hide 0)
-            eventLoop tv xc signal
+        hide t
+            | t == 0 =
+                when isPersistent (hideWindow d w) >> eventLoop tv xc signal
+            | otherwise = do
+                void $ forkIO
+                     $ threadDelay t >> atomically (putTMVar signal $ Hide 0)
+                eventLoop tv xc signal
 
-        reveal t | t == 0 =
-            if isPersistent
-                then do
-                r' <- repositionWin d w fs cfg
-                showWindow d w
-                eventLoop tv (XConf d r' w fs cfg) signal
-            else eventLoop tv xc signal
-                 | otherwise = do
-            void $ forkIO
-                 $ threadDelay t >> atomically (putTMVar signal $ Reveal 0)
-            eventLoop tv xc signal
+        reveal t
+            | t == 0 = do
+                when isPersistent (showWindow r cfg d w)
+                eventLoop tv xc signal
+            | otherwise = do
+                void $ forkIO
+                     $ threadDelay t >> atomically (putTMVar signal $ Reveal 0)
+                eventLoop tv xc signal
 
-        toggle t = isMapped d w >>= \b -> if b then hide t else reveal t
+        toggle t = do
+            ismapped <- isMapped d w
+            atomically (putTMVar signal $ if ismapped then Hide t else Reveal t)
+            eventLoop tv xc signal
 
         reposWindow rcfg = do
           r' <- repositionWin d w fs rcfg
