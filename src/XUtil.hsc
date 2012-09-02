@@ -217,7 +217,7 @@ withColors d cs f = do
   ps <- mapM (io . initColor d) cs
   f $ map pixel ps
 
--- | Creates a window with the attribute override_redirect set to True.
+-- | Creates a window with the attribute override_redirect set to the specified value.
 -- Windows Managers should not touch this kind of windows.
 newWindow :: Display -> Screen -> Window -> Rectangle -> Bool -> IO Window
 newWindow dpy scr rw (Rectangle x y w h) o = do
