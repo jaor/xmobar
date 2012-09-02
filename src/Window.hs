@@ -92,9 +92,11 @@ setProperties r c d w srs = do
   c2 <- internAtom d "ATOM"                     False
   v  <- internAtom d "_NET_WM_WINDOW_TYPE_DOCK" False
   p  <- internAtom d "_NET_WM_PID"              False
+  n  <- internAtom d "_NET_WM_NAME"             False
 
   setTextProperty d w "xmobar" wM_CLASS
   setTextProperty d w "xmobar" wM_NAME
+  setTextProperty d w "xmobar" n
 
   ismapped <- isMapped d w
   changeProperty32 d w a1 c1 propModeReplace $
