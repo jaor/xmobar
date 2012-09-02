@@ -36,9 +36,9 @@ createWin d fs c = do
   srs     <- getScreenInfo d
   rootw   <- rootWindow d dflt
   (as,ds) <- textExtents fs "0"
-  let ht    = as + ds + 4
-      (r,o) = setPosition (position c) srs (fi ht)
-  win <- newWindow  d (defaultScreenOfDisplay d) rootw r o
+  let ht = as + ds + 4
+      r  = setPosition (position c) srs (fi ht)
+  win <- newWindow  d (defaultScreenOfDisplay d) rootw r True
   setProperties r c d win srs
   when (lowerOnStart c) (lowerWindow d win)
   when (not $ hideOnStart c) $ mapWindow         d win
@@ -49,22 +49,22 @@ repositionWin :: Display -> Window -> XFont -> Config -> IO Rectangle
 repositionWin d win fs c = do
   srs     <- getScreenInfo d
   (as,ds) <- textExtents fs "0"
-  let ht    = as + ds + 4
-      (r,_) = setPosition (position c) srs (fi ht)
+  let ht = as + ds + 4
+      r  = setPosition (position c) srs (fi ht)
   moveResizeWindow d win (rect_x r) (rect_y r) (rect_width r) (rect_height r)
   updateStrut r c d win srs
   return r
 
-setPosition :: XPosition -> [Rectangle] -> Dimension -> (Rectangle,Bool)
+setPosition :: XPosition -> [Rectangle] -> Dimension -> Rectangle
 setPosition p rs ht =
   case p' of
-    Top -> (Rectangle rx ry rw h, True)
-    TopW a i -> (Rectangle (ax a i) ry (nw i) h, True)
-    TopSize a i ch -> (Rectangle (ax a i) ry (nw i) (mh ch), True)
-    Bottom -> (Rectangle rx ny rw h, True)
-    BottomW a i -> (Rectangle (ax a i) ny (nw i) h, True)
-    BottomSize a i ch  -> (Rectangle (ax a i) (ny' ch) (nw i) (mh ch), True)
-    Static cx cy cw ch -> (Rectangle (fi cx) (fi cy) (fi cw) (fi ch), True)
+    Top -> Rectangle rx ry rw h
+    TopW a i -> Rectangle (ax a i) ry (nw i) h
+    TopSize a i ch -> Rectangle (ax a i) ry (nw i) (mh ch)
+    Bottom -> Rectangle rx ny rw h
+    BottomW a i -> Rectangle (ax a i) ny (nw i) h
+    BottomSize a i ch  -> Rectangle (ax a i) (ny' ch) (nw i) (mh ch)
+    Static cx cy cw ch -> Rectangle (fi cx) (fi cy) (fi cw) (fi ch)
     OnScreen _ p'' -> setPosition p'' [scr] ht
   where
     (scr@(Rectangle rx ry rw rh), p') =
