@@ -38,7 +38,7 @@ createWin d fs c = do
   (as,ds) <- textExtents fs "0"
   let ht = as + ds + 4
       r  = setPosition (position c) srs (fi ht)
-  win <- newWindow  d (defaultScreenOfDisplay d) rootw r True
+  win <- newWindow  d (defaultScreenOfDisplay d) rootw r (not (dock c))
   setProperties r c d win srs
   when (lowerOnStart c) (lowerWindow d win)
   when (not $ hideOnStart c) $ mapWindow         d win

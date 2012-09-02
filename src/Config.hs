@@ -53,6 +53,7 @@ data Config =
            , bgColor        :: String     -- ^ Backgroud color
            , fgColor        :: String     -- ^ Default font color
            , position       :: XPosition  -- ^ Top Bottom or Static
+           , dock           :: Bool       --   act as a normal dockapp (don't override_redirect)
            , border         :: Border     -- ^ NoBorder TopB BottomB or FullB
            , borderColor    :: String     -- ^ Border color
            , hideOnStart    :: Bool       -- ^ Hide (Unmap) the window on
@@ -97,6 +98,7 @@ defaultConfig =
            , bgColor  = "#000000"
            , fgColor  = "#BFBFBF"
            , position = Top
+           , dock     = False
            , border = NoBorder
            , borderColor  = "#BFBFBF"
            , hideOnStart  = False
