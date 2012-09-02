@@ -52,7 +52,7 @@ repositionWin d win fs c = do
   let ht    = as + ds + 4
       (r,_) = setPosition (position c) srs (fi ht)
   moveResizeWindow d win (rect_x r) (rect_y r) (rect_width r) (rect_height r)
-  setProperties r c d win srs
+  updateStrut r c d win srs
   return r
 
 setPosition :: XPosition -> [Rectangle] -> Dimension -> (Rectangle,Bool)
@@ -86,9 +86,8 @@ setPosition p rs ht =
 
 setProperties :: Rectangle -> Config -> Display -> Window -> [Rectangle] -> IO ()
 setProperties r c d w srs = do
-  a1 <- internAtom d "_NET_WM_STRUT_PARTIAL"    False
   c1 <- internAtom d "CARDINAL"                 False
-  a2 <- internAtom d "_NET_WM_WINDOW_TYPE"      False
+  a  <- internAtom d "_NET_WM_WINDOW_TYPE"      False
   c2 <- internAtom d "ATOM"                     False
   v  <- internAtom d "_NET_WM_WINDOW_TYPE_DOCK" False
   p  <- internAtom d "_NET_WM_PID"              False
@@ -98,14 +97,24 @@ setProperties r c d w srs = do
   setTextProperty d w "xmobar" wM_NAME
   setTextProperty d w "xmobar" n
 
+  changeProperty32 d w a c2 propModeReplace [fromIntegral v]
+
+  getProcessID >>= changeProperty32 d w p c1 propModeReplace . return . fromIntegral
+
+  updateStrut r c d w srs
+
+
+updateStrut :: Rectangle -> Config -> Display -> Window -> [Rectangle] -> IO()
+updateStrut r c d w srs = do
+  a <- internAtom d "_NET_WM_STRUT_PARTIAL"    False
+  c1 <- internAtom d "CARDINAL"                 False
   ismapped <- isMapped d w
-  changeProperty32 d w a1 c1 propModeReplace $
+
+  changeProperty32 d w a c1 propModeReplace $
     if ismapped
         then map fi $ getStrutValues r (position c) (getRootWindowHeight srs)
         else replicate 12 0
-  changeProperty32 d w a2 c2 propModeReplace [fromIntegral v]
-
-  getProcessID >>= changeProperty32 d w p c1 propModeReplace . return . fromIntegral
+  
 
 getRootWindowHeight :: [Rectangle] -> Int
 getRootWindowHeight srs = maximum (map getMaxScreenYCoord srs)
