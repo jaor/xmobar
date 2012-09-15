@@ -48,24 +48,25 @@ import Plugins.Monitors.Volume
 import Plugins.Monitors.Mpris
 #endif
 
-data Monitors = Weather      Station    Args Rate
-              | Network      Interface  Args Rate
-              | BatteryP     [String]   Args Rate
-              | DiskU        DiskSpec   Args Rate
-              | DiskIO       DiskSpec   Args Rate
-              | Thermal      Zone       Args Rate
-              | ThermalZone  ZoneNo     Args Rate
-              | Memory       Args       Rate
-              | Swap         Args       Rate
-              | Cpu          Args       Rate
-              | MultiCpu     Args       Rate
-              | Battery      Args       Rate
-              | Brightness   Args       Rate
-              | CpuFreq      Args       Rate
-              | CoreTemp     Args       Rate
-              | TopProc      Args       Rate
-              | TopMem       Args       Rate
-              | Uptime       Args       Rate
+data Monitors = Weather      Station     Args Rate
+              | Network      Interface   Args Rate
+              | DynNetwork               Args Rate
+              | BatteryP     [String]    Args Rate
+              | DiskU        DiskSpec    Args Rate
+              | DiskIO       DiskSpec    Args Rate
+              | Thermal      Zone        Args Rate
+              | ThermalZone  ZoneNo      Args Rate
+              | Memory       Args        Rate
+              | Swap         Args        Rate
+              | Cpu          Args        Rate
+              | MultiCpu     Args        Rate
+              | Battery      Args        Rate
+              | Brightness   Args        Rate
+              | CpuFreq      Args        Rate
+              | CoreTemp     Args        Rate
+              | TopProc      Args        Rate
+              | TopMem       Args        Rate
+              | Uptime       Args        Rate
 #ifdef IWLIB
               | Wireless Interface  Args Rate
 #endif
@@ -95,6 +96,7 @@ type DiskSpec  = [(String, String)]
 instance Exec Monitors where
     alias (Weather s _ _) = s
     alias (Network i _ _) = i
+    alias (DynNetwork _ _) = "dynnetwork"
     alias (Thermal z _ _) = z
     alias (ThermalZone z _ _) = "thermal" ++ show z
     alias (Memory _ _) = "memory"
@@ -126,6 +128,7 @@ instance Exec Monitors where
     alias (Mpris2 _ _ _) = "mpris2"
 #endif
     start (Network  i a r) = startNet i a r
+    start (DynNetwork a r) = startDynNet a r
     start (Cpu a r) = startCpu a r
     start (MultiCpu a r) = startMultiCpu a r
     start (TopProc a r) = startTop a r

@@ -1044,9 +1044,10 @@ can be used in the output template as `%mydate%`
 
 - Runs the given program, and displays its standard output.
 
-`PipeReader "/path/to/pipe" Alias`
+`PipeReader "default text:/path/to/pipe" Alias`
 
 - Reads its displayed output from the given pipe.
+- Prefix an optional default text separated by a colon
 
 `BufferedPipeReader  Alias [ (Timeout, Bool, "/path/to/pipe1")
                            , (Timeout, Bool, "/path/to/pipe2")

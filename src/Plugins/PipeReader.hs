@@ -23,6 +23,12 @@ data PipeReader = PipeReader String String
 instance Exec PipeReader where
     alias (PipeReader _ a)    = a
     start (PipeReader p _) cb = do
-        h <- openFile p ReadWriteMode
+        let (def, pipe) = split ':' p
+        h <- openFile pipe ReadWriteMode
+        cb def
         forever (hGetLineSafe h >>= cb)
-        where forever a = a >> forever a
+      where
+        forever a = a >> forever a
+        split c xs | c `elem` xs = let (pre, post) = span ((/=) c) xs
+                                   in (pre, dropWhile ((==) c) post)
+                   | otherwise   = ([], xs)
