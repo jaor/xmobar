@@ -8,6 +8,8 @@ _New features_
     MPD status (thanks to Ben Boeckel).
   - New monitor `BufferedPipeReader` displaying data from multiple
     pipes (thanks to Jochen Keil).
+  - New monitor `DynNetwork`, which detects the active interface
+    automatically, by Reto Hablützel
   - `PipeReader`'s default text is now configurable, by Reto
     Hablützel.
   - DBUS support: Jochen implemented an extension for DBUS signal
