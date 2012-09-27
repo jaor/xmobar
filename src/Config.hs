@@ -34,6 +34,7 @@ import Plugins.StdinReader
 import Plugins.XMonadLog
 import Plugins.EWMH
 import Plugins.Kbd
+import Plugins.Locks
 
 #ifdef INOTIFY
 import Plugins.Mail
@@ -120,7 +121,7 @@ infixr :*:
 -- the 'Runnable.Runnable' Read instance. To install a plugin just add
 -- the plugin's type to the list of types (separated by ':*:') appearing in
 -- this function's type signature.
-runnableTypes :: Command :*: Monitors :*: Date :*: PipeReader :*: BufferedPipeReader :*: CommandReader :*: StdinReader :*: XMonadLog :*: EWMH :*: Kbd :*:
+runnableTypes :: Command :*: Monitors :*: Date :*: PipeReader :*: BufferedPipeReader :*: CommandReader :*: StdinReader :*: XMonadLog :*: EWMH :*: Kbd :*: Locks :*:
 #ifdef INOTIFY
                  Mail :*: MBox :*:
 #endif

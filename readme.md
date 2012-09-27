@@ -997,6 +997,13 @@ something like:
 
 		Run Kbd [("us(dvorak)", "DV"), ("us", "US")]
 
+### `Locks`
+
+- Displays the status of Caps Lock, Num Lock and Scroll Lock.
+- Aliases to `locks`
+- Example:
+
+	Run Locks
 
 ## Executing External Commands
 
