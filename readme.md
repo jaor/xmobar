@@ -777,7 +777,7 @@ something like:
 - Default template: none (you must specify a template for each file system).
 - Example:
 
-         Disks [("/", "<read> <write>"), ("sdb1", "<total>")] [] 10
+         DiskIO [("/", "<read> <write>"), ("sdb1", "<total>")] [] 10
 
 ### `ThermalZone Number Args RefreshRate`
 
