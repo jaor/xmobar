@@ -114,7 +114,7 @@ startLoop xcfg@(XConf _ _ w _ _) sig vs = do
 #endif
           ev <- getEvent e
           case ev of
-            ConfigureEvent {} -> atomically $ putTMVar signal Reposition
+            -- ConfigureEvent {} -> (atomically $ putTMVar signal Reposition)
             ExposeEvent {} -> atomically $ putTMVar signal Wakeup
             RRScreenChangeNotifyEvent {} -> atomically $ putTMVar signal Reposition
             _ -> return ()

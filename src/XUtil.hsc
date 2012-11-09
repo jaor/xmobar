@@ -179,7 +179,7 @@ printString dpy drw fs@(Xft font) _ fc bc x y s = do
 #endif
 
 
--- | Creates a window with the attribute override_redirect set to True.
+-- | Creates a window with the attribute override_redirect set to the specified value.
 -- Windows Managers should not touch this kind of windows.
 newWindow :: Display -> Screen -> Window -> Rectangle -> Bool -> IO Window
 newWindow dpy scr rw (Rectangle x y w h) o = do
