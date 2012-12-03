@@ -756,8 +756,8 @@ something like:
 
 - Aliases to `disku`
 - Disks: list of pairs of the form (device or mount point, template),
-  where the template can contain <size>, <free>, <used>, <freep> or
-  <usedp>, <freebar> or <usedbar> for total, free, used, free
+  where the template can contain `<size>`, `<free>`, `<used>`, `<freep>` or
+  `<usedp>`, `<freebar>` or `<usedbar>` for total, free, used, free
   percentage and used percentage of the given file system capacity.
 - Args: default monitor arguments. `-t`/`--template` is ignored.
 - Default template: none (you must specify a template for each file system).
