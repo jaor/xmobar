@@ -771,7 +771,7 @@ something like:
 
 - Aliases to `diskio`
 - Disks: list of pairs of the form (device or mount point, template),
-  where the template can contain <total>, <read>, <write> for total,
+  where the template can contain `<total>`, `<read>`, `<write>` for total,
   read and write speed, respectively.
 - Args: default monitor arguments. `-t`/`--template` is ignored.
 - Default template: none (you must specify a template for each file system).
