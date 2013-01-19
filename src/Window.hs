@@ -59,10 +59,12 @@ setPosition :: XPosition -> [Rectangle] -> Dimension -> (Rectangle,Bool)
 setPosition p rs ht =
   case p' of
     Top -> (Rectangle rx ry rw h, True)
+    TopP l r -> (Rectangle (rx + fi l) ry (rw - fi l - fi r) h, True)
     TopW a i -> (Rectangle (ax a i) ry (nw i) h, True)
     TopSize a i ch -> (Rectangle (ax a i) ry (nw i) (mh ch), True)
     Bottom -> (Rectangle rx ny rw h, True)
     BottomW a i -> (Rectangle (ax a i) ny (nw i) h, True)
+    BottomP l r -> (Rectangle (rx + fi l) ny (rw - fi l - fi r) h, True)
     BottomSize a i ch  -> (Rectangle (ax a i) (ny' ch) (nw i) (mh ch), True)
     Static cx cy cw ch -> (Rectangle (fi cx) (fi cy) (fi cw) (fi ch), True)
     OnScreen _ p'' -> setPosition p'' [scr] ht
@@ -115,9 +117,11 @@ getStrutValues r@(Rectangle x y w h) p rwh =
     case p of
     OnScreen _ p'   -> getStrutValues r p' rwh
     Top             -> [0, 0, st,  0, 0, 0, 0, 0, nx, nw,  0,  0]
+    TopP    _ _     -> [0, 0, st,  0, 0, 0, 0, 0, nx, nw,  0,  0]
     TopW    _ _     -> [0, 0, st,  0, 0, 0, 0, 0, nx, nw,  0,  0]
     TopSize      {} -> [0, 0, st,  0, 0, 0, 0, 0, nx, nw,  0,  0]
     Bottom          -> [0, 0,  0, sb, 0, 0, 0, 0,  0,  0, nx, nw]
+    BottomP _ _     -> [0, 0,  0, sb, 0, 0, 0, 0,  0,  0, nx, nw]
     BottomW _ _     -> [0, 0,  0, sb, 0, 0, 0, 0,  0,  0, nx, nw]
     BottomSize   {} -> [0, 0,  0, sb, 0, 0, 0, 0,  0,  0, nx, nw]
     Static       {} -> getStaticStrutValues p rwh

@@ -200,8 +200,10 @@ Other configuration options:
 :    Default font color.
 
 `position`
-:     Top, TopW, TopSize, Bottom, BottomW, BottomSize or Static (with x, y,
-      width and height).
+:     Top, TopP, TopW, TopSize, Bottom, BottomP, BottomW, BottomSize or Static
+      (with x, y, width and height).
+
+:     TopP and BottomP take 2 arguments: left padding and right padding.
 
 :     TopW and BottomW take 2 arguments: an alignment parameter (L for
       left, C for centered, R for Right) and an integer for the
@@ -217,6 +219,13 @@ Other configuration options:
 :          position = BottomW C 75
 
 :     to place xmobar at the bottom, centered with the 75% of the screen width.
+
+:     Or:
+
+:          position = BottomP 120 0
+
+:    to place xmobar at the bottom, with 120 pixel indent of the left.
+
 
 :     Or
 

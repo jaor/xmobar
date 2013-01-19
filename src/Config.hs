@@ -23,6 +23,7 @@ module Config
     , runnableTypes
     ) where
 
+
 import Commands
 import {-# SOURCE #-} Runnable
 import Plugins.Monitors
@@ -73,7 +74,9 @@ data Config =
 data XPosition = Top
                | TopW Align Int
                | TopSize Align Int Int
+               | TopP Int Int
                | Bottom
+               | BottomP Int Int
                | BottomW Align Int
                | BottomSize Align Int Int
                | Static {xpos, ypos, width, height :: Int}
