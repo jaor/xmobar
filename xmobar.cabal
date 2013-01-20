@@ -30,6 +30,10 @@ flag with_xft
   description: Use Xft to render text. UTF-8 support included.
   default: False
 
+flag with_icon
+  description: Provide tray icon rendering support. XBM, XPM support included.
+  default: False
+
 flag with_utf8
   description: With UTF-8 support.
   default: True
@@ -74,7 +78,7 @@ executable xmobar
     hs-source-dirs:     src
     main-is:            Main.hs
     other-modules:
-      Xmobar, Config, Parsers, Commands, Localize,
+      Xmobar, Config, Parsers, Commands, Localize, XGraphic,
       XUtil, StatFS, Runnable, ColorCache, Window, Signal,
       Plugins, Plugins.BufferedPipeReader,
       Plugins.CommandReader, Plugins.Date, Plugins.EWMH,
@@ -88,7 +92,7 @@ executable xmobar
       Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
       Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
       Plugins.Monitors.Uptime, Plugins.Monitors.Weather,
-      Plugins.Monitors.Bright
+      Plugins.Monitors.Bright, Plugins.Icons
 
     ghc-prof-options:   -prof -auto-all
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
@@ -123,6 +127,11 @@ executable xmobar
        build-depends: utf8-string == 0.3.*, X11-xft >= 0.2 && < 0.4
        other-modules: MinXft
        cpp-options: -DXFT
+
+    if flag(with_icon) || flag(all_extensions)
+       build-depends: X11-xft >= 0.2 && < 0.4
+       other-modules: XGraphic, Plugins.Icons
+       cpp-options: -DXGraphic
 
     if flag(with_utf8) || flag(all_extensions)
        build-depends: utf8-string == 0.3.*
