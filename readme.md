@@ -101,19 +101,19 @@ Extensions need additional libraries (listed below) that will be
 automatically downloaded and installed if you're using cabal install.
 Otherwise, you'll need to install them yourself.
 
-`with_dbus`
-:    Enables support for DBUS by making xmobar to publish a service on
+- `with_dbus`:
+     Enables support for DBUS by making xmobar to publish a service on
      the session bus.  Requires the [dbus] package.
 
-`with_threaded`
-:    Uses GHC's threaded runtime.  Use this option if xmobar enters a
+- `with_threaded`:
+     Uses GHC's threaded runtime.  Use this option if xmobar enters a
      high-CPU regime right after starting.
 
-`with_utf8`
-:    UTF-8 support. Requires the [utf8-string] package.
+- `with_utf8`:
+     UTF-8 support. Requires the [utf8-string] package.
 
-`with_xft`
-:    Antialiased fonts. Requires the [X11-xft] package. This option
+- `with_xft`:
+     Antialiased fonts. Requires the [X11-xft] package. This option
      automatically enables UTF-8.
 
      To use XFT fonts you need to use the `xft:` prefix in the `font`
@@ -121,45 +121,45 @@ Otherwise, you'll need to install them yourself.
 
         font = "xft:Times New Roman-10:italic"
 
-`with_mpd`
-:    Enables support for the [MPD] daemon. Requires the [libmpd] package.
+- `with_mpd`:
+     Enables support for the [MPD] daemon. Requires the [libmpd] package.
 
-`with_mpris`
-:    Enables support for MPRIS v1/v2 protocol.
+- `with_mpris`:
+     Enables support for MPRIS v1/v2 protocol.
      Requires the [dbus] and [text] packages.
 
-`with_inotify`
-:    Support for inotify in modern linux kernels. This option is needed
+- `with_inotify`:
+     Support for inotify in modern linux kernels. This option is needed
      for the MBox and Mail plugins to work. Requires the [hinotify]
      package.
 
-`with_iwlib`
-:    Support for wireless cards. Enables the Wireless plugin. No Haskell
+- `with_iwlib`:
+     Support for wireless cards. Enables the Wireless plugin. No Haskell
      library is required, but you will need the [iwlib] C library and
      headers in your system (e.g., install `libiw-dev` in Debian-based
      systems).
 
-`with_alsa`
-:    Support for ALSA sound cards. Enables the Volume plugin. Requires the
+- `with_alsa`:
+     Support for ALSA sound cards. Enables the Volume plugin. Requires the
      [alsa-mixer] package.
 
-`with_datezone`
-:    Support for other timezones. Enables the DateZone plugin.
+- `with_datezone`:
+     Support for other timezones. Enables the DateZone plugin.
      Requires [timezone-olson] and [timezone-series] package.
 
-`all_extensions`
-:    Enables all the extensions above.
+- `all_extensions`:
+     Enables all the extensions above.
 
 Running xmobar
 ==============
 
 You can now run xmobar with:
 
-        xmobar /path/to/config &
+    xmobar /path/to/config &
 
 or
 
-        xmobar &
+    xmobar &
 
 if you have the default configuration file saved as `~/.xmobarrc`
 
@@ -190,92 +190,92 @@ For the output template:
 
 Other configuration options:
 
-`font`
-:    Name of the font to be used. Use the `xft:` prefix for XFT fonts.
+- `font`:
+    Name of the font to be used. Use the `xft:` prefix for XFT fonts.
 
-`bgColor`
-:    Background color.
+- `bgColor`:
+    Background color.
 
-`fgColor`
-:    Default font color.
+- `fgColor`:
+    Default font color.
 
-`position`
-:     Top, TopP, TopW, TopSize, Bottom, BottomP, BottomW, BottomSize or Static
+- `position`:
+      Top, TopP, TopW, TopSize, Bottom, BottomP, BottomW, BottomSize or Static
       (with x, y, width and height).
 
-:     TopP and BottomP take 2 arguments: left padding and right padding.
+      TopP and BottomP take 2 arguments: left padding and right padding.
 
-:     TopW and BottomW take 2 arguments: an alignment parameter (L for
+      TopW and BottomW take 2 arguments: an alignment parameter (L for
       left, C for centered, R for Right) and an integer for the
       percentage width xmobar window will have in respect to the
       screen width.
 
-:     TopSize and BottomSize take 3 arguments: an alignment parameter, an
+      TopSize and BottomSize take 3 arguments: an alignment parameter, an
       integer for the percentage width, and an integer for the minimum pixel
       height that the xmobar window will have.
 
-:     For example:
+      For example:
 
-:          position = BottomW C 75
+      `position = BottomW C 75`
 
-:     to place xmobar at the bottom, centered with the 75% of the screen width.
+      to place xmobar at the bottom, centered with the 75% of the screen width.
 
-:     Or:
+      or:
 
-:          position = BottomP 120 0
+      `position = BottomP 120 0`
 
-:    to place xmobar at the bottom, with 120 pixel indent of the left.
+      to place xmobar at the bottom, with 120 pixel indent of the left.
 
 
-:     Or
+      or
 
-:          position = Static { xpos = 0 , ypos = 0, width = 1024, height = 15 }
+      `position = Static { xpos = 0 , ypos = 0, width = 1024, height = 15 }`
 
-:     or
+      or
 
-:         position = Top
+      `position = Top`
 
-`lowerOnStart`
-:     When True the window is sent the bottom of the window stack initially.
+- `lowerOnStart`:
+      When True the window is sent the bottom of the window stack initially.
 
-`hideOnStart`
-:     When set to True the window is initially not mapped, i.e. hidden. It then
+- `hideOnStart`:
+      When set to True the window is initially not mapped, i.e. hidden. It then
       can be toggled manually (for example using the dbus interface) or
       automatically (by a plugin) to make it reappear.
 
-`persistent`
-:     When True the window status is fixed i.e. hiding or revealing is not
+- `persistent`:
+      When True the window status is fixed i.e. hiding or revealing is not
       possible. This option can be toggled at runtime.
 
-`border`
-:     TopB, TopBM, BottomB, BottomBM, FullB, FullBM or NoBorder (default).
+- `border`:
+      TopB, TopBM, BottomB, BottomBM, FullB, FullBM or NoBorder (default).
 
-:     TopB, BottomB, FullB take no arguments, and request drawing a
+      TopB, BottomB, FullB take no arguments, and request drawing a
       border at the top, bottom or around xmobar's window,
       respectively.
 
-:     TopBM, BottomBM, FullBM take an integer argument, which is the
+      TopBM, BottomBM, FullBM take an integer argument, which is the
       margin, in pixels, between the border of the window and the
       drawn border.
 
-`borderColor`
-:     Border color.
+- `borderColor`:
+      Border color.
 
-`commands`
-:    For setting the options of the programs to run (optional).
+- `commands`:
+     For setting the options of the programs to run (optional).
 
-`sepChar`
-:    The character to be used for indicating commands in the output
+- `sepChar`:
+     The character to be used for indicating commands in the output
      template (default '%').
 
-`alignSep`
-:    a 2 character string for aligning text in the output template. The
+- `alignSep`:
+     a 2 character string for aligning text in the output template. The
      text before the first character will be align to left, the text in
      between the 2 characters will be centered, and the text after the
      second character will be align to the right.
 
-`template`
-:    The output template.
+- `template`:
+     The output template.
 
 ### Running xmobar with i3status
 
