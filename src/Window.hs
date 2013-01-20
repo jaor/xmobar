@@ -41,7 +41,7 @@ createWin d fs c = do
   win <- newWindow  d (defaultScreenOfDisplay d) rootw r o
   setProperties r c d win srs
   when (lowerOnStart c) (lowerWindow d win)
-  when (not $ hideOnStart c) $ mapWindow         d win
+  when (not $ hideOnStart c) $ showWindow r c d win
   return (r,win)
 
 -- | Updates the size and position of the window
