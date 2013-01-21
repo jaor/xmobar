@@ -238,7 +238,7 @@ drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
       (w,fs) = (window &&& fontS  ) r
       strLn  = io . mapM getWidth
       getWidth (Text s,cl) = textWidth d fs s >>= \tw -> return (Text s,cl,fi tw)
-      getWidth (Icon s,cl) = return (Icon s,cl,fi 10)
+      getWidth (Icon s,cl) = return (Icon s,cl,fi ht)
 
   withColors d [bgColor c, borderColor c] $ \[bgcolor, bdcolor] -> do
     gc <- io $ createGC  d w
@@ -268,8 +268,8 @@ printStrings :: Drawable -> GC -> XFont -> Position
 printStrings _ _ _ _ _ [] = return ()
 printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
   r <- ask
-  let fromWidget (Text s) = s
-      fromWidget (Icon s) = s
+  let fromWidget (Text t) = t
+      fromWidget (Icon t) = t
   (as,ds) <- io $ textExtents fontst (fromWidget s)
   let (conf,d)             = (config &&& display) r
       Rectangle _ _ wid ht = rect r
