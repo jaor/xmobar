@@ -170,7 +170,7 @@ drawBitmap d p _ gc fc bc x y i = do
     withColors d [fc, bc] $ \[fc', bc'] -> do
         setForeground d gc fc'
         setBackground d gc bc'
-        io $ copyPlane d (pixmap i) p gc 0 0 (width i) (height i) x (y - (fromIntegral $ height i)) 1
+        io $ copyPlane d (pixmap i) p gc 0 0 (width i) (height i) x (y - (fi $ height i)) 1
 
 printString' :: Display -> Drawable -> XFont -> GC -> String -> String
             -> Position -> Position -> Widget -> IO ()
