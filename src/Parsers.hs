@@ -47,9 +47,8 @@ textParser :: String -> Parser [(Widget, ColorString)]
 textParser c = do s <- many1 $
                     noneOf "<" <|>
                     (try $ notFollowedBy' (char '<')
-                                           (string "icon=" ) <|>
-                             notFollowedBy' (char '<')
-                                           (string "fc=" <|> string "/fc>" ))
+                                          (string "fc="  <|>
+                                          string "icon=" <|> string "/fc>"))
                   return [(Text s, c)]
 
 
