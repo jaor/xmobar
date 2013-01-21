@@ -30,11 +30,11 @@ instance Exec Icons where
     run Icons = do
     d <- openDisplay ""
     root <- rootWindow d (defaultScreen d)
-    win <- newWindow d (defaultScreenOfDisplay d) root (0 0 8 8) True
+    win <- newWindow d (defaultScreenOfDisplay d) root (Rectangle 0 0 8 8) True
     let p = whitePixel d (defaultScreen d)
-    drawInWin d win p "cat.xbm" -- FIXME: hardcoded icon
     let mapRaised dpy w = mapWindow dpy w >> raiseWindow dpy w
     mapRaised d win
+    drawInWin d win p "cat.xbm" -- FIXME: hardcoded icon
     sync d False
     threadDelay (1 * 1000000)
     closeDisplay d
