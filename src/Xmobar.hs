@@ -231,12 +231,15 @@ updateWin v = do
 -- $print
 
 -- | Draws in and updates the window
-drawInWin :: Rectangle -> [[(String, String)]] -> X ()
+drawInWin :: Rectangle -> [[(Widget, String)]] -> X ()
 drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
   r <- ask
   let (c,d ) = (config &&& display) r
       (w,fs) = (window &&& fontS  ) r
-      strLn  = io . mapM (\(s,cl) -> textWidth d fs s >>= \tw -> return (s,cl,fi tw))
+      strLn  = io . mapM getWidth
+      getWidth (Text s,cl) = textWidth d fs s >>= \tw -> return (Text s,cl,fi tw)
+      getWidth (Icon s,cl) = return (Icon s,cl,fi 10)
+
   withColors d [bgColor c, borderColor c] $ \[bgcolor, bdcolor] -> do
     gc <- io $ createGC  d w
     -- create a pixmap to write to and fill it with a rectangle
@@ -261,11 +264,13 @@ drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
 
 -- | An easy way to print the stuff we need to print
 printStrings :: Drawable -> GC -> XFont -> Position
-             -> Align -> [(String, String, Position)] -> X ()
+             -> Align -> [(Widget, String, Position)] -> X ()
 printStrings _ _ _ _ _ [] = return ()
 printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
   r <- ask
-  (as,ds) <- io $ textExtents fontst s
+  let fromWidget (Text s) = s
+      fromWidget (Icon s) = s
+  (as,ds) <- io $ textExtents fontst (fromWidget s)
   let (conf,d)             = (config &&& display) r
       Rectangle _ _ wid ht = rect r
       totSLen              = foldr (\(_,_,len) -> (+) len) 0 sl
@@ -278,5 +283,5 @@ printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
       (fc,bc)              = case break (==',') c of
                                (f,',':b) -> (f, b           )
                                (f,    _) -> (f, bgColor conf)
-  io $ printString d dr fontst gc fc bc offset valign s
+  io $ printString' d dr fontst gc fc bc offset valign s
   printStrings dr gc fontst (offs + l) a xs
