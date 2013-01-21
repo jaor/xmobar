@@ -26,7 +26,7 @@ module Xmobar
     , createWin, updateWin
     -- * Printing
     -- $print
-    , drawInWin, printStrings
+    , drawInWin, drawThings
     ) where
 
 import Prelude
@@ -246,9 +246,9 @@ drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
     io $ setForeground d gc bgcolor
     io $ fillRectangle d p gc 0 0 wid ht
     -- write to the pixmap the new string
-    printStrings p gc fs 1 L =<< strLn left
-    printStrings p gc fs 1 R =<< strLn right
-    printStrings p gc fs 1 C =<< strLn center
+    drawThings p gc fs 1 L =<< strLn left
+    drawThings p gc fs 1 R =<< strLn right
+    drawThings p gc fs 1 C =<< strLn center
     -- draw 1 pixel border if requested
     io $ drawBorder (border c) d p gc bdcolor wid ht
     -- copy the pixmap with the new string to the window
@@ -260,10 +260,10 @@ drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
     io $ sync       d True
 
 -- | An easy way to print the stuff we need to print
-printStrings :: Drawable -> GC -> XFont -> Position
+drawThings :: Drawable -> GC -> XFont -> Position
              -> Align -> [(String, String, Position)] -> X ()
-printStrings _ _ _ _ _ [] = return ()
-printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
+drawThings _ _ _ _ _ [] = return ()
+drawThings dr gc fontst offs a sl@((s,c,l):xs) = do
   r <- ask
   (as,ds) <- io $ textExtents fontst s
   let (conf,d)             = (config &&& display) r
@@ -278,5 +278,5 @@ printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
       (fc,bc)              = case break (==',') c of
                                (f,',':b) -> (f, b           )
                                (f,    _) -> (f, bgColor conf)
-  io $ printString d dr fontst gc fc bc offset valign s
-  printStrings dr gc fontst (offs + l) a xs
+  io $ printString' d dr fontst gc fc bc offset valign s
+  drawThings dr gc fontst (offs + l) a xs

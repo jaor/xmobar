@@ -14,12 +14,13 @@
 
 module XUtil
     ( XFont
+    , drawIcon
     , initFont
     , initCoreFont
     , initUtf8Font
     , textExtents
     , textWidth
-    , printString
+    , printString'
     , newWindow
     , nextEvent'
     , readFileSafe
@@ -39,6 +40,7 @@ import Graphics.X11.Xlib.Extras
 import System.Mem.Weak ( addFinalizer )
 import System.Posix.Types (Fd(..))
 import System.IO
+import XGraphic
 #if defined XFT || defined UTF8
 # if __GLASGOW_HASKELL__ < 612
 import qualified System.IO.UTF8 as UTF8 (readFile,hGetLine)
@@ -67,6 +69,11 @@ hGetLineSafe = UTF8.hGetLine
 #else
 hGetLineSafe = hGetLine
 #endif
+
+data Icon = Icon { width  :: Dimension
+                 , height :: Dimension
+                 , pixmap :: Pixmap
+                 }
 
 -- Hide the Core Font/Xft switching here
 data XFont = Core FontStruct
@@ -150,6 +157,26 @@ textExtents (Xft xftfont) _ = do
   descent <- fi `fmap` xft_descent xftfont
   return (ascent, descent)
 #endif
+
+loadIcon :: Display -> Drawable -> String -> IO Icon
+loadIcon d w p = do
+    (bw, bh, bp, _, _) <- readBitmapFile d w p
+    return $ Icon bw bh bp
+
+drawIcon :: Display -> Drawable -> XFont -> GC -> String -> String
+            -> Position -> Position -> Icon -> IO ()
+drawIcon d p _ gc fc bc x y i = do
+    withColors d [fc, bc] $ \[fc', bc'] -> do
+        setForeground d gc fc'
+        setBackground d gc bc'
+        io $ copyPlane d (pixmap i) p gc 0 0 (width i) (height i) x (y - (fromIntegral $ height i)) 1
+
+printString' :: Display -> Drawable -> XFont -> GC -> String -> String
+            -> Position -> Position -> String  -> IO ()
+printString' d p fs gc fc bc x y s = do
+    if s == "cat.xbm"
+        then loadIcon d p s >>= drawIcon d p fs gc fc bc x y
+        else printString d p fs gc fc bc x y s
 
 printString :: Display -> Drawable -> XFont -> GC -> String -> String
             -> Position -> Position -> String  -> IO ()
