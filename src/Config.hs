@@ -56,6 +56,7 @@ data Config =
            , position       :: XPosition  -- ^ Top Bottom or Static
            , border         :: Border     -- ^ NoBorder TopB BottomB or FullB
            , borderColor    :: String     -- ^ Border color
+           , iconPath		:: String    -- ^ Path to find Icon Bitmap cache
            , hideOnStart    :: Bool       -- ^ Hide (Unmap) the window on
                                           --   initialization
            , lowerOnStart   :: Bool       -- ^ Lower to the bottom of the
@@ -102,6 +103,7 @@ defaultConfig =
            , position = Top
            , border = NoBorder
            , borderColor  = "#BFBFBF"
+           , iconPath     = "~/.xmobar/icons"
            , hideOnStart  = False
            , lowerOnStart = True
            , persistent   = False
