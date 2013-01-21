@@ -46,9 +46,12 @@ stringParser c = manyTill (iconParser c <|> textParser c <|> colorParser) eof
 textParser :: String -> Parser [(Widget, ColorString)]
 textParser c = do s <- many1 $
                     noneOf "<" <|>
-                    ( try $ notFollowedBy' (char '<')
-                                           (string "fc=" <|> string "/fc>" ) )
+                    (try $ notFollowedBy' (char '<')
+                                           (string "icon=" ) <|>
+                             notFollowedBy' (char '<')
+                                           (string "fc=" <|> string "/fc>" ))
                   return [(Text s, c)]
+
 
 -- | Wrapper for notFollowedBy that returns the result of the first parser.
 --   Also works around the issue that, at least in Parsec 3.0.0, notFollowedBy
