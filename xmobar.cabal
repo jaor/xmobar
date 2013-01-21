@@ -92,7 +92,7 @@ executable xmobar
       Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
       Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
       Plugins.Monitors.Uptime, Plugins.Monitors.Weather,
-      Plugins.Monitors.Bright, Plugins.Icons
+      Plugins.Monitors.Bright
 
     ghc-prof-options:   -prof -auto-all
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
@@ -127,11 +127,6 @@ executable xmobar
        build-depends: utf8-string == 0.3.*, X11-xft >= 0.2 && < 0.4
        other-modules: MinXft
        cpp-options: -DXFT
-
-    if flag(with_icon) || flag(all_extensions)
-       build-depends: X11-xft >= 0.2 && < 0.4
-       other-modules: XGraphic, Plugins.Icons
-       cpp-options: -DXGraphic
 
     if flag(with_utf8) || flag(all_extensions)
        build-depends: utf8-string == 0.3.*
