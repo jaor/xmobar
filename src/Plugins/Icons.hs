@@ -28,12 +28,13 @@ import Data.Bits
 import Control.Monad
 import System.FilePath
 import XUtil
+import Control.Concurrent (threadDelay)
 
 data Icons = Icons
     deriving (Read, Show)
 
-readXBM :: Display -> Drawable -> String -> IO Pixmap
-readXBM display window filename = do
+--readXBM :: Display -> Drawable -> String -> IO Pixmap
+--readXBM display window filename = do
    -- graphical context
 --   GC gc
 
@@ -58,20 +59,19 @@ readXBM display window filename = do
 --                   hotspot_x hotspot_y
 --                 )
 
-   (bitmap_width, bitmap_height, bitmap, _, _) <- 
-                      readBitmapFile display window filename
+--   (bitmap_width, bitmap_height, bitmap, _, _) <- 
+--                      readBitmapFile display window filename
 
 -- createGC :: Display -> Drawable -> IO GC
-   gc <- io $ createGC display window
+--   gc <- io $ createGC display window
 
 -- copyPlane :: Display -> Drawable -> Drawable -> GC -> Position -> Position -> Dimension -> Dimension -> Position -> Position -> Pixel -> IO ())
-   copyPlane( display bitmap window gc
-              0 0
-              bitmap_width bitmap_height
-              bitmap_width bitmap_height
-              1
-			)
-   return bitmap
+--   copyPlane display bitmap window gc
+--              0 0
+--              bitmap_width bitmap_height
+--              bitmap_width bitmap_height
+--              1
+--   return bitmap
 --    /* check for failure or success. */
 --    switch (rc) {
 --        case BitmapOpenFailed:
@@ -91,14 +91,25 @@ readXBM display window filename = do
 --    }
 --
 
+drawInWin :: Display -> Window -> String -> IO ()
+drawInWin dpy win str = do
+ gc <- createGC dpy win
+ --p <- createPixmap dpy win 200 100 (defaultDepthOfScreen (defaultScreenOfDisplay dpy))
+ (bitmap_width, bitmap_height, p, _, _) <- readBitmapFile dpy win str
+ copyArea dpy p win gc 0 0 200 100 0 0
+ freeGC dpy gc
+ freePixmap dpy p
+
+
 instance Exec Icons where
     alias Icons = "icons"
     rate Icons = 2
-    --Pixmap bitmap
     run Icons = do
     d <- openDisplay ""
     root <- rootWindow d (defaultScreen d)
-    bitmap <- readXBM d root "cat.xbm"
+    --bitmap <- readXBM d root "~/Current_Work/Haskell/xmobar/cat.xbm"
+    drawInWin d root "cat.xbm"
+    sync d False
  --       modMap <- getModifierMapping d
  --       ( _, _, _, _, _, _, _, m ) <- queryPointer d root
  --       ls <- filterM ( \( ks, _ ) -> do
@@ -108,4 +119,5 @@ instance Exec Icons where
  --               Just ( i, _ ) -> testBit m (fromIntegral i)
  --           ) locks
     closeDisplay d
+    return "<fc=red>Hello World!!</fc>"
 --        return $ unwords $ map snd ls
