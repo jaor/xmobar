@@ -148,10 +148,10 @@ parseConfig = runParser parseConf fields "Config" . stripComments
               <|?> pHideOnStart  <|?> pLowerOnStart
               <|?> pPersistent   <|?> pCommands
               <|?> pSepChar      <|?> pAlignSep
-              <|?> pTemplate     <|?> pIconPath
+              <|?> pTemplate
 
       fields    = [ "font", "bgColor", "fgColor", "sepChar", "alignSep"
-                  , "border", "borderColor" ,"template", "position", "iconpath"
+                  , "border", "borderColor" ,"template", "position"
                   , "hideOnStart", "lowerOnStart", "persistent", "commands"
                   ]
 
@@ -168,7 +168,6 @@ parseConfig = runParser parseConf fields "Config" . stripComments
       pLowerOnStart = field lowerOnStart "lowerOnStart" $ tillFieldEnd >>= read' "lowerOnStart"
       pPersistent   = field persistent   "persistent"   $ tillFieldEnd >>= read' "persistent"
       pBorder       = field border       "border"       $ tillFieldEnd >>= read' "border"
-      pIconPath     = field iconpath     "iconpath"     $ tillFieldEnd >>= read' "iconpath"
       pCommands     = field commands     "commands"     $ readCommands
 
       staticPos = do string "Static"
