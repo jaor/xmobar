@@ -40,7 +40,7 @@ parseString c s =
 
 -- | Gets the string and combines the needed parsers
 stringParser :: String -> Parser [[(Widget, ColorString)]]
-stringParser c = manyTill (iconParser c <|> textParser c <|> colorParser) eof
+stringParser c = manyTill (try (iconParser c) <|> textParser c <|> colorParser) eof
 
 -- | Parses a maximal string without color markup.
 textParser :: String -> Parser [(Widget, ColorString)]
@@ -72,7 +72,7 @@ iconParser c = do
 colorParser :: Parser [(Widget, ColorString)]
 colorParser = do
   c <- between (string "<fc=") (string ">") colors
-  s <- manyTill (iconParser c <|> textParser c <|> colorParser) (try $ string "</fc>")
+  s <- manyTill (try (iconParser c) <|> textParser c <|> colorParser) (try $ string "</fc>")
   return (concat s)
 
 -- | Parses a color specification (hex or named)
