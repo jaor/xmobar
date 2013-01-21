@@ -18,6 +18,7 @@ import Plugins
 import XGraphic
 import Graphics.X11
 import Control.Concurrent (threadDelay)
+import XUtil
 
 data Icons = Icons
     deriving (Read, Show)
@@ -29,8 +30,11 @@ instance Exec Icons where
     run Icons = do
     d <- openDisplay ""
     root <- rootWindow d (defaultScreen d)
+    win <- newWindow d (defaultScreen d) root (0 0 8 8) True
     let p = whitePixel d (defaultScreen d)
-    drawInWin d root p "cat.xbm" -- FIXME: hardcoded icon
+    drawInWin d win p "cat.xbm" -- FIXME: hardcoded icon
+    let mapRaised dpy w = mapWindow dpy w >> raiseWindow dpy w
+    mapRaised d win
     sync d False
     threadDelay (1 * 1000000)
     closeDisplay d
