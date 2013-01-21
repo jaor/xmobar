@@ -29,16 +29,18 @@ instance Exec Icons where
     run Icons = do
     d <- openDisplay ""
     root <- rootWindow d (defaultScreen d)
-    drawInWin d root "cat.xbm" -- FIXME: hardcoded icon
+    let p = whitePixel d (defaultScreen d)
+    drawInWin d root p "cat.xbm" -- FIXME: hardcoded icon
     sync d False
     threadDelay (1 * 1000000)
     closeDisplay d
     return "<fc=red>Hello World!!</fc>"
 
 
-drawInWin :: Display -> Window -> String -> IO ()
-drawInWin dpy win str = do
+drawInWin :: Display -> Window -> Pixel-> String -> IO ()
+drawInWin dpy win pix str = do
  gc <- createGC dpy win
+ setForeground dpy gc pix
  (bitmap_width, bitmap_height, p, _, _) <- readBitmapFile dpy win str
  copyPlane dpy p win gc 0 0 bitmap_width bitmap_height 0 0 1
  freeGC dpy gc
