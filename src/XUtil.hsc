@@ -33,6 +33,7 @@ import Control.Monad.Trans
 import Control.Exception (SomeException, handle)
 import Foreign
 -- import Foreign.C.Types
+import Data.Foldable (forM_)
 import Graphics.X11.Xlib hiding (textExtents, textWidth)
 import qualified Graphics.X11.Xlib as Xlib (textExtents, textWidth)
 import Graphics.X11.Xlib.Extras
@@ -184,9 +185,7 @@ printString' d p fs gc fc bc x y w = do
     case w of 
         (Text s) -> printString d p fs gc fc bc x y s
 	(Icon i) -> do bitmap <- loadBitmap d p i
-		       case bitmap of
-			     Just bmap -> drawBitmap d p fs gc fc bc x y bmap
-		             Nothing -> return ()
+		       forM_ bitmap $ drawBitmap d p fs gc fc bc x y
 
 printString :: Display -> Drawable -> XFont -> GC -> String -> String
             -> Position -> Position -> String  -> IO ()
