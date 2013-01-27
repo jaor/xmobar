@@ -19,7 +19,7 @@ module XUtil
     , initUtf8Font
     , textExtents
     , textWidth
-    , printString
+    , printString'
     , newWindow
     , nextEvent'
     , readFileSafe
@@ -33,12 +33,17 @@ import Control.Monad.Trans
 import Control.Exception (SomeException, handle)
 import Foreign
 -- import Foreign.C.Types
+import Data.Foldable (forM_)
 import Graphics.X11.Xlib hiding (textExtents, textWidth)
 import qualified Graphics.X11.Xlib as Xlib (textExtents, textWidth)
 import Graphics.X11.Xlib.Extras
 import System.Mem.Weak ( addFinalizer )
 import System.Posix.Types (Fd(..))
+import System.Directory (doesFileExist)
 import System.IO
+import XGraphic
+import Types
+
 #if defined XFT || defined UTF8
 # if __GLASGOW_HASKELL__ < 612
 import qualified System.IO.UTF8 as UTF8 (readFile,hGetLine)
@@ -67,6 +72,11 @@ hGetLineSafe = UTF8.hGetLine
 #else
 hGetLineSafe = hGetLine
 #endif
+
+data Bitmap = Bitmap { width  :: Dimension
+                     , height :: Dimension
+                     , pixmap :: Pixmap
+                     }
 
 -- Hide the Core Font/Xft switching here
 data XFont = Core FontStruct
@@ -150,6 +160,32 @@ textExtents (Xft xftfont) _ = do
   descent <- fi `fmap` xft_descent xftfont
   return (ascent, descent)
 #endif
+
+loadBitmap :: Display -> Drawable -> FilePath -> IO (Maybe Bitmap)
+loadBitmap d w p = do
+     exist <- doesFileExist p
+     if exist
+	then do
+	   (bw, bh, bp, _, _) <- readBitmapFile d w p
+	   return $ Just $ Bitmap bw bh bp
+	else
+	   return Nothing
+
+drawBitmap :: Display -> Drawable -> XFont -> GC -> String -> String
+            -> Position -> Position -> Bitmap -> IO ()
+drawBitmap d p _ gc fc bc x y i = do
+    withColors d [fc, bc] $ \[fc', bc'] -> do
+        setForeground d gc fc'
+        setBackground d gc bc'
+        io $ copyPlane d (pixmap i) p gc 0 0 (width i) (height i) x (y - (fi $ height i)) 1
+
+printString' :: Display -> Drawable -> XFont -> GC -> String -> String
+            -> Position -> Position -> Widget -> IO ()
+printString' d p fs gc fc bc x y w = do
+    case w of 
+        (Text s) -> printString d p fs gc fc bc x y s
+	(Icon i) -> do bitmap <- loadBitmap d p i
+		       forM_ bitmap $ drawBitmap d p fs gc fc bc x y
 
 printString :: Display -> Drawable -> XFont -> GC -> String -> String
             -> Position -> Position -> String  -> IO ()

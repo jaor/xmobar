@@ -23,7 +23,6 @@ module Config
     , runnableTypes
     ) where
 
-
 import Commands
 import {-# SOURCE #-} Runnable
 import Plugins.Monitors

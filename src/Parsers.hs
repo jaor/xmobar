@@ -17,9 +17,11 @@ module Parsers
     ( parseString
     , parseTemplate
     , parseConfig
+    , Widget(..)
     ) where
 
 import Config
+import Types
 import Runnable
 import Commands
 
@@ -27,24 +29,28 @@ import qualified Data.Map as Map
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Perm
 
+type ColorString = String
+
 -- | Runs the string parser
-parseString :: Config -> String -> IO [(String, String)]
+parseString :: Config -> String -> IO [(Widget, ColorString)]
 parseString c s =
     case parse (stringParser (fgColor c)) "" s of
-      Left  _ -> return [("Could not parse string: " ++ s, fgColor c)]
+      Left  _ -> return [(Text $ "Could not parse string: " ++ s, fgColor c)]
       Right x -> return (concat x)
 
 -- | Gets the string and combines the needed parsers
-stringParser :: String -> Parser [[(String, String)]]
-stringParser c = manyTill (textParser c <|> colorParser) eof
+stringParser :: String -> Parser [[(Widget, ColorString)]]
+stringParser c = manyTill (textParser c <|> try (iconParser c) <|> colorParser) eof
 
 -- | Parses a maximal string without color markup.
-textParser :: String -> Parser [(String, String)]
+textParser :: String -> Parser [(Widget, ColorString)]
 textParser c = do s <- many1 $
                     noneOf "<" <|>
-                    ( try $ notFollowedBy' (char '<')
-                                           (string "fc=" <|> string "/fc>" ) )
-                  return [(s, c)]
+                    (try $ notFollowedBy' (char '<')
+                                          (string "fc="  <|>
+                                          string "icon=" <|> string "/fc>"))
+                  return [(Text s, c)]
+
 
 -- | Wrapper for notFollowedBy that returns the result of the first parser.
 --   Also works around the issue that, at least in Parsec 3.0.0, notFollowedBy
@@ -54,11 +60,19 @@ notFollowedBy' p e = do x <- p
                         notFollowedBy $ try (e >> return '*')
                         return x
 
+icon :: Parser String
+icon = many1 $ noneOf ">"
+
+iconParser :: String -> Parser [(Widget, ColorString)]
+iconParser c = do
+  i <- between (string "<icon=") (string ">") icon
+  return [(Icon i, c)]
+  
 -- | Parsers a string wrapped in a color specification.
-colorParser :: Parser [(String, String)]
+colorParser :: Parser [(Widget, ColorString)]
 colorParser = do
   c <- between (string "<fc=") (string ">") colors
-  s <- manyTill (textParser c <|> colorParser) (try $ string "</fc>")
+  s <- manyTill (try (textParser c <|> iconParser c) <|> colorParser) (try $ string "</fc>")
   return (concat s)
 
 -- | Parses a color specification (hex or named)
