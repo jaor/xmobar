@@ -23,13 +23,13 @@ module Xmobar
     , startCommand
     -- * Window Management
     -- $window
-    , createWin, updateWin
+    , createWin
     -- * Printing
     -- $print
     , drawInWin, printStrings
     ) where
 
-import Prelude
+import Prelude hiding (lookup)
 import Graphics.X11.Xlib hiding (textExtents, textWidth)
 import Graphics.X11.Xlib.Extras
 import Graphics.X11.Xinerama
@@ -41,7 +41,9 @@ import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Exception (handle, SomeException(..))
 import Data.Bits
+import Data.Map hiding (foldr, map, filter)
 
+import Bitmap
 import Config
 import Parsers
 import Commands
@@ -72,6 +74,7 @@ data XConf =
           , rect    :: Rectangle
           , window  :: Window
           , fontS   :: XFont
+          , iconS   :: Map FilePath Bitmap
           , config  :: Config
           }
 
@@ -81,7 +84,7 @@ runX xc f = runReaderT f xc
 
 -- | Starts the main event loop and threads
 startLoop :: XConf -> TMVar SignalType -> [[(Maybe ThreadId, TVar String)]] -> IO ()
-startLoop xcfg@(XConf _ _ w _ _) sig vs = do
+startLoop xcfg@(XConf _ _ w _ _ _) sig vs = do
 #ifdef XFT
     xftInitFtLibrary
 #endif
@@ -98,7 +101,7 @@ startLoop xcfg@(XConf _ _ w _ _) sig vs = do
     eventLoop tv xcfg sig
   where
     handler thing (SomeException _) =
-      putStrLn ("Thread " ++ thing ++ " failed") >> return ()
+      void $ putStrLn ("Thread " ++ thing ++ " failed")
     -- Reacts on events from X
     eventer signal =
       allocaXEvent $ \e -> do
@@ -139,12 +142,14 @@ checker tvar ov vs signal = do
 
 -- | Continuously wait for a signal from a thread or a interrupt handler
 eventLoop :: TVar [String] -> XConf -> TMVar SignalType -> IO ()
-eventLoop tv xc@(XConf d r w fs cfg) signal = do
+eventLoop tv xc@(XConf d r w fs is cfg) signal = do
       typ <- atomically $ takeTMVar signal
       case typ of
          Wakeup -> do
-            runX xc (updateWin tv)
-            eventLoop tv xc signal
+            str <- updateString cfg tv
+            xc' <- updateCache d w is str >>= \c -> return xc { iconS = c }
+            runX xc' $ drawInWin r str
+            eventLoop tv xc' signal
 
          Reposition ->
             reposWindow cfg
@@ -187,7 +192,7 @@ eventLoop tv xc@(XConf d r w fs cfg) signal = do
 
         reposWindow rcfg = do
           r' <- repositionWin d w fs rcfg
-          eventLoop tv (XConf d r' w fs rcfg) signal
+          eventLoop tv (XConf d r' w fs is rcfg) signal
 
         updateConfigPosition ocfg =
           case position ocfg of
@@ -219,24 +224,24 @@ startCommand sig (com,s,ss)
                            return (Just h,var)
     where is = s ++ "Updating..." ++ ss
 
-updateWin :: TVar [String] -> X ()
-updateWin v = do
-  xc <- ask
-  s <- io $ atomically $ readTVar v
-  let (conf,rec) = (config &&& rect) xc
-      l:c:r:_ = s ++ repeat ""
-  ps <- io $ mapM (parseString conf) [l, c, r]
-  drawInWin rec ps
+updateString :: Config -> TVar [String] -> IO [[(Widget, String)]]
+updateString conf v = do
+  s <- atomically $ readTVar v
+  let l:c:r:_ = s ++ repeat ""
+  io $ mapM (parseString conf) [l, c, r]
 
 -- $print
 
 -- | Draws in and updates the window
-drawInWin :: Rectangle -> [[(String, String)]] -> X ()
+drawInWin :: Rectangle -> [[(Widget, String)]] -> X ()
 drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
   r <- ask
   let (c,d ) = (config &&& display) r
       (w,fs) = (window &&& fontS  ) r
-      strLn  = io . mapM (\(s,cl) -> textWidth d fs s >>= \tw -> return (s,cl,fi tw))
+      strLn  = io . mapM getWidth
+      getWidth (Text s,cl) = textWidth d fs s >>= \tw -> return (Text s,cl,fi tw)
+      getWidth (Icon s,cl) = return (Icon s,cl,fi ht)
+
   withColors d [bgColor c, borderColor c] $ \[bgcolor, bdcolor] -> do
     gc <- io $ createGC  d w
     -- create a pixmap to write to and fill it with a rectangle
@@ -261,11 +266,13 @@ drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
 
 -- | An easy way to print the stuff we need to print
 printStrings :: Drawable -> GC -> XFont -> Position
-             -> Align -> [(String, String, Position)] -> X ()
+             -> Align -> [(Widget, String, Position)] -> X ()
 printStrings _ _ _ _ _ [] = return ()
 printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
   r <- ask
-  (as,ds) <- io $ textExtents fontst s
+  let fromWidget (Text t) = t
+      fromWidget (Icon t) = t
+  (as,ds) <- io $ textExtents fontst (fromWidget s)
   let (conf,d)             = (config &&& display) r
       Rectangle _ _ wid ht = rect r
       totSLen              = foldr (\(_,_,len) -> (+) len) 0 sl
@@ -278,5 +285,7 @@ printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
       (fc,bc)              = case break (==',') c of
                                (f,',':b) -> (f, b           )
                                (f,    _) -> (f, bgColor conf)
-  io $ printString d dr fontst gc fc bc offset valign s
+  case s of
+    (Text t) -> io $ printString d dr fontst gc fc bc offset valign t
+    (Icon p) -> io $ maybe (return ()) (drawBitmap d dr gc fc bc offset valign) (lookup p (iconS r))
   printStrings dr gc fontst (offs + l) a xs

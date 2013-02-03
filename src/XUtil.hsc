@@ -33,12 +33,14 @@ import Control.Monad.Trans
 import Control.Exception (SomeException, handle)
 import Foreign
 -- import Foreign.C.Types
+import Data.Foldable (forM_)
 import Graphics.X11.Xlib hiding (textExtents, textWidth)
 import qualified Graphics.X11.Xlib as Xlib (textExtents, textWidth)
 import Graphics.X11.Xlib.Extras
 import System.Mem.Weak ( addFinalizer )
 import System.Posix.Types (Fd(..))
 import System.IO
+
 #if defined XFT || defined UTF8
 # if __GLASGOW_HASKELL__ < 612
 import qualified System.IO.UTF8 as UTF8 (readFile,hGetLine)

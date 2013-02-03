@@ -26,6 +26,7 @@ import Config
 import XUtil
 
 import Data.List (intercalate)
+import qualified Data.Map as Map
 
 import Paths_xmobar (version)
 import Data.Version (showVersion)
@@ -60,7 +61,8 @@ main = do
   sig   <- setupSignalHandler
   vars  <- mapM (mapM $ startCommand sig) cls
   (r,w) <- createWin d fs conf
-  startLoop (XConf d r w fs conf) sig vars
+  let ic = Map.empty
+  startLoop (XConf d r w fs ic conf) sig vars
 
 -- | Splits the template in its parts
 splitTemplate :: Config -> [String]
