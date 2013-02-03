@@ -271,9 +271,9 @@ printStrings :: Drawable -> GC -> XFont -> Position
 printStrings _ _ _ _ _ [] = return ()
 printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
   r <- ask
-  let fromWidget (Text t) = t
-      fromWidget (Icon t) = t
-  (as,ds) <- io $ textExtents fontst (fromWidget s)
+  (as,ds) <- case s of
+                  Text t -> io $ textExtents fontst t
+                  Icon _ -> return (0, 0)
   let (conf,d)             = (config &&& display) r
       Rectangle _ _ wid ht = rect r
       totSLen              = foldr (\(_,_,len) -> (+) len) 0 sl
