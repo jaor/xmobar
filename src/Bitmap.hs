@@ -13,7 +13,7 @@
 module Bitmap
  ( updateCache
  , drawBitmap
- , Bitmap) where
+ , Bitmap(..)) where
 
 import Control.Monad
 import Data.Map hiding (foldr, map, filter)

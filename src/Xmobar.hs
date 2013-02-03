@@ -239,8 +239,9 @@ drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
   let (c,d ) = (config &&& display) r
       (w,fs) = (window &&& fontS  ) r
       strLn  = io . mapM getWidth
+      iconW i = maybe 0 Bitmap.width (lookup i $ iconS r)
       getWidth (Text s,cl) = textWidth d fs s >>= \tw -> return (Text s,cl,fi tw)
-      getWidth (Icon s,cl) = return (Icon s,cl,fi ht)
+      getWidth (Icon s,cl) = return (Icon s,cl,fi $ iconW s)
 
   withColors d [bgColor c, borderColor c] $ \[bgcolor, bdcolor] -> do
     gc <- io $ createGC  d w
