@@ -46,9 +46,14 @@ loadBitmap d w p = do
     exist <- doesFileExist p
     if exist
        then do
-            (bw, bh, bp, _, _) <- readBitmapFile d w p
-            addFinalizer bp (freePixmap d bp)
-            return $ Just $ Bitmap bw bh bp
+            bmap <- readBitmapFile d w p
+            case bmap of
+                 Right (bw, bh, bp, _, _) -> do
+                     addFinalizer bp (freePixmap d bp)
+                     return $ Just $ Bitmap bw bh bp
+                 Left err -> do
+                     putStrLn err
+                     return Nothing
        else
            return Nothing
 
