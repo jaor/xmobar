@@ -14,7 +14,6 @@
 
 module Plugins.Mail where
 
-import Prelude hiding (catch)
 import Plugins
 import Plugins.Utils (expandHome, changeLoop)
 

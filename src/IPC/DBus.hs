@@ -12,15 +12,13 @@
 --
 -----------------------------------------------------------------------------
 
-module IPC.DBus ( runIPC ) where
-
-import Prelude hiding (catch)
+module IPC.DBus (runIPC) where
 
 import DBus
 import DBus.Client
 import Control.Monad (when)
 import Control.Concurrent.STM
-import Control.Exception (catch)
+import Control.Exception (handle)
 import System.IO (stderr, hPutStrLn)
 
 import Signal
@@ -35,7 +33,7 @@ interfaceName :: InterfaceName
 interfaceName = interfaceName_ "org.Xmobar.Control"
 
 runIPC :: TMVar SignalType -> IO ()
-runIPC mvst = catch exportConnection printException
+runIPC mvst = handle printException exportConnection
     where
     printException :: ClientError -> IO ()
     printException = hPutStrLn stderr . clientErrorMessage

@@ -14,12 +14,12 @@
 
 module Plugins.Monitors.Volume (runVolume, volumeConfig) where
 
-import Prelude hiding ( catch )
-import Control.Monad ( liftM, mplus )
-import Data.Maybe
+import Control.Applicative ((<$>))
+import Control.Monad ( join, liftM2, liftM3, mplus )
+import Data.Traversable (sequenceA)
 import Plugins.Monitors.Common
 import Sound.ALSA.Mixer
-import Sound.ALSA.Exception ( catch )
+import qualified Sound.ALSA.Exception as AE
 import System.Console.GetOpt
 
 volumeConfig :: IO MConfig
@@ -110,19 +110,53 @@ formatDb opts dbi = do
 runVolume :: String -> String -> [String] -> Monitor String
 runVolume mixerName controlName argv = do
     opts <- io $ parseOpts argv
-    control <- liftM fromJust $ io $ getControlByName mixerName controlName
-    let volumeControl = fromJust $ mplus (playback $ volume control)
-                                         (common $ volume control)
-        switchControl = fromJust $ mplus (playback $ switch control)
-                                         (common $ switch control)
-        maybeNA = maybe (return "N/A")
-    (lo, hi) <- io $ getRange volumeControl
-    val <- io $ getChannel FrontLeft $ value volumeControl
-    db <- io $ catch (getChannel FrontLeft $ dB volumeControl)
-                     (\_ -> return $ Just 0)
-    sw <- io $ getChannel FrontLeft switchControl
-    p <- maybeNA (formatVol lo hi) val
-    b <- maybeNA (formatVolBar lo hi) val
-    d <- maybeNA (formatDb opts) db
-    s <- maybeNA (formatSwitch opts) sw
+    control <- io $ getControlByName mixerName controlName
+    (lo, hi) <- io . liftMaybe $ getRange <$> volumeControl control
+    val <- getVal $ volumeControl control
+    db <- getDB $ volumeControl control
+    sw <- getSw $ switchControl control
+    p <- liftMonitor $ liftM3 formatVol lo hi val
+    b <- liftMonitor $ liftM3 formatVolBar lo hi val
+    d <- getFormatDB opts db
+    s <- getFormatSwitch opts sw
     parseTemplate [p, b, d, s]
+
+  where
+
+    volumeControl :: Maybe Control -> Maybe Volume
+    volumeControl c = join $
+           (playback . volume <$> c) `mplus` (common . volume <$> c)
+
+    switchControl :: Maybe Control -> Maybe Switch
+    switchControl c = join $
+           (playback . switch <$> c) `mplus` (common . switch <$> c)
+
+    liftMaybe :: Maybe (IO (a,b)) -> IO (Maybe a, Maybe b)
+    liftMaybe = fmap (liftM2 (,) (fmap fst) (fmap snd)) . sequenceA
+
+    liftMonitor :: Maybe (Monitor String) -> Monitor String
+    liftMonitor Nothing = return unavailable
+    liftMonitor (Just m) = m
+
+    getDB :: Maybe Volume -> Monitor (Maybe Integer)
+    getDB Nothing = return Nothing
+    getDB (Just v) = io $ AE.catch (getChannel FrontLeft $ dB v)
+                                   (const $ return $ Just 0)
+
+    getVal :: Maybe Volume -> Monitor (Maybe Integer)
+    getVal Nothing = return Nothing
+    getVal (Just v) = io $ getChannel FrontLeft $ value v
+
+    getSw :: Maybe Switch -> Monitor (Maybe Bool)
+    getSw Nothing = return Nothing
+    getSw (Just s) = io $ getChannel FrontLeft s
+
+    getFormatDB :: VolumeOpts -> Maybe Integer -> Monitor String
+    getFormatDB _ Nothing = return unavailable
+    getFormatDB opts (Just d) = formatDb opts d
+
+    getFormatSwitch :: VolumeOpts -> Maybe Bool -> Monitor String
+    getFormatSwitch _ Nothing = return unavailable
+    getFormatSwitch opts (Just sw) = formatSwitch opts sw
+
+    unavailable = "N/A"
