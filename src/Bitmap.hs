@@ -22,17 +22,18 @@ import System.Directory (doesFileExist)
 import System.Mem.Weak ( addFinalizer )
 import ColorCache
 import Parsers (Widget(..))
+import Actions (Action)
 
 data Bitmap = Bitmap { width  :: Dimension
                      , height :: Dimension
                      , pixmap :: Pixmap
                      }
 
-updateCache :: Display -> Window -> Map FilePath Bitmap -> [[(Widget, String)]]
-               -> IO (Map FilePath Bitmap)
+updateCache :: Display -> Window -> Map FilePath Bitmap ->
+               [[(Widget, String, Maybe Action)]] -> IO (Map FilePath Bitmap)
 updateCache dpy win cache ps = do
-  let paths = map (\(Icon p, _) -> p) . concatMap (filter icons) $ ps
-      icons (Icon _, _) = True
+  let paths = map (\(Icon p, _, _) -> p) . concatMap (filter icons) $ ps
+      icons (Icon _, _, _) = True
       icons _ = False
       go m path = if member path m
                      then return m

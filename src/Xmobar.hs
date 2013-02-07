@@ -42,11 +42,13 @@ import Control.Concurrent.STM
 import Control.Exception (handle, SomeException(..))
 import Data.Bits
 import Data.Map hiding (foldr, map, filter)
+import Data.Maybe (fromJust)
 
 import Bitmap
 import Config
 import Parsers
 import Commands
+import Actions
 import Runnable
 import Signal
 import Window
@@ -98,7 +100,7 @@ startLoop xcfg@(XConf _ _ w _ _ _) sig vs = do
 #ifdef DBUS
     runIPC sig
 #endif
-    eventLoop tv xcfg sig
+    eventLoop tv xcfg [] sig
   where
     handler thing (SomeException _) =
       void $ putStrLn ("Thread " ++ thing ++ " failed")
@@ -107,7 +109,7 @@ startLoop xcfg@(XConf _ _ w _ _ _) sig vs = do
       allocaXEvent $ \e -> do
         dpy <- openDisplay ""
         xrrSelectInput    dpy (defaultRootWindow dpy) rrScreenChangeNotifyMask
-        selectInput       dpy w (exposureMask .|. structureNotifyMask)
+        selectInput       dpy w (exposureMask .|. structureNotifyMask .|. buttonPressMask)
 
         forever $ do
 #ifdef THREADED_RUNTIME
@@ -120,6 +122,7 @@ startLoop xcfg@(XConf _ _ w _ _ _) sig vs = do
             ConfigureEvent {} -> atomically $ putTMVar signal Reposition
             ExposeEvent {} -> atomically $ putTMVar signal Wakeup
             RRScreenChangeNotifyEvent {} -> atomically $ putTMVar signal Reposition
+            ButtonEvent {} -> atomically $ putTMVar signal (Action (fi $ ev_x ev))
             _ -> return ()
 
 -- | Send signal to eventLoop every time a var is updated
@@ -141,15 +144,16 @@ checker tvar ov vs signal = do
 
 
 -- | Continuously wait for a signal from a thread or a interrupt handler
-eventLoop :: TVar [String] -> XConf -> TMVar SignalType -> IO ()
-eventLoop tv xc@(XConf d r w fs is cfg) signal = do
+eventLoop :: TVar [String] -> XConf -> [(Action, Position, Position)] -> TMVar SignalType -> IO ()
+eventLoop tv xc@(XConf d r w fs is cfg) as signal = do
       typ <- atomically $ takeTMVar signal
       case typ of
          Wakeup -> do
             str <- updateString cfg tv
             xc' <- updateCache d w is str >>= \c -> return xc { iconS = c }
+            as' <- updateActions xc r str
             runX xc' $ drawInWin r str
-            eventLoop tv xc' signal
+            eventLoop tv xc' as' signal
 
          Reposition ->
             reposWindow cfg
@@ -163,36 +167,38 @@ eventLoop tv xc@(XConf d r w fs is cfg) signal = do
          Toggle t -> toggle t
 
          TogglePersistent -> eventLoop
-            tv xc { config = cfg { persistent = not $ persistent cfg } } signal
+            tv xc { config = cfg { persistent = not $ persistent cfg } } as signal
+
+         Action x -> action x
 
     where
         isPersistent = not $ persistent cfg
 
         hide t
             | t == 0 =
-                when isPersistent (hideWindow d w) >> eventLoop tv xc signal
+                when isPersistent (hideWindow d w) >> eventLoop tv xc as signal
             | otherwise = do
                 void $ forkIO
                      $ threadDelay t >> atomically (putTMVar signal $ Hide 0)
-                eventLoop tv xc signal
+                eventLoop tv xc as signal
 
         reveal t
             | t == 0 = do
                 when isPersistent (showWindow r cfg d w)
-                eventLoop tv xc signal
+                eventLoop tv xc as signal
             | otherwise = do
                 void $ forkIO
                      $ threadDelay t >> atomically (putTMVar signal $ Reveal 0)
-                eventLoop tv xc signal
+                eventLoop tv xc as signal
 
         toggle t = do
             ismapped <- isMapped d w
             atomically (putTMVar signal $ if ismapped then Hide t else Reveal t)
-            eventLoop tv xc signal
+            eventLoop tv xc as signal
 
         reposWindow rcfg = do
           r' <- repositionWin d w fs rcfg
-          eventLoop tv (XConf d r' w fs is rcfg) signal
+          eventLoop tv (XConf d r' w fs is rcfg) as signal
 
         updateConfigPosition ocfg =
           case position ocfg of
@@ -204,6 +210,9 @@ eventLoop tv xc@(XConf d r w fs is cfg) signal = do
                   return (ocfg {position = OnScreen (n+1) o})
             o ->
               return (ocfg {position = OnScreen 1 o})
+
+        action x = do mapM_ (\(a,_,_) -> runAction a) $ filter (\(_, from, to) -> x >= from && x <= to) as
+                      eventLoop tv xc as signal
 
 -- $command
 
@@ -224,24 +233,47 @@ startCommand sig (com,s,ss)
                            return (Just h,var)
     where is = s ++ "Updating..." ++ ss
 
-updateString :: Config -> TVar [String] -> IO [[(Widget, String)]]
+updateString :: Config -> TVar [String] -> IO [[(Widget, String, Maybe Action)]]
 updateString conf v = do
   s <- atomically $ readTVar v
   let l:c:r:_ = s ++ repeat ""
   io $ mapM (parseString conf) [l, c, r]
 
+updateActions :: XConf -> Rectangle -> [[(Widget, String, Maybe Action)]] ->
+                 IO [(Action, Position, Position)]
+updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
+  let (d,fs) = (display &&& fontS) conf
+      strLn  = io . mapM getCoords
+      iconW i = maybe 0 Bitmap.width (lookup i $ iconS conf)
+      getCoords (Text s,_,a) = textWidth d fs s >>= \tw -> return (a,0,fi tw)
+      getCoords (Icon s,_,a) = return (a,0,fi $ iconW s)
+      partCoord off xs = map (\(a, x, x') -> (fromJust a, x, x')) $
+                         filter (\(a, _,_) -> a /= Nothing) $
+                         scanl (\(_,_,x') (a,_,w') -> (a, x', x' + w')) (Nothing, 0, off) xs
+
+      totSLen              = (\(_,_,len) -> fi len) . last
+      remWidth xs          = fi wid - totSLen xs
+      offs                 = 1
+      offset a xs          = case a of
+                               C -> (remWidth xs + offs) `div` 2
+                               R -> remWidth xs
+                               L -> offs
+
+  fmap concat $ mapM (\(a,xs) -> strLn xs >>= \xs' -> return $ partCoord (offset a xs') xs') $
+                zip [L,C,R] [left,center,right]
+
 -- $print
 
 -- | Draws in and updates the window
-drawInWin :: Rectangle -> [[(Widget, String)]] -> X ()
+drawInWin :: Rectangle -> [[(Widget, String, Maybe Action)]] -> X ()
 drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
   r <- ask
   let (c,d ) = (config &&& display) r
       (w,fs) = (window &&& fontS  ) r
       strLn  = io . mapM getWidth
       iconW i = maybe 0 Bitmap.width (lookup i $ iconS r)
-      getWidth (Text s,cl) = textWidth d fs s >>= \tw -> return (Text s,cl,fi tw)
-      getWidth (Icon s,cl) = return (Icon s,cl,fi $ iconW s)
+      getWidth (Text s,cl,_) = textWidth d fs s >>= \tw -> return (Text s,cl,fi tw)
+      getWidth (Icon s,cl,_) = return (Icon s,cl,fi $ iconW s)
 
   withColors d [bgColor c, borderColor c] $ \[bgcolor, bdcolor] -> do
     gc <- io $ createGC  d w
@@ -272,8 +304,8 @@ printStrings _ _ _ _ _ [] = return ()
 printStrings dr gc fontst offs a sl@((s,c,l):xs) = do
   r <- ask
   (as,ds) <- case s of
-                  Text t -> io $ textExtents fontst t
-                  Icon _ -> return (0, 0)
+               Text t -> io $ textExtents fontst t
+               Icon _ -> return (0, 0)
   let (conf,d)             = (config &&& display) r
       Rectangle _ _ wid ht = rect r
       totSLen              = foldr (\(_,_,len) -> (+) len) 0 sl

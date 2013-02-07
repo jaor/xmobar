@@ -23,6 +23,7 @@ module Parsers
 import Config
 import Runnable
 import Commands
+import Actions
 
 import qualified Data.Map as Map
 import Text.ParserCombinators.Parsec
@@ -33,24 +34,26 @@ data Widget = Icon String | Text String
 type ColorString = String
 
 -- | Runs the string parser
-parseString :: Config -> String -> IO [(Widget, ColorString)]
+parseString :: Config -> String -> IO [(Widget, ColorString, Maybe Action)]
 parseString c s =
-    case parse (stringParser (fgColor c)) "" s of
-      Left  _ -> return [(Text $ "Could not parse string: " ++ s, fgColor c)]
+    case parse (stringParser (fgColor c) Nothing) "" s of
+      Left  _ -> return [(Text $ "Could not parse string: " ++ s, fgColor c, Nothing)]
       Right x -> return (concat x)
 
 -- | Gets the string and combines the needed parsers
-stringParser :: String -> Parser [[(Widget, ColorString)]]
-stringParser c = manyTill (textParser c <|> try (iconParser c) <|> colorParser) eof
+stringParser :: String -> Maybe Action -> Parser [[(Widget, ColorString, Maybe Action)]]
+stringParser c a = manyTill (textParser c a <|> try (iconParser c a) <|> try (actionParser c) <|> colorParser a) eof
 
 -- | Parses a maximal string without color markup.
-textParser :: String -> Parser [(Widget, ColorString)]
-textParser c = do s <- many1 $
-                    noneOf "<" <|>
-                    (try $ notFollowedBy' (char '<')
-                                          (string "fc="  <|>
-                                          string "icon=" <|> string "/fc>"))
-                  return [(Text s, c)]
+textParser :: String -> Maybe Action -> Parser [(Widget, ColorString, Maybe Action)]
+textParser c a = do s <- many1 $
+                        noneOf "<" <|>
+                        (try $ notFollowedBy' (char '<')
+                                               (try (string "fc=")  <|>
+                                               try (string "action=") <|>
+                                               try (string "/action>") <|>
+                                               try (string "icon=") <|> string "/fc>"))
+                    return [(Text s, c, a)]
 
 
 -- | Wrapper for notFollowedBy that returns the result of the first parser.
@@ -61,17 +64,24 @@ notFollowedBy' p e = do x <- p
                         notFollowedBy $ try (e >> return '*')
                         return x
 
-iconParser :: String -> Parser [(Widget, ColorString)]
-iconParser c = do
+iconParser :: String -> Maybe Action -> Parser [(Widget, ColorString, Maybe Action)]
+iconParser c a = do
   string "<icon="
   i <- manyTill (noneOf ">") (try (string "/>"))
-  return [(Icon i, c)]
-  
+  return [(Icon i, c, a)]
+
+actionParser :: String -> Parser [(Widget, ColorString, Maybe Action)]
+actionParser c = do
+  a <- between (string "<action=") (string ">") (many1 (noneOf ">"))
+  let a' = Just (Spawn a)
+  s <- manyTill (try (textParser c a') <|> try (iconParser c a') <|> try (colorParser a') <|> actionParser c) (try $ string "</action>")
+  return (concat s)
+ 
 -- | Parsers a string wrapped in a color specification.
-colorParser :: Parser [(Widget, ColorString)]
-colorParser = do
+colorParser :: Maybe Action -> Parser [(Widget, ColorString, Maybe Action)]
+colorParser a = do
   c <- between (string "<fc=") (string ">") colors
-  s <- manyTill (try (textParser c <|> iconParser c) <|> colorParser) (try $ string "</fc>")
+  s <- manyTill (try (textParser c a) <|> try (iconParser c a) <|> try (colorParser a) <|> actionParser c) (try $ string "</fc>")
   return (concat s)
 
 -- | Parses a color specification (hex or named)
