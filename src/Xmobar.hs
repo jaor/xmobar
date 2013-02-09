@@ -259,7 +259,7 @@ updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
                                R -> remWidth xs
                                L -> offs
 
-  fmap concat $ mapM (\(a,xs) -> strLn xs >>= \xs' -> return $ partCoord (offset a xs') xs') $
+  fmap concat $ mapM (\(a,xs) -> fmap (\xs' -> partCoord (offset a xs') xs') $ strLn xs) $
                 zip [L,C,R] [left,center,right]
 
 -- $print
