@@ -137,7 +137,9 @@ Otherwise, you'll need to install them yourself.
 :    Support for wireless cards. Enables the Wireless plugin. No Haskell
      library is required, but you will need the [iwlib] C library and
      headers in your system (e.g., install `libiw-dev` in Debian-based
-     systems).
+     systems). On Debian-based systems, you must install with this flag
+     explictly (e.g. in addition to all_extensions), after installing
+     'libiw-dev'
 
 `with_alsa`
 :    Support for ALSA sound cards. Enables the Volume plugin. Requires the
@@ -656,7 +658,7 @@ something like:
 - Default template: `<essid> <quality>`
 - Requires the C library [iwlib] (part of the wireless tools suite)
   installed in your system. In addition, to activate this plugin you
-  must pass `--flags="with_iwlib"` during compilation.
+  must pass `--flags="with_iwlib"` explicitly during compilation.
 
 ### `Memory Args RefreshRate`
 
