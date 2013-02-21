@@ -251,7 +251,7 @@ updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
                          filter (\(a, _,_) -> a /= Nothing) $
                          scanl (\(_,_,x') (a,_,w') -> (a, x', x' + w')) (Nothing, 0, off) xs
 
-      totSLen              = (\(_,_,len) -> fi len) . last
+      totSLen              = foldr (\(_,_,len) -> (+) len) 0
       remWidth xs          = fi wid - totSLen xs
       offs                 = 1
       offset a xs          = case a of
