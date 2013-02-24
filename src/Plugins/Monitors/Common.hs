@@ -265,7 +265,7 @@ templateStringParser =
        }
     where
       nonPlaceHolder = liftM concat . many $
-                       many1 (noneOf "<") <|> colorSpec
+                       many1 (noneOf "<") <|> colorSpec <|> iconSpec
 
 -- | Recognizes color specification and returns it unchanged
 colorSpec :: Parser String
@@ -274,6 +274,12 @@ colorSpec = try (string "</fc>") <|> try (
                s <- many1 (alphaNum <|> char ',' <|> char '#')
                char '>'
                return $ "<fc=" ++ s ++ ">")
+
+-- | Recognizes icon specification and returns it unchanged
+iconSpec :: Parser String
+iconSpec = try (do string "<icon="
+                   i <- manyTill (noneOf ">") (try (string "/>"))
+                   return $ "<icon=" ++ i ++ "/>")
 
 -- | Parses the command part of the template string
 templateCommandParser :: Parser String
