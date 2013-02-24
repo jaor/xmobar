@@ -20,7 +20,6 @@ import Data.Map hiding (foldr, map, filter)
 import Graphics.X11.Xlib
 import System.Directory (doesFileExist)
 import System.Mem.Weak ( addFinalizer )
-import XGraphic
 import ColorCache
 import Parsers (Widget(..))
 
