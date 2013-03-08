@@ -664,7 +664,7 @@ something like:
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
              `total`, `free`, `buffer`, `cache`, `rest`, `used`,
-             `usedratio`, `usedbar`, `freebar`
+             `usedratio`, `usedbar`, `freeratio`, `freebar`
 - Default template: `Mem: <usedratio>% (<cache>M)`
 
 ### `Swap Args RefreshRate`
