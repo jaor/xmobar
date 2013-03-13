@@ -468,7 +468,7 @@ an example of a template for the commands above using an icon:
 
     template="<icon=/home/jao/.xmobar/mem.xbm/><memory> <swap>"
 
-Action example:
+This example will run "xclock" command when date is clicked:
 
     template="<action=xclock>%date%</action>
 
