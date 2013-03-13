@@ -42,7 +42,8 @@ parseString c s =
 
 -- | Gets the string and combines the needed parsers
 stringParser :: String -> Maybe Action -> Parser [[(Widget, ColorString, Maybe Action)]]
-stringParser c a = manyTill (textParser c a <|> try (iconParser c a) <|> try (actionParser c) <|> colorParser a) eof
+stringParser c a = manyTill (textParser c a <|> try (iconParser c a) <|>
+                             try (actionParser c) <|> colorParser a) eof
 
 -- | Parses a maximal string without color markup.
 textParser :: String -> Maybe Action -> Parser [(Widget, ColorString, Maybe Action)]
@@ -74,14 +75,16 @@ actionParser :: String -> Parser [(Widget, ColorString, Maybe Action)]
 actionParser c = do
   a <- between (string "<action=") (string ">") (many1 (noneOf ">"))
   let a' = Just (Spawn a)
-  s <- manyTill (try (textParser c a') <|> try (iconParser c a') <|> try (colorParser a') <|> actionParser c) (try $ string "</action>")
+  s <- manyTill (try (textParser c a') <|> try (iconParser c a') <|>
+                 try (colorParser a') <|> actionParser c) (try $ string "</action>")
   return (concat s)
  
 -- | Parsers a string wrapped in a color specification.
 colorParser :: Maybe Action -> Parser [(Widget, ColorString, Maybe Action)]
 colorParser a = do
   c <- between (string "<fc=") (string ">") colors
-  s <- manyTill (try (textParser c a) <|> try (iconParser c a) <|> try (colorParser a) <|> actionParser c) (try $ string "</fc>")
+  s <- manyTill (try (textParser c a) <|> try (iconParser c a) <|>
+                 try (colorParser a) <|> actionParser c) (try $ string "</fc>")
   return (concat s)
 
 -- | Parses a color specification (hex or named)
