@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Window
--- Copyright   :  (c) 2011-12 Jose A. Ortega Ruiz
+-- Copyright   :  (c) 2011-13 Jose A. Ortega Ruiz
 --             :  (c) 2012 Jochen Keil
 -- License     :  BSD-style (see LICENSE)
 --
@@ -39,9 +39,9 @@ createWin d fs c = do
   let ht    = as + ds + 4
       (r,o) = setPosition (position c) srs (fi ht)
   win <- newWindow  d (defaultScreenOfDisplay d) rootw r o
-  setProperties r c d win srs
   when (lowerOnStart c) (lowerWindow d win)
   when (not $ hideOnStart c) $ showWindow r c d win
+  setProperties r c d win srs
   return (r,win)
 
 -- | Updates the size and position of the window
@@ -86,7 +86,8 @@ setPosition p rs ht =
     ny' h'   = ry + fi (rh - mh h')
     safeIndex i = lookup i . zip [0..]
 
-setProperties :: Rectangle -> Config -> Display -> Window -> [Rectangle] -> IO ()
+setProperties :: Rectangle -> Config -> Display -> Window -> [Rectangle]
+                 -> IO ()
 setProperties r c d w srs = do
   a1 <- internAtom d "_NET_WM_STRUT_PARTIAL"    False
   c1 <- internAtom d "CARDINAL"                 False
