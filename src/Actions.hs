@@ -20,4 +20,3 @@ data Action = Spawn String
 
 runAction :: Action -> IO ()
 runAction (Spawn s) = void $ system (s ++ "&")
-runAction _ = return () 
