@@ -243,10 +243,11 @@ updateActions :: XConf -> Rectangle -> [[(Widget, String, Maybe Action)]] ->
                  IO [(Action, Position, Position)]
 updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
   let (d,fs) = (display &&& fontS) conf
+      strLn :: [(Widget, String, Maybe Action)] -> IO [(Maybe Action, Position, Position)]
       strLn  = io . mapM getCoords
       iconW i = maybe 0 Bitmap.width (lookup i $ iconS conf)
-      getCoords (Text s,_,a) = textWidth d fs s >>= \tw -> return (a,0,fi tw)
-      getCoords (Icon s,_,a) = return (a,0,fi $ iconW s)
+      getCoords (Text s,_,a) = textWidth d fs s >>= \tw -> return (a, 0, fi tw)
+      getCoords (Icon s,_,a) = return (a, 0, fi $ iconW s)
       partCoord off xs = map (\(a, x, x') -> (fromJust a, x, x')) $
                          filter (\(a, _,_) -> a /= Nothing) $
                          scanl (\(_,_,x') (a,_,w') -> (a, x', x' + w')) (Nothing, 0, off) xs
