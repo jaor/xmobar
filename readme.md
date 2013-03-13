@@ -190,6 +190,8 @@ For the output template:
 
 - `<icon=/path/to/icon.xbm/>` will insert the given bitmap.
 
+- `<action=command>` will execute given command.
+
 Other configuration options:
 
 `font`
@@ -439,6 +441,12 @@ form:
 
 which will produce the expected result.
 
+It's also possible to use action directives of the form:
+
+     <action=command>
+
+which will be executed when clicked on.
+
 ## The `commands` Configuration Option
 
 The `commands` configuration option is a list of commands information
@@ -459,6 +467,10 @@ swap monitor plugin, with default options, every second.  And here's
 an example of a template for the commands above using an icon:
 
     template="<icon=/home/jao/.xmobar/mem.xbm/><memory> <swap>"
+
+Action example:
+
+    template="<action=xclock>%date%</action>
 
 The only internal available command is `Com` (see below Executing
 External Commands). All other commands are provided by plugins. xmobar
