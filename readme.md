@@ -727,7 +727,7 @@ something like:
   - `-L`: low power (`watts`) threshold (default: -12)
   - `-H`: high power threshold (default: -10)
   - `-l`: color to display power lower than the `-L` threshold
-  - `-m`: color to display power lower than the `-H` threshold
+  - `-n`: color to display power lower than the `-H` threshold
   - `-h`: color to display power highter than the `-H` threshold
   - `-p`: color to display positive power (battery charging)
   - `-f`: file in `/sys/class/power_supply` with AC info (default:
