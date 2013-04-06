@@ -162,8 +162,9 @@ runBatt' bfs args = do
     NA -> return "N/A"
   where fmtPercent :: Float -> Monitor [String]
         fmtPercent x = do
-          p <- showPercentWithColors x
-          b <- showPercentBar (100 * x) x
+          let x' = minimum [1, x]
+          p <- showPercentWithColors x'
+          b <- showPercentBar (100 * x') x'
           return [b, p]
         fmtWatts x o s d = color x o $ showDigits d x ++ (if s then "W" else "")
         fmtTime :: Integer -> String
