@@ -163,9 +163,8 @@ runBatt' bfs args = do
   case c of
     Result x w t s ->
       do l <- fmtPercent x
-         let ts =  [fmtTime $ floor t, fmtWatts w opts suffix d]
-         s' <- parseTemplate' (s ++ "<acstatus>") (l ++ "":ts)
-         parseTemplate (l ++ s':ts)
+         let ts = [fmtTime $ floor t, fmtWatts w opts suffix d]
+         parseTemplate (l ++ s:ts)
     NA -> return "N/A"
   where fmtPercent :: Float -> Monitor [String]
         fmtPercent x = do

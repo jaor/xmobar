@@ -302,28 +302,27 @@ templateParser = many templateStringParser --"%")
 parseTemplate :: [String] -> Monitor String
 parseTemplate l =
     do t <- getConfigValue template
-       s <- io $ runP templateParser t
        e <- getConfigValue export
        let m = Map.fromList . zip e $ l
-       return $ combine m s
+       parseTemplate' t m
 
--- | Works like parseTemplate, but using the given template string.
-parseTemplate' :: String -> [String] -> Monitor String
-parseTemplate' t l = do
-  t' <- getConfigValue template
-  setConfigValue t template
-  r <- parseTemplate l
-  setConfigValue t' template
-  return r
+-- | Parses the template given to it with a map of export values and combines
+-- them
+parseTemplate' :: String -> Map.Map String String -> Monitor String
+parseTemplate' t m =
+    do s <- io $ runP templateParser t
+       combine m s
 
--- | Given a finite "Map" and a parsed templatet produces the
--- | resulting output string.
-combine :: Map.Map String String -> [(String, String, String)] -> String
-combine _ [] = []
+-- | Given a finite "Map" and a parsed template t produces the
+-- | resulting output string as the output of the monitor.
+combine :: Map.Map String String -> [(String, String, String)] -> Monitor String
+combine _ [] = return []
 combine m ((s,ts,ss):xs) =
-    s ++ str ++ ss ++ combine m xs
-        where str = Map.findWithDefault err ts m
-              err = "<" ++ ts ++ " not found!>"
+    do next <- combine m xs
+       let str = Map.findWithDefault err ts m
+           err = "<" ++ ts ++ " not found!>"
+       nstr <- parseTemplate' str m
+       return $ s ++ (if null nstr then str else nstr) ++ ss ++ next
 
 -- $strings
 
