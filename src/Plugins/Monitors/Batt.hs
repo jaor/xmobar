@@ -162,16 +162,17 @@ runBatt' bfs args = do
   d <- getConfigValue decDigits
   case c of
     Result x w t s ->
-      do l <- fmtPercent x
+      do ac <- io $ haveAc (onlineFile opts)
+         l <- fmtPercent x ac opts
          let ts = [fmtTime $ floor t, fmtWatts w opts suffix d]
          parseTemplate (l ++ s:ts)
     NA -> return "N/A"
-  where fmtPercent :: Float -> Monitor [String]
-        fmtPercent x = do
+  where fmtPercent x ac o = do
           let x' = minimum [1, x]
+          p' <- floatToPercent x'
           p <- showPercentWithColors x'
           b <- showPercentBar (100 * x') x'
-          return [b, p]
+          return [b, if ac then maybeColor (posColor o) p' else p]
         fmtWatts x o s d = color x o $ showDigits d x ++ (if s then "W" else "")
         fmtTime :: Integer -> String
         fmtTime x = hours ++ ":" ++ if length minutes == 2
