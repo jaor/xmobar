@@ -163,7 +163,9 @@ or
 
         xmobar &
 
-if you have the default configuration file saved as `~/.xmobarrc`
+if you have the default configuration file saved as
+`$XDG\_CONFIG\_HOME/xmobar/xmobarrc` (defaulting to
+`~/.config/xmobar/xmobarrc`), or `~/.xmobarrc`.
 
 ### Signal Handling
 

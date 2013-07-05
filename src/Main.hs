@@ -32,8 +32,10 @@ import Paths_xmobar (version)
 import Data.Version (showVersion)
 import Graphics.X11.Xlib
 import System.Console.GetOpt
+import System.Directory (getHomeDirectory)
 import System.Exit
 import System.Environment
+import System.FilePath ((</>))
 import System.Posix.Files
 import Control.Monad (unless)
 
@@ -88,13 +90,29 @@ readConfig f = do
                     ": configuration file contains errors at:\n" ++ show err)
          return $ parseConfig s
 
+xdgConfigDir :: IO String
+xdgConfigDir = do env <- getEnvironment
+                  case lookup "XDG_CONFIG_HOME" env of
+                       Just val -> return val
+                       Nothing  -> getHomeDirectory >>= return . (</> ".config")
+
+xmobarConfigDir :: IO FilePath
+xmobarConfigDir = xdgConfigDir >>= return . (</> "xmobar")
+
+getXdgConfigFile :: IO FilePath
+getXdgConfigFile = xmobarConfigDir >>= return . (</> "xmobarrc")
+
 -- | Read default configuration file or load the default config
 readDefaultConfig :: IO (Config,[String])
 readDefaultConfig = do
+  xdgconf <- getXdgConfigFile
+  x <- io $ fileExist xdgconf
   home <- io $ getEnv "HOME"
   let path = home ++ "/.xmobarrc"
   f <- io $ fileExist path
-  if f then readConfig path else return (defaultConfig,[])
+  if x then readConfig path
+       else if f then readConfig path
+                 else return (defaultConfig,[])
 
 data Opts = Help
           | Version
