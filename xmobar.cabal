@@ -92,7 +92,7 @@ executable xmobar
 
     ghc-prof-options:   -prof -auto-all
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
-    extra-libraries: Xrandr
+    extra-libraries: Xrandr Xrender
 
     build-depends:
       base == 4.*,

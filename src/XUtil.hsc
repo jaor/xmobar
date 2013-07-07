@@ -26,6 +26,35 @@ module XUtil
     , hGetLineSafe
     , io
     , fi
+    , XRenderPictureAttributes(..)
+    , XRenderPictFormat(..)
+    , XRenderColor(..) -- reexport
+    , Picture
+    , xRenderFindStandardFormat
+    , xRenderCreatePicture
+    , xRenderFillRectangle
+    , xRenderComposite
+    , xRenderCreateSolidFill
+    , xRenderFreePicture
+    , withRenderPicture
+    , withRenderFill
+    , parseRenderColor
+    , pictOpMinimum
+    , pictOpClear
+    , pictOpSrc
+    , pictOpDst
+    , pictOpOver
+    , pictOpOverReverse
+    , pictOpIn
+    , pictOpInReverse
+    , pictOpOut
+    , pictOpOutReverse
+    , pictOpAtop
+    , pictOpAtopReverse
+    , pictOpXor
+    , pictOpAdd
+    , pictOpSaturate
+    , pictOpMaximum
     ) where
 
 import Control.Concurrent
@@ -38,6 +67,7 @@ import Graphics.X11.Xlib.Extras
 import System.Mem.Weak ( addFinalizer )
 import System.Posix.Types (Fd(..))
 import System.IO
+import Foreign.C
 
 #if defined XFT || defined UTF8
 # if __GLASGOW_HASKELL__ < 612
@@ -157,13 +187,11 @@ printString d p (Core fs) gc fc bc x y s = do
     setFont d gc $ fontFromFontStruct fs
     withColors d [fc, bc] $ \[fc', bc'] -> do
       setForeground d gc fc'
-      setBackground d gc bc'
       drawImageString d p gc x y s
 
 printString d p (Utf8 fs) gc fc bc x y s =
     withColors d [fc, bc] $ \[fc', bc'] -> do
       setForeground d gc fc'
-      setBackground d gc bc'
       io $ wcDrawImageString d p fs gc x y s
 
 #ifdef XFT
@@ -171,10 +199,6 @@ printString dpy drw fs@(Xft font) _ fc bc x y s = do
   (a,d)  <- textExtents fs s
   gi <- xftTxtExtents dpy font s
   withDrawingColors dpy drw fc bc $ \draw -> \fc' -> \bc' ->
-    (drawXftRect draw bc' (x + 1 - fi (xglyphinfo_x gi))
-                          (y - (a + d) + 1)
-                          (xglyphinfo_xOff gi)
-                          (a + d)) >>
     (drawXftString draw fc' font x (y - 2) s)
 #endif
 
@@ -220,3 +244,79 @@ setupLocale = withCString "" (setlocale $ #const LC_ALL) >> return ()
 setupLocale :: IO ()
 setupLocale = return ()
 #endif
+
+--  More XRender nonsense
+#include <X11/extensions/Xrender.h>
+
+type Picture = XID
+type PictOp = CInt
+
+foreign import ccall unsafe "X11/extensions/Xrender.h XRenderFillRectangle"
+  xRenderFillRectangle :: Display -> PictOp -> Picture -> Ptr XRenderColor -> CInt -> CInt -> CUInt -> CUInt -> IO ()
+foreign import ccall unsafe "X11/extensions/Xrender.h XRenderComposite"
+  xRenderComposite :: Display -> PictOp -> Picture -> Picture -> Picture -> CInt -> CInt -> CInt -> CInt -> CInt -> CInt -> CUInt -> CUInt -> IO ()
+foreign import ccall unsafe "X11/extensions/Xrender.h XRenderCreateSolidFill"
+  xRenderCreateSolidFill :: Display -> Ptr XRenderColor -> IO Picture
+foreign import ccall unsafe "X11/extensions/Xrender.h XRenderFreePicture"
+  xRenderFreePicture :: Display -> Picture -> IO ()
+foreign import ccall unsafe "string.h" memset :: Ptr a -> CInt -> CSize -> IO ()
+foreign import ccall unsafe "X11/extensions/Xrender.h XRenderFindStandardFormat"
+  xRenderFindStandardFormat :: Display -> CInt -> IO (Ptr XRenderPictFormat)
+foreign import ccall unsafe "X11/extensions/Xrender.h XRenderCreatePicture"
+  xRenderCreatePicture :: Display -> Drawable -> Ptr XRenderPictFormat -> CULong -> Ptr XRenderPictureAttributes -> IO Picture
+
+data XRenderPictFormat = XRenderPictFormat
+data XRenderPictureAttributes = XRenderPictureAttributes
+
+-- Attributes not supported
+instance Storable XRenderPictureAttributes where
+    sizeOf _ = #{size XRenderPictureAttributes}
+    alignment _ = alignment (undefined :: CInt)
+    peek _ = return XRenderPictureAttributes
+    poke p XRenderPictureAttributes = do
+        memset p 0 #{size XRenderPictureAttributes}
+
+-- | Convenience function, gives us an XRender handle to a traditional
+-- Pixmap.  Don't let it escape.
+withRenderPicture :: Display -> Drawable -> (Picture -> IO a) -> IO ()
+withRenderPicture d p f = do
+    format <- xRenderFindStandardFormat d 1 -- PictStandardRGB24
+    alloca $ \attr -> do
+        pic <- xRenderCreatePicture d p format 0 attr
+        f pic
+        xRenderFreePicture d pic
+
+-- | Convenience function, gives us an XRender picture that is a solid
+-- fill of color 'c'.  Don't let it escape.
+withRenderFill :: Display -> XRenderColor -> (Picture -> IO a) -> IO ()
+withRenderFill d c f = do
+    pic <- with c (xRenderCreateSolidFill d)
+    f pic
+    xRenderFreePicture d pic
+
+-- | Parses color into XRender color (allocation not necessary!)
+parseRenderColor :: Display -> String -> IO XRenderColor
+parseRenderColor d c = do
+    let colormap = defaultColormap d (defaultScreen d)
+    Color _ red green blue _ <- parseColor d colormap c
+    return $ XRenderColor (fromIntegral red) (fromIntegral green) (fromIntegral blue) 0xFFFF
+
+pictOpMinimum, pictOpClear, pictOpSrc, pictOpDst, pictOpOver, pictOpOverReverse,
+    pictOpIn, pictOpInReverse, pictOpOut, pictOpOutReverse, pictOpAtop,
+    pictOpAtopReverse, pictOpXor, pictOpAdd, pictOpSaturate, pictOpMaximum :: PictOp
+pictOpMinimum = 0
+pictOpClear = 0
+pictOpSrc = 1
+pictOpDst = 2
+pictOpOver = 3
+pictOpOverReverse = 4
+pictOpIn = 5
+pictOpInReverse = 6
+pictOpOut = 7
+pictOpOutReverse = 8
+pictOpAtop = 9
+pictOpAtopReverse = 10
+pictOpXor = 11
+pictOpAdd = 12
+pictOpSaturate = 13
+pictOpMaximum = 13

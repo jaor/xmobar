@@ -119,6 +119,7 @@ data Opts = Help
           | Font       String
           | BgColor    String
           | FgColor    String
+          | Alpha      String
           | T
           | B
           | D
@@ -139,6 +140,8 @@ options =
       "The background color. Default black"
     , Option "F" ["fgcolor"] (ReqArg FgColor "fg color")
       "The foreground color. Default grey"
+    , Option "a" ["alpha"] (ReqArg Alpha "alpha")
+      "The transparency: 0 is transparent, 255 is opaque"
     , Option "o" ["top"] (NoArg T) "Place xmobar at the top of the screen"
     , Option "b" ["bottom"] (NoArg B)
       "Place xmobar at the bottom of the screen"
@@ -195,6 +198,7 @@ doOpts conf (o:oo) =
     Font s -> doOpts' (conf {font = s})
     BgColor s -> doOpts' (conf {bgColor = s})
     FgColor s -> doOpts' (conf {fgColor = s})
+    Alpha n -> doOpts' (conf {alpha = read n})
     T -> doOpts' (conf {position = Top})
     B -> doOpts' (conf {position = Bottom})
     D -> doOpts' (conf {overrideRedirect = False})
@@ -215,4 +219,3 @@ doOpts conf (o:oo) =
                         "specified with the -" ++ c:" option\n")
         readStr str = [x | (x,t) <- reads str, ("","") <- lex t]
         doOpts' opts = doOpts opts oo
-
