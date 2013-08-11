@@ -89,11 +89,28 @@ pPressure = do manyTill anyChar $ char '('
                skipRestOfLine
                return $ read s
 
+{-
+    example of 'http://weather.noaa.gov/pub/data/observations/metar/decoded/VTUD.TXT':
+        Station name not available
+        Aug 11, 2013 - 10:00 AM EDT / 2013.08.11 1400 UTC
+        Wind: from the N (350 degrees) at 1 MPH (1 KT):0
+        Visibility: 4 mile(s):0
+        Sky conditions: mostly clear
+        Temperature: 77 F (25 C)
+        Dew Point: 73 F (23 C)
+        Relative Humidity: 88%
+        Pressure (altimeter): 29.77 in. Hg (1008 hPa)
+        ob: VTUD 111400Z 35001KT 8000 FEW030 25/23 Q1008 A2977 INFO R RWY30
+        cycle: 14
+-}
 parseData :: Parser [WeatherInfo]
 parseData =
-    do st <- getAllBut ","
-       space
-       ss <- getAllBut "("
+    do (st, ss) <- try (string "Station name not available" >> return ("??", "??")) <|>
+                   (do st <- getAllBut ","
+                       space
+                       ss <- getAllBut "("
+                       return (st, ss)
+                   )
        skipRestOfLine >> getAllBut "/"
        (y,m,d,h) <- pTime
        w <- getAfterString "Wind: "
