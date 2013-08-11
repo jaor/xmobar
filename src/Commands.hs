@@ -62,7 +62,7 @@ instance Exec Command where
     start (Com prog args _ r) cb = if r > 0 then go else exec
         where go = exec >> tenthSeconds r >> go
               exec = do
-                (i,o,e,p) <- runInteractiveCommand (unwords (prog:args))
+                (i,o,e,p) <- runInteractiveProcess prog args Nothing Nothing
                 exit <- waitForProcess p
                 let closeHandles = hClose o >> hClose i >> hClose e
                     getL = handle (\(SomeException _) -> return "")
