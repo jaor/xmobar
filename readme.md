@@ -678,7 +678,7 @@ something like:
 
 ### `Wireless Interface Args RefreshRate`
 
-- Aliases to the interface name with the suffix "wi": thus, `Wirelss
+- Aliases to the interface name with the suffix "wi": thus, `Wireless
   "wlan0" []` can be used as `%wlan0wi%`
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
