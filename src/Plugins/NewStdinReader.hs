@@ -12,7 +12,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Plugins.NewStdinReader where
+module Plugins.NewStdinReader (NewStdinReader(..)) where
 
 import Prelude
 import System.Posix.Process
@@ -34,4 +34,5 @@ instance Exec NewStdinReader where
       then exitImmediately ExitSuccess
       else start NewStdinReader cb
 
+unescape :: String -> String
 unescape = replace "<<" "<"
