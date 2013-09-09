@@ -78,9 +78,9 @@ executable xmobar
       XUtil, StatFS, Runnable, ColorCache, Window, Signal,
       Plugins, Plugins.BufferedPipeReader,
       Plugins.CommandReader, Plugins.Date, Plugins.EWMH,
-      Plugins.PipeReader, Plugins.StdinReader, Plugins.XMonadLog,
-      Plugins.Utils, Plugins.Kbd, Plugins.Locks, Plugins.Monitors,
-      Plugins.Monitors.Batt, Plugins.Monitors.Common,
+      Plugins.PipeReader, Plugins.StdinReader, Plugins.NewStdinReader,
+      Plugins.XMonadLog, Plugins.Utils, Plugins.Kbd, Plugins.Locks,
+      Plugins.Monitors, Plugins.Monitors.Batt, Plugins.Monitors.Common,
       Plugins.Monitors.CoreCommon, Plugins.Monitors.CoreTemp,
       Plugins.Monitors.CpuFreq, Plugins.Monitors.Cpu,
       Plugins.Monitors.Disk, Plugins.Monitors.Mem,
@@ -108,7 +108,8 @@ executable xmobar
       X11 >= 1.6.1,
       mtl >= 2.0 && < 2.2,
       parsec == 3.1.*,
-      stm >= 2.3 && < 2.5
+      stm >= 2.3 && < 2.5,
+      MissingH
 
     if flag(with_threaded)
        -- -threaded is a workaround for 100% CPU busy loop
