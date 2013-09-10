@@ -1117,6 +1117,15 @@ can be used in the output template as `%mydate%`
 
 - Aliases to StdinReader
 - Displays any text received by xmobar on its standard input.
+- Strips actions to prevent attacks.
+
+`NewStdinReader`
+
+- Aliases to NewStdinReader
+- Displays any text received by xmobar on its standard input.
+- Accepts actions.
+- To display a literal '<', it should be doubled: "<<" will display a single '<'.
+- Warning: only use this if you are escaping (see previous statement) the text being sent to xmobar's standard input.
 
 `Date Format Alias RefreshRate`
 

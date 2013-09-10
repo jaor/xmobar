@@ -2,7 +2,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Plugins.StdinReader
+-- Module      :  Plugins.XMonadLog
 -- Copyright   :  (c) Spencer Janssen
 -- License     :  BSD-style (see LICENSE)
 --
