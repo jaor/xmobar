@@ -1117,6 +1117,22 @@ can be used in the output template as `%mydate%`
 
 - Aliases to StdinReader
 - Displays any text received by xmobar on its standard input.
+- Strips actions from the text received.  This means you can't pass dynamic
+  actions via stdin.  This is safer than `UnsafeStdinReader` because there is
+  no need to escape the content before passing it to xmobar's standard input.
+
+`UnsafeStdinReader`
+
+- Aliases to UnsafeStdinReader
+- Displays any text received by xmobar on its standard input.
+- Will not do anything to the text received.  This means you can pass dynamic
+  actions via stdin.  Be careful to remove tags from dynamic text that you
+  pipe-thru to xmobar's standard input, e.g. window's title.  There is no way
+  to escape the tags, i.e. you can't print a literal "<action>" tag on xmobar.
+- Sample usage: send to xmobar's stdin the list of your workspaces enclosed by
+  actions tags that switches the workspaces to be able to switch workspaces by
+  clicking on xmobar:
+  `<action=xdotool key alt+1>ws1</action> <action=xdotool key alt+1>ws2</action>`
 
 `Date Format Alias RefreshRate`
 

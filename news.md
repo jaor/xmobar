@@ -10,6 +10,9 @@ _New features_
     [github #99]).
   - `Com` uses safer `runInteractiveProcess` instead of spawning a
     shell (David McLean).
+  - New plugin `UnsafeStdinReader` that allows actions from stdin.
+    Now it's possible to have clickable workspaces!
+    (see [github #125]).
 
 _Bug fixes_
 
@@ -23,6 +26,7 @@ _Bug fixes_
 [github #99]: https://github.com/jaor/xmobar/issues/115
 [github #115]: https://github.com/jaor/xmobar/issues/115
 [github #117]: https://github.com/jaor/xmobar/issues/117
+[github #125]: https://github.com/jaor/xmobar/issues/125
 [issue #65]: http://code.google.com/p/xmobar/issues/detail?id=65
 
 ## Version 0.18 (June 5, 2013)

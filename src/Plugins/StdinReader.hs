@@ -8,11 +8,15 @@
 -- Stability   :  unstable
 -- Portability :  unportable
 --
--- A plugin for reading from stdin
+-- A plugin for reading from `stdin`.
+--
+-- Exports:
+-- - `StdinReader` to safely display stdin content (striping actions).
+-- - `UnsafeStdinReader` to display stdin content as-is.
 --
 -----------------------------------------------------------------------------
 
-module Plugins.StdinReader where
+module Plugins.StdinReader (StdinReader(..)) where
 
 import Prelude
 import System.Posix.Process
@@ -22,14 +26,19 @@ import Control.Exception (SomeException(..), handle)
 import Plugins
 import Actions (stripActions)
 
-data StdinReader = StdinReader deriving (Read, Show)
+data StdinReader = StdinReader | UnsafeStdinReader
+  deriving (Read, Show)
 
 instance Exec StdinReader where
-  start StdinReader cb = do
+  start stdinReader cb = do
     s <- handle (\(SomeException e) -> do hPrint stderr e; return "")
                 (hGetLineSafe stdin)
-    cb (stripActions s)
+    cb $ escape stdinReader s
     eof <- hIsEOF stdin
     if eof
       then exitImmediately ExitSuccess
-      else start StdinReader cb
+      else start stdinReader cb
+
+escape :: StdinReader -> String -> String
+escape StdinReader = stripActions
+escape UnsafeStdinReader = id
