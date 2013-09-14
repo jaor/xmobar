@@ -1128,7 +1128,8 @@ can be used in the output template as `%mydate%`
 - Will not do anything to the text received.  This means you can pass dynamic
   actions via stdin.  Be careful to remove tags from dynamic text that you
   pipe-thru to xmobar's standard input, e.g. window's title.  There is no way
-  to escape the tags, i.e. you can't print a literal "<action>" tag on xmobar.
+  to escape the tags, i.e. you can't print a literal `<action>` tag as a text
+  on xmobar.
 - Sample usage: send to xmobar's stdin the list of your workspaces enclosed by
   actions tags that switches the workspaces to be able to switch workspaces by
   clicking on xmobar:
