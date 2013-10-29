@@ -109,7 +109,7 @@ readDefaultConfig = do
   x <- io $ fileExist xdgconf
   home <- io $ getEnv "HOME"
   let path = home ++ "/.xmobarrc"
-  f <- io $ fileExist path
+  f <- io $ fileExist xdgconf
   if x then readConfig path
        else if f then readConfig path
                  else return (defaultConfig,[])
