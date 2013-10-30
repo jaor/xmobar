@@ -105,14 +105,16 @@ getXdgConfigFile = xmobarConfigDir >>= return . (</> "xmobarrc")
 -- | Read default configuration file or load the default config
 readDefaultConfig :: IO (Config,[String])
 readDefaultConfig = do
-  xdgconf <- getXdgConfigFile
-  x <- io $ fileExist xdgconf
+  xdgConfigFile <- getXdgConfigFile
+  xdgConfigFileExists <- io $ fileExist xdgConfigFile
   home <- io $ getEnv "HOME"
-  let path = home ++ "/.xmobarrc"
-  f <- io $ fileExist xdgconf
-  if x then readConfig path
-       else if f then readConfig path
-                 else return (defaultConfig,[])
+  let defaultConfigFile = home ++ "/.xmobarrc"
+  defaultConfigFileExists <- io $ fileExist defaultConfigFile
+  if xdgConfigFileExists
+    then readConfig xdgConfigFile
+    else if defaultConfigFileExists
+         then readConfig defaultConfigFile
+         else return (defaultConfig,[])
 
 data Opts = Help
           | Version
