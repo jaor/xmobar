@@ -22,7 +22,9 @@ import Graphics.X11.Xlib.Extras
 import Graphics.X11.Xinerama
 import Foreign.C.Types (CLong)
 
-import Data.Maybe(fromMaybe)
+import Data.Function (on)
+import Data.List (maximumBy)
+import Data.Maybe (fromMaybe)
 import System.Posix.Process (getProcessID)
 
 import Config
@@ -72,8 +74,8 @@ setPosition p rs ht =
     OnScreen _ p'' -> setPosition p'' [scr] ht
   where
     (scr@(Rectangle rx ry rw rh), p') =
-      case p of OnScreen i x -> (fromMaybe (head rs) $ safeIndex i rs, x)
-                _ -> (head rs, p)
+      case p of OnScreen i x -> (fromMaybe (broadest rs) $ safeIndex i rs, x)
+                _ -> (broadest rs, p)
     ny = ry + fi (rh - ht)
     center i = rx + fi (div (remwid i) 2)
     right  i = rx + fi (remwid i)
@@ -87,6 +89,7 @@ setPosition p rs ht =
     mh h' = max (fi h') h
     ny' h' = ry + fi (rh - mh h')
     safeIndex i = lookup i . zip [0..]
+    broadest = maximumBy (compare `on` rect_width)
 
 setProperties :: Config -> Display -> Window -> IO ()
 setProperties c d w = do
