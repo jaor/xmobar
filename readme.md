@@ -132,7 +132,7 @@ Otherwise, you'll need to install them yourself.
      Requires the [dbus] and [text] packages.
 
 `with_inotify`
-:    Support for inotify in modern linux kernels. This option is needed
+:    Support for inotify in modern Linux kernels. This option is needed
      for the MBox and Mail plugins to work. Requires the [hinotify]
      package.
 
@@ -256,7 +256,7 @@ Other configuration options:
 
 `allDesktops`
 :     When set to True (the default), xmobar will tell the window manager
-      explicitily to be shown in all desktops, by setting
+      explicitly to be shown in all desktops, by setting
       `_NET_WM_DESKTOP` to 0xffffffff.
 
 `overrideRedirect`
@@ -347,7 +347,7 @@ When compiled with the optional `with_dbus` flag, xmobar can be
 controlled over dbus. All signals defined in [src/Signal.hs] as `data
 SignalType` can now be sent over dbus to xmobar.  Due to current
 limitations of the implementation only one process of xmobar can
-aquire the dbus. This is handled on a first-come-first-seved basis,
+acquire the dbus. This is handled on a first-come-first-served basis,
 meaning that the first process will get the dbus interface. Other
 processes will run without further problems, yet have no dbus
 interface.
@@ -514,7 +514,7 @@ options (or *monitor arguments*) they all share.
 ### Default Monitor Arguments
 
 Monitors accept a common set of arguments, described in the first
-subsection below.  In additon, some monitors accept additional options
+subsection below.  In addition, some monitors accept additional options
 that are specific to them.  When specifying the list of arguments in
 your configuration, the common options come first, followed by "--",
 followed by any monitor-specific options.
@@ -751,7 +751,7 @@ something like:
   - `-H`: high power threshold (default: -10)
   - `-l`: color to display power lower than the `-L` threshold
   - `-m`: color to display power lower than the `-H` threshold
-  - `-h`: color to display power highter than the `-H` threshold
+  - `-h`: color to display power higher than the `-H` threshold
   - `-p`: color to display positive power (battery charging)
   - `-f`: file in `/sys/class/power_supply` with AC info (default:
     "AC/online")
@@ -860,7 +860,7 @@ more than one battery.
 - Variables that can be used with the `-t`/`--template` argument:
 	    `temp`
 - Default template: `<temp>C`
-- This plugin works only on sytems with devices having thermal zone.
+- This plugin works only on systems with devices having thermal zone.
   Check directories in `/sys/class/thermal` for possible values of the
   zone number (e.g., 0 corresponds to `thermal_zone0` in that
   directory).
@@ -878,7 +878,7 @@ more than one battery.
 - Variables that can be used with the `-t`/`--template` argument:
 	    `temp`
 - Default template: `Thm: <temp>C`
-- This plugin works only on sytems with devices having thermal zone.
+- This plugin works only on systems with devices having thermal zone.
   Check directories in /proc/acpi/thermal_zone for possible values.
 - Example:
 
@@ -1001,7 +1001,7 @@ more than one battery.
 - Args: list of maildirs in form
   `[("name1","path1"),...]`. Paths may start with a '~'
   to expand to the user's home directory.
-- This plugin requires inotify support in your linux kernel and the
+- This plugin requires inotify support in your Linux kernel and the
   [hinotify] package. To activate, pass `--flags="with_inotify"`
   during compilation.
 - Example:
@@ -1021,11 +1021,11 @@ more than one battery.
    -d dir  --dir dir a string giving the base directory where mbox files with
                      a relative path live.
    -p prefix --prefix prefix  a string giving a prefix for the list
-                      of displayed mail coints
+                      of displayed mail counts
    -s suffix --suffix suffix  a string giving a suffix for the list
-                      of displayed mail coints
+                      of displayed mail counts
 - Paths may start with a '~' to expand to the user's home directory.
-- This plugin requires inotify support in your linux kernel and the
+- This plugin requires inotify support in your Linux kernel and the
   [hinotify] package. To activate, pass `--flags="with_inotify"`
   during compilation.
 - Example. The following command look for mails in `/var/mail/inbox`
@@ -1059,7 +1059,7 @@ more than one battery.
     - `-C`: file with the current brightness (default:
        actual_brightness)
     - `-M`: file with the maximum brightness (default:
-       max_brigtness)
+       max_brightness)
 - Variables that can be used with the `-t`/`--template` argument:
 	    `hbar`, `percent`, `bar`
 - Default template: `<percent>`
@@ -1070,9 +1070,9 @@ more than one battery.
 ### `Kbd Opts`
 
 - Registers to XKB/X11-Events and output the currently active keyboard layout.
-  Supports replacement of layoutnames.
+  Supports replacement of layout names.
 - Aliases to `kbd`
-- Opts is a list of tuple:
+- Opts is a list of tuples:
     -  first element of the tuple is the search string
     -  second element of the tuple is the corresponding replacement
 - Example:
@@ -1176,13 +1176,13 @@ can be used in the output template as `%mydate%`
   content is restored i.e. if there was already something from a
   previous pipe it will be put on display again, overwriting the
   current status.
-- A pipe with Timout of 0 will be displayed permanently, just like
+- A pipe with Timeout of 0 will be displayed permanently, just like
   `PipeReader`
 - The boolean option indicates whether new data for this pipe should
   make xmobar appear (unhide, reveal). In this case, the Timeout
   additionally specifies when the window should be hidden again. The
   output is restored in any case.
-- Use it for OSD like status bars e.g. for setting the volume or
+- Use it for OSD-like status bars e.g. for setting the volume or
   brightness:
 
         Run BufferedPipeReader "bpr"
