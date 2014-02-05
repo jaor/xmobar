@@ -23,7 +23,9 @@ module Plugins.Monitors.Common (
                        , getConfigValue
                        , mkMConfig
                        , runM
+                       , runMD
                        , runMB
+                       , runMBD
                        , io
                        -- * Parsers
                        -- $parsers
@@ -178,11 +180,14 @@ options =
     , Option "x" ["nastring"] (ReqArg NAString "N/A string") "String used when the monitor is not available"
     ]
 
-doArgs :: [String] -> ([String] -> Monitor String) -> Monitor String
-doArgs args action =
+doArgs :: [String] -> ([String] -> Monitor String) -> ([String] -> Monitor Bool) -> Monitor String
+doArgs args action detect =
     case getOpt Permute options args of
       (o, n, [])   -> do doConfigOptions o
-                         action n
+                         ready <- detect n
+                         if ready
+                            then action n
+                            else return "<Waiting...>"
       (_, _, errs) -> return (concat errs)
 
 doConfigOptions :: [Opts] -> Monitor ()
@@ -216,10 +221,18 @@ runM :: [String] -> IO MConfig -> ([String] -> Monitor String) -> Int
         -> (String -> IO ()) -> IO ()
 runM args conf action r = runMB args conf action (tenthSeconds r)
 
-runMB :: [String] -> IO MConfig -> ([String] -> Monitor String)
-         -> IO () -> (String -> IO ()) -> IO ()
-runMB args conf action wait cb = handle (cb . showException) loop
-  where ac = doArgs args action
+runMD :: [String] -> IO MConfig -> ([String] -> Monitor String) -> Int
+        -> ([String] -> Monitor Bool) -> (String -> IO ()) -> IO ()
+runMD args conf action r = runMBD args conf action (tenthSeconds r)
+
+runMB :: [String] -> IO MConfig -> ([String] -> Monitor String) -> IO ()
+        -> (String -> IO ()) -> IO ()
+runMB args conf action wait = runMBD args conf action wait (\_ -> return True)
+
+runMBD :: [String] -> IO MConfig -> ([String] -> Monitor String) -> IO ()
+        -> ([String] -> Monitor Bool) -> (String -> IO ()) -> IO ()
+runMBD args conf action wait detect cb = handle (cb . showException) loop
+  where ac = doArgs args action detect
         loop = conf >>= runReaderT ac >>= cb >> wait >> loop
 
 showException :: SomeException -> String

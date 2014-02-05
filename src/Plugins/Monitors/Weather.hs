@@ -16,10 +16,8 @@ module Plugins.Monitors.Weather where
 
 import Plugins.Monitors.Common
 
-import Control.Monad (when)
-import System.Process
-import System.Exit
-import System.IO
+import Control.Exception (catch, IOException)
+import Network.HTTP
 
 import Text.ParserCombinators.Parsec
 
@@ -129,20 +127,15 @@ parseData =
 defUrl :: String
 defUrl = "http://weather.noaa.gov/pub/data/observations/metar/decoded/"
 
+stationUrl :: String -> String
+stationUrl station = defUrl ++ station ++ ".TXT"
+
 getData :: String -> IO String
-getData url=
-        do (i,o,e,p) <- runInteractiveCommand ("curl " ++ defUrl ++ url ++ ".TXT")
-           exit <- waitForProcess p
-           let closeHandles = do hClose o
-                                 hClose i
-                                 hClose e
-           case exit of
-             ExitSuccess -> do str <- hGetContents o
-                               when (str == str) $ return ()
-                               closeHandles
-                               return str
-             _ -> do closeHandles
-                     return "Could not retrieve data"
+getData station = do
+    let request = getRequest (stationUrl station)
+    catch (simpleHTTP request >>= getResponseBody) errHandler
+    where errHandler :: IOException -> IO String
+          errHandler _ = return "<Could not retrieve data>"
 
 formatWeather :: [WeatherInfo] -> Monitor String
 formatWeather [(WI st ss y m d h w v sk tC tF dp r p)] =
@@ -156,3 +149,21 @@ runWeather str =
     do d <- io $ getData $ head str
        i <- io $ runP parseData d
        formatWeather i
+
+weatherReady :: [String] -> Monitor Bool
+weatherReady str = do
+    let station = head str
+        request = headRequest (stationUrl station)
+    io $ catch (simpleHTTP request >>= checkResult) errHandler
+    where errHandler :: IOException -> IO Bool
+          errHandler _ = return False
+          checkResult result = do
+            case result of
+                Left _ -> return False
+                Right response -> do
+                    case rspCode response of
+                        -- Permission or network errors are failures; anything
+                        -- else is recoverable.
+                        (4, _, _) -> return False
+                        (5, _, _) -> return False
+                        (_, _, _) -> return True

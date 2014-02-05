@@ -19,7 +19,7 @@ module Plugins.Monitors where
 
 import Plugins
 
-import Plugins.Monitors.Common (runM)
+import Plugins.Monitors.Common (runM, runMD)
 import Plugins.Monitors.Weather
 import Plugins.Monitors.Net
 import Plugins.Monitors.Mem
@@ -40,7 +40,7 @@ import Plugins.Monitors.Wireless
 #endif
 #ifdef LIBMPD
 import Plugins.Monitors.MPD
-import Plugins.Monitors.Common (runMB)
+import Plugins.Monitors.Common (runMBD)
 #endif
 #ifdef ALSA
 import Plugins.Monitors.Volume
@@ -136,7 +136,7 @@ instance Exec Monitors where
     start (MultiCpu a r) = startMultiCpu a r
     start (TopProc a r) = startTop a r
     start (TopMem a r) = runM a topMemConfig runTopMem r
-    start (Weather s a r) = runM (a ++ [s]) weatherConfig runWeather r
+    start (Weather s a r) = runMD (a ++ [s]) weatherConfig runWeather r weatherReady
     start (Thermal z a r) = runM (a ++ [z]) thermalConfig runThermal r
     start (ThermalZone z a r) =
       runM (a ++ [show z]) thermalZoneConfig runThermalZone r
@@ -155,8 +155,8 @@ instance Exec Monitors where
     start (Wireless i a r) = runM (a ++ [i]) wirelessConfig runWireless r
 #endif
 #ifdef LIBMPD
-    start (MPD a r) = runM a mpdConfig runMPD r
-    start (AutoMPD a) = runMB a mpdConfig runMPD mpdWait
+    start (MPD a r) = runMD a mpdConfig runMPD r mpdReady
+    start (AutoMPD a) = runMBD a mpdConfig runMPD mpdWait mpdReady
 #endif
 #ifdef ALSA
     start (Volume m c a r) = runM a volumeConfig (runVolume m c) r

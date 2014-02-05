@@ -12,7 +12,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Plugins.Monitors.MPD ( mpdConfig, runMPD, mpdWait ) where
+module Plugins.Monitors.MPD ( mpdConfig, runMPD, mpdWait, mpdReady ) where
 
 import Data.List
 import Plugins.Monitors.Common
@@ -62,6 +62,17 @@ mpdWait = do
   case status of
     Left _ -> threadDelay 10000000
     _ -> return ()
+
+mpdReady :: [String] -> Monitor Bool
+mpdReady _ = do
+  response <- io $ M.withMPD M.ping
+  case response of
+    Right _         -> return True
+    -- Only cases where MPD isn't responding is an issue; bogus information at
+    -- least won't hold xmobar up.
+    Left M.NoMPD    -> return False
+    Left M.TimedOut -> return False
+    Left _          -> return True
 
 mopts :: [String] -> IO MOpts
 mopts argv =
