@@ -33,7 +33,7 @@ parseMEM =
            info = M.fromList $ map (\line -> (line !! 0, (read $ line !! 1 :: Float) / 1024)) content
            [total, free, buffer, cache] = map (info M.!) ["MemTotal:", "MemFree:", "Buffers:", "Cached:"]
            rest = free + buffer + cache
-           used = total - rest
+           used = total - (M.findWithDefault rest "MemAvailable:" info)
            usedratio = used / total
            freeratio = free / total
        return [usedratio, freeratio, total, free, buffer, cache, rest, used, freeratio]
