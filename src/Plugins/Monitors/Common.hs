@@ -324,10 +324,10 @@ combine :: Map.Map String String -> [(String, String, String)] -> Monitor String
 combine _ [] = return []
 combine m ((s,ts,ss):xs) =
     do next <- combine m xs
-       let str = Map.findWithDefault err ts m
-           err = "<" ++ ts ++ " not found!>"
-       nstr <- parseTemplate' str m
-       return $ s ++ (if null nstr then str else nstr) ++ ss ++ next
+       str <- case Map.lookup ts m of
+         Nothing -> return $ "<" ++ ts ++ ">"
+         Just  r -> let f "" = r; f n = n; in fmap f $ parseTemplate' r m
+       return $ s ++ str ++ ss ++ next
 
 -- $strings
 
