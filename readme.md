@@ -197,7 +197,10 @@ For the output template:
 
 - `<icon=/path/to/icon.xbm/>` will insert the given bitmap.
 
-- `<action=command>` will execute given command.
+- ```<action=`command` button=12345>``` will execute given command when
+  clicked with specified buttons. If not specified, button is equal to 1
+  (left mouse button). Using old syntax (without backticks surrounding `command`)
+  will result in `button` attribute being ignored.
 
 Other configuration options:
 
@@ -461,9 +464,10 @@ which will produce the expected result.
 
 It's also possible to use action directives of the form:
 
-     <action=command>
+     <action=`command` button=12345>
 
-which will be executed when clicked on.
+which will be executed when clicked on with specified mouse buttons. This tag
+can be nested, allowing different commands to be run depending on button clicked.
 
 ## The `commands` Configuration Option
 
@@ -488,7 +492,7 @@ an example of a template for the commands above using an icon:
 
 This example will run "xclock" command when date is clicked:
 
-    template="<action=xclock>%date%</action>
+    template="<action=`xclock`>%date%</action>
 
 The only internal available command is `Com` (see below Executing
 External Commands). All other commands are provided by plugins. xmobar
@@ -1137,7 +1141,7 @@ can be used in the output template as `%mydate%`
 - Sample usage: send to xmobar's stdin the list of your workspaces enclosed by
   actions tags that switches the workspaces to be able to switch workspaces by
   clicking on xmobar:
-  `<action=xdotool key alt+1>ws1</action> <action=xdotool key alt+1>ws2</action>`
+  ```<action=`xdotool key alt+1`>ws1</action> <action=`xdotool key alt+1`>ws2</action>```
 
 <font size="+1">**`Date Format Alias RefreshRate`**</font>
 

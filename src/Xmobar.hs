@@ -122,7 +122,7 @@ startLoop xcfg@(XConf _ _ w _ _ _) sig vs = do
             ConfigureEvent {} -> atomically $ putTMVar signal Reposition
             ExposeEvent {} -> atomically $ putTMVar signal Wakeup
             RRScreenChangeNotifyEvent {} -> atomically $ putTMVar signal Reposition
-            ButtonEvent {} -> atomically $ putTMVar signal (Action (fi $ ev_x ev))
+            ButtonEvent {} -> atomically $ putTMVar signal (Action (ev_button ev) (fi $ ev_x ev))
             _ -> return ()
 
 -- | Send signal to eventLoop every time a var is updated
@@ -144,7 +144,7 @@ checker tvar ov vs signal = do
 
 
 -- | Continuously wait for a signal from a thread or a interrupt handler
-eventLoop :: TVar [String] -> XConf -> [(Action, Position, Position)] -> TMVar SignalType -> IO ()
+eventLoop :: TVar [String] -> XConf -> [([Action], Position, Position)] -> TMVar SignalType -> IO ()
 eventLoop tv xc@(XConf d r w fs is cfg) as signal = do
       typ <- atomically $ takeTMVar signal
       case typ of
@@ -169,7 +169,7 @@ eventLoop tv xc@(XConf d r w fs is cfg) as signal = do
          TogglePersistent -> eventLoop
             tv xc { config = cfg { persistent = not $ persistent cfg } } as signal
 
-         Action x -> action x
+         Action but x -> action but x
 
     where
         isPersistent = not $ persistent cfg
@@ -211,8 +211,12 @@ eventLoop tv xc@(XConf d r w fs is cfg) as signal = do
             o ->
               return (ocfg {position = OnScreen 1 o})
 
-        action x = do mapM_ (\(a,_,_) -> runAction a) $ filter (\(_, from, to) -> x >= from && x <= to) as
-                      eventLoop tv xc as signal
+        action button x = do
+          mapM_ runAction $
+            filter (\(Spawn b _) -> button `elem` b) $
+            concatMap (\(a,_,_) -> a) $
+            filter (\(_, from, to) -> x >= from && x <= to) as
+          eventLoop tv xc as signal
 
 -- $command
 
@@ -233,17 +237,17 @@ startCommand sig (com,s,ss)
                            return (Just h,var)
     where is = s ++ "Updating..." ++ ss
 
-updateString :: Config -> TVar [String] -> IO [[(Widget, String, Maybe Action)]]
+updateString :: Config -> TVar [String] -> IO [[(Widget, String, Maybe [Action])]]
 updateString conf v = do
   s <- atomically $ readTVar v
   let l:c:r:_ = s ++ repeat ""
   io $ mapM (parseString conf) [l, c, r]
 
-updateActions :: XConf -> Rectangle -> [[(Widget, String, Maybe Action)]] ->
-                 IO [(Action, Position, Position)]
+updateActions :: XConf -> Rectangle -> [[(Widget, String, Maybe [Action])]] ->
+                 IO [([Action], Position, Position)]
 updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
   let (d,fs) = (display &&& fontS) conf
-      strLn :: [(Widget, String, Maybe Action)] -> IO [(Maybe Action, Position, Position)]
+      strLn :: [(Widget, String, Maybe [Action])] -> IO [(Maybe [Action], Position, Position)]
       strLn  = io . mapM getCoords
       iconW i = maybe 0 Bitmap.width (lookup i $ iconS conf)
       getCoords (Text s,_,a) = textWidth d fs s >>= \tw -> return (a, 0, fi tw)
@@ -266,7 +270,7 @@ updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
 -- $print
 
 -- | Draws in and updates the window
-drawInWin :: Rectangle -> [[(Widget, String, Maybe Action)]] -> X ()
+drawInWin :: Rectangle -> [[(Widget, String, Maybe [Action])]] -> X ()
 drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
   r <- ask
   let (c,d ) = (config &&& display) r

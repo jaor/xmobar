@@ -22,6 +22,7 @@ import Data.Typeable (Typeable)
 import Control.Concurrent.STM
 import Control.Exception hiding (handle)
 import System.Posix.Signals
+import Graphics.X11.Types (Button)
 import Graphics.X11.Xlib.Types (Position)
 
 #ifdef DBUS
@@ -41,7 +42,7 @@ data SignalType = Wakeup
                 | Reveal Int
                 | Toggle Int
                 | TogglePersistent
-                | Action Position
+                | Action Button Position
     deriving (Read, Show)
 
 #ifdef DBUS

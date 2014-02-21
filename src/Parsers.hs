@@ -28,13 +28,14 @@ import Actions
 import qualified Data.Map as Map
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Perm
+import Graphics.X11.Types (Button)
 
 data Widget = Icon String | Text String
 
 type ColorString = String
 
 -- | Runs the string parser
-parseString :: Config -> String -> IO [(Widget, ColorString, Maybe Action)]
+parseString :: Config -> String -> IO [(Widget, ColorString, Maybe [Action])]
 parseString c s =
     case parse (stringParser (fgColor c) Nothing) "" s of
       Left  _ -> return [(Text $ "Could not parse string: " ++ s
@@ -43,14 +44,14 @@ parseString c s =
       Right x -> return (concat x)
 
 -- | Gets the string and combines the needed parsers
-stringParser :: String -> Maybe Action
-                -> Parser [[(Widget, ColorString, Maybe Action)]]
+stringParser :: String -> Maybe [Action]
+                -> Parser [[(Widget, ColorString, Maybe [Action])]]
 stringParser c a = manyTill (textParser c a <|> try (iconParser c a) <|>
-                             try (actionParser c) <|> colorParser a) eof
+                             try (actionParser c a) <|> colorParser a) eof
 
 -- | Parses a maximal string without color markup.
-textParser :: String -> Maybe Action
-              -> Parser [(Widget, ColorString, Maybe Action)]
+textParser :: String -> Maybe [Action]
+              -> Parser [(Widget, ColorString, Maybe [Action])]
 textParser c a = do s <- many1 $
                           noneOf "<" <|>
                             try (notFollowedBy' (char '<')
@@ -61,7 +62,6 @@ textParser c a = do s <- many1 $
                                    string "/fc>"))
                     return [(Text s, c, a)]
 
-
 -- | Wrapper for notFollowedBy that returns the result of the first parser.
 --   Also works around the issue that, at least in Parsec 3.0.0, notFollowedBy
 --   accepts only parsers with return type Char.
@@ -70,28 +70,38 @@ notFollowedBy' p e = do x <- p
                         notFollowedBy $ try (e >> return '*')
                         return x
 
-iconParser :: String -> Maybe Action
-              -> Parser [(Widget, ColorString, Maybe Action)]
+iconParser :: String -> Maybe [Action]
+              -> Parser [(Widget, ColorString, Maybe [Action])]
 iconParser c a = do
   string "<icon="
   i <- manyTill (noneOf ">") (try (string "/>"))
   return [(Icon i, c, a)]
 
-actionParser :: String -> Parser [(Widget, ColorString, Maybe Action)]
-actionParser c = do
-  a <- between (string "<action=") (string ">") (many1 (noneOf ">"))
-  let a' = Just (Spawn a)
+actionParser :: String -> Maybe [Action] -> Parser [(Widget, ColorString, Maybe [Action])]
+actionParser c act = do
+  string "<action="
+  command <- choice [between (char '`') (char '`') (many1 (noneOf "`")),
+                   many1 (noneOf ">")]
+  buttons <- (char '>' >> return "1") <|> (space >> spaces >>
+    between (string "button=") (string ">") (many1 (oneOf "12345")))
+  let a = Spawn (toButtons buttons) command
+      a' = case act of
+        Nothing -> Just [a]
+        Just act' -> Just $ a : act'
   s <- manyTill (try (textParser c a') <|> try (iconParser c a') <|>
-                 try (colorParser a') <|> actionParser c)
+                 try (colorParser a') <|> actionParser c a')
                 (try $ string "</action>")
   return (concat s)
 
+toButtons :: String -> [Button]
+toButtons s = map (\x -> read [x]) s
+
 -- | Parsers a string wrapped in a color specification.
-colorParser :: Maybe Action -> Parser [(Widget, ColorString, Maybe Action)]
+colorParser :: Maybe [Action] -> Parser [(Widget, ColorString, Maybe [Action])]
 colorParser a = do
   c <- between (string "<fc=") (string ">") colors
   s <- manyTill (try (textParser c a) <|> try (iconParser c a) <|>
-                 try (colorParser a) <|> actionParser c) (try $ string "</fc>")
+                 try (colorParser a) <|> actionParser c a) (try $ string "</fc>")
   return (concat s)
 
 -- | Parses a color specification (hex or named)

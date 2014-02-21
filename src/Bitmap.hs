@@ -30,7 +30,7 @@ data Bitmap = Bitmap { width  :: Dimension
                      }
 
 updateCache :: Display -> Window -> Map FilePath Bitmap ->
-               [[(Widget, String, Maybe Action)]] -> IO (Map FilePath Bitmap)
+               [[(Widget, String, Maybe [Action])]] -> IO (Map FilePath Bitmap)
 updateCache dpy win cache ps = do
   let paths = map (\(Icon p, _, _) -> p) . concatMap (filter icons) $ ps
       icons (Icon _, _, _) = True
