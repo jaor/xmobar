@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Plugins.Mail
@@ -15,6 +16,7 @@
 module Plugins.Mail where
 
 import Plugins
+#ifdef INOTIFY
 import Plugins.Utils (expandHome, changeLoop)
 
 import Control.Monad
@@ -27,6 +29,10 @@ import System.INotify
 import Data.List (isPrefixOf)
 import Data.Set (Set)
 import qualified Data.Set as S
+#else
+import System.IO
+#endif
+
 
 -- | A list of mail box names and paths to maildirs.
 data Mail = Mail [(String, FilePath)] String
@@ -34,6 +40,11 @@ data Mail = Mail [(String, FilePath)] String
 
 instance Exec Mail where
     alias (Mail _ a) = a
+#ifndef INOTIFY
+    start _ _ = do
+        hPutStrLn stderr $ "Warning: xmobar is not compiled with -fwith_inotify,"
+                        ++ " but the Mail plugin requires it."
+#else
     start (Mail ms _) cb = do
         vs <- mapM (const $ newTVarIO S.empty) ms
 
@@ -65,3 +76,4 @@ handle v e = atomically $ modifyTVar v $ case e of
  where
     delete = S.delete (filePath e)
     create = S.insert (filePath e)
+#endif

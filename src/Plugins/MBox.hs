@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Plugins.MBox
@@ -16,6 +17,7 @@ module Plugins.MBox (MBox(..)) where
 
 import Prelude
 import Plugins
+#ifdef INOTIFY
 import Plugins.Utils (changeLoop, expandHome)
 
 import Control.Monad (when)
@@ -57,6 +59,10 @@ parseOptions args =
     (o, _, []) -> return $ foldr id defaults o
     (_, _, errs) -> ioError . userError $ concat errs
 
+#else
+import System.IO
+#endif
+
 -- | A list of display names, paths to mbox files and display colours,
 -- followed by a list of options.
 data MBox = MBox [(String, FilePath, String)] [String] String
@@ -64,8 +70,12 @@ data MBox = MBox [(String, FilePath, String)] [String] String
 
 instance Exec MBox where
   alias (MBox _ _ a) = a
+#ifndef INOTIFY
+  start _ _ = do
+    hPutStrLn stderr $ "Warning: xmobar is not compiled with -fwith_inotify" ++
+          " but the MBox plugin requires it"
+#else
   start (MBox boxes args _) cb = do
-
     opts <- parseOptions args
     let showAll = oAll opts
         prefix = oPrefix opts
@@ -109,3 +119,4 @@ handleNotification v _ =  do
   (p, _) <- atomically $ readTVar v
   n <- countMails p
   atomically $ writeTVar v (p, n)
+#endif
