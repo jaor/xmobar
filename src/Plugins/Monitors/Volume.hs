@@ -110,11 +110,13 @@ formatDb opts dbi = do
 runVolume :: String -> String -> [String] -> Monitor String
 runVolume mixerName controlName argv = do
     opts <- io $ parseOpts argv
-    control <- io $ getControlByName mixerName controlName
-    (lo, hi) <- io . liftMaybe $ getRange <$> volumeControl control
-    val <- getVal $ volumeControl control
-    db <- getDB $ volumeControl control
-    sw <- getSw $ switchControl control
+    (lo, hi, val, db, sw) <- io $ withMixer mixerName $ \mixer -> do
+        control <- getControlByName mixer controlName
+        (lo, hi) <- liftMaybe $ getRange <$> volumeControl control
+        val <- getVal $ volumeControl control
+        db <- getDB $ volumeControl control
+        sw <- getSw $ switchControl control
+        return (lo, hi, val, db, sw)
     p <- liftMonitor $ liftM3 formatVol lo hi val
     b <- liftMonitor $ liftM3 formatVolBar lo hi val
     d <- getFormatDB opts db
@@ -138,18 +140,18 @@ runVolume mixerName controlName argv = do
     liftMonitor Nothing = unavailable
     liftMonitor (Just m) = m
 
-    getDB :: Maybe Volume -> Monitor (Maybe Integer)
+    getDB :: Maybe Volume -> IO (Maybe Integer)
     getDB Nothing = return Nothing
-    getDB (Just v) = io $ AE.catch (getChannel FrontLeft $ dB v)
-                                   (const $ return $ Just 0)
+    getDB (Just v) = AE.catch (getChannel FrontLeft $ dB v)
+                              (const $ return $ Just 0)
 
-    getVal :: Maybe Volume -> Monitor (Maybe Integer)
+    getVal :: Maybe Volume -> IO (Maybe Integer)
     getVal Nothing = return Nothing
-    getVal (Just v) = io $ getChannel FrontLeft $ value v
+    getVal (Just v) = getChannel FrontLeft $ value v
 
-    getSw :: Maybe Switch -> Monitor (Maybe Bool)
+    getSw :: Maybe Switch -> IO (Maybe Bool)
     getSw Nothing = return Nothing
-    getSw (Just s) = io $ getChannel FrontLeft s
+    getSw (Just s) = getChannel FrontLeft s
 
     getFormatDB :: VolumeOpts -> Maybe Integer -> Monitor String
     getFormatDB _ Nothing = unavailable
