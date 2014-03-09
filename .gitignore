@@ -9,3 +9,5 @@
 /web/index.html
 /web/releases.html
 /cabal-dev/
+.cabal-sandbox
+cabal.sandbox.config

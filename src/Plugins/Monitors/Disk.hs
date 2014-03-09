@@ -23,7 +23,8 @@ import Control.Exception (SomeException, handle)
 import Control.Monad (zipWithM)
 import qualified Data.ByteString.Lazy.Char8 as B
 import Data.List (isPrefixOf, find)
-import System.Directory (canonicalizePath)
+import Data.Maybe (catMaybes)
+import System.Directory (canonicalizePath, doesFileExist)
 
 diskIOConfig :: IO MConfig
 diskIOConfig = mkMConfig "" ["total", "read", "write",
@@ -40,11 +41,15 @@ type DevDataRef = IORef [(DevName, [Float])]
 mountedDevices :: [String] -> IO [(DevName, Path)]
 mountedDevices req = do
   s <- B.readFile "/etc/mtab"
-  parse `fmap` mapM canon (devs s)
+  parse `fmap` mapM mbcanon (devs s)
   where
+    mbcanon (d, p) = doesFileExist d >>= \e ->
+                     if e
+                        then Just `fmap` canon (d,p)
+                        else return Nothing
     canon (d, p) = do {d' <- canonicalizePath d; return (d', p)}
     devs = filter isDev . map (firstTwo . B.words) . B.lines
-    parse = map undev . filter isReq
+    parse = map undev . filter isReq . catMaybes
     firstTwo (a:b:_) = (B.unpack a, B.unpack b)
     firstTwo _ = ("", "")
     isDev (d, _) = "/dev/" `isPrefixOf` d
