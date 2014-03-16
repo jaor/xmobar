@@ -19,13 +19,17 @@ import qualified Data.ByteString.Lazy.Char8 as B
 import Data.List (isPrefixOf, transpose, unfoldr)
 import Data.IORef (IORef, newIORef, readIORef, writeIORef)
 
+variables :: [String]
+variables = ["bar", "vbar","total","user","nice","system","idle"]
+vNum :: Int
+vNum = length variables
+
 multiCpuConfig :: IO MConfig
 multiCpuConfig =
   mkMConfig "Cpu: <total>%" $
-            ["auto" ++ k | k <- monitors] ++
+            ["auto" ++ k | k <- variables] ++
             [ k ++ n     | n <- "" : map show [0 :: Int ..]
-                         , k <- monitors]
-    where monitors = ["bar","total","user","nice","system","idle"]
+                         , k <- variables]
 
 type CpuDataRef = IORef [[Float]]
 
@@ -56,20 +60,21 @@ formatMultiCpus xs = fmap concat $ mapM formatCpu xs
 
 formatCpu :: [Float] -> Monitor [String]
 formatCpu xs
-  | length xs < 4 = showPercentsWithColors $ replicate 6 0.0
+  | length xs < 4 = showPercentsWithColors $ replicate vNum 0.0
   | otherwise = let t = foldr (+) 0 $ take 3 xs
                 in do b <- showPercentBar (100 * t) t
+                      h <- showVerticalBar (100 * t) t
                       ps <- showPercentsWithColors (t:xs)
-                      return (b:ps)
+                      return (b:h:ps)
 
 splitEvery :: (Eq a) => Int -> [a] -> [[a]]
 splitEvery n = unfoldr (\x -> if null x then Nothing else Just $ splitAt n x)
 
 groupData :: [String] -> [[String]]
-groupData = transpose . tail . splitEvery 6
+groupData = transpose . tail . splitEvery vNum
 
 formatAutoCpus :: [String] -> Monitor [String]
-formatAutoCpus [] = return $ replicate 6 ""
+formatAutoCpus [] = return $ replicate vNum ""
 formatAutoCpus xs = return $ map unwords (groupData xs)
 
 runMultiCpu :: CpuDataRef -> [String] -> Monitor String

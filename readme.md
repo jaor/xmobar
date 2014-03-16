@@ -672,9 +672,9 @@ something like:
   `%eth0%`
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
-  `dev`, `rx`, `tx`, `rxbar`, `txbar`. Reception and transmission
-  rates (`rx` and `tx`) are displayed in Kbytes per second, and you
-  can set the `-S` to "True" to make them displayed with units (the
+  `dev`, `rx`, `tx`, `rxbar`, `rxvbar`, `txbar`, `txvbar`. Reception and
+  transmission rates (`rx` and `tx`) are displayed in Kbytes per second,
+  and you can set the `-S` to "True" to make them displayed with units (the
   string "Kb/s").
 - Default template: `<dev>: <rx>KB|<tx>KB`
 
@@ -684,9 +684,9 @@ something like:
 - Aliases to "dynnetwork"
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
-  `dev`, `rx`, `tx`, `rxbar`, `txbar`. Reception and transmission
-  rates (`rx` and `tx`) are displayed in Kbytes per second, and you
-  can set the `-S` to "True" to make them displayed with units (the
+  `dev`, `rx`, `tx`, `rxbar`, `rxvbar`, `txbar`, `txvbar`. Reception and
+  transmission rates (`rx` and `tx`) are displayed in Kbytes per second,
+  and you can set the `-S` to "True" to make them displayed with units (the
   string "Kb/s").
 - Default template: `<dev>: <rx>KB|<tx>KB`
 
@@ -696,7 +696,7 @@ something like:
   "wlan0" []` can be used as `%wlan0wi%`
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
-            `essid`, `quality`, `qualitybar`
+            `essid`, `quality`, `qualitybar`, `qualityvbar`
 - Default template: `<essid> <quality>`
 - Requires the C library [iwlib] (part of the wireless tools suite)
   installed in your system. In addition, to activate this plugin you
@@ -708,7 +708,7 @@ something like:
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
              `total`, `free`, `buffer`, `cache`, `rest`, `used`,
-             `usedratio`, `usedbar`, `freeratio`, `freebar`
+             `usedratio`, `usedbar`, `usedvbar`, `freeratio`, `freebar`, `freevbar`
 - Default template: `Mem: <usedratio>% (<cache>M)`
 
 ### `Swap Args RefreshRate`
@@ -724,7 +724,7 @@ something like:
 - Aliases to `cpu`
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
-	    `total`, `bar`, `user`, `nice`, `system`, `idle`, `iowait`
+	    `total`, `bar`, `vbar`, `user`, `nice`, `system`, `idle`, `iowait`
 - Default template: `Cpu: <total>%`
 
 ### `MultiCpu Args RefreshRate`
@@ -732,9 +732,9 @@ something like:
 - Aliases to `multicpu`
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
-	    `autototal`, `autobar`, `autouser`, `autonice`,
-	    `autosystem`, `autoidle`, `total`, `bar`, `user`, `nice`,
-	    `system`, `idle`, `total0`, `bar0`, `user0`, `nice0`,
+	    `autototal`, `autobar`, `autovbar`, `autouser`, `autonice`,
+	    `autosystem`, `autoidle`, `total`, `bar`, `vbar`, `user`, `nice`,
+	    `system`, `idle`, `total0`, `bar0`, `vbar0`, `user0`, `nice0`,
 	    `system0`, `idle0`, ...
   The auto* variables automatically detect the number of CPUs on the system
   and display one entry for each.
@@ -767,7 +767,7 @@ something like:
     "AC/online")
 
 - Variables that can be used with the `-t`/`--template` argument:
-	    `left`, `leftbar`, `timeleft`, `watts`, `acstatus`
+	    `left`, `leftbar`, `leftvbar`, `timeleft`, `watts`, `acstatus`
 - Default template: `Batt: <watts>, <left>% / <timeleft>`
 - Example (note that you need "--" to separate regular monitor options from
   Battery's specific ones):
@@ -840,8 +840,9 @@ more than one battery.
 - Aliases to `disku`
 - Disks: list of pairs of the form (device or mount point, template),
   where the template can contain `<size>`, `<free>`, `<used>`, `<freep>` or
-  `<usedp>`, `<freebar>` or `<usedbar>` for total, free, used, free
-  percentage and used percentage of the given file system capacity.
+  `<usedp>`, `<freebar>`, `<freevbar>`, `<usedbar>` or `<usedvbar>` for total,
+  free, used, free percentage and used percentage of the given file system
+  capacity.
 - Args: default monitor arguments. `-t`/`--template` is ignored.
 - Default template: none (you must specify a template for each file system).
 - Example:
@@ -855,7 +856,9 @@ more than one battery.
 - Aliases to `diskio`
 - Disks: list of pairs of the form (device or mount point, template),
   where the template can contain `<total>`, `<read>`, `<write>` for total,
-  read and write speed, respectively.
+  read and write speed, respectively. There are also bar versions of each:
+  `<totalbar>`, `<totalvbar>`, `<readbar>`, `<readvbar>`, `<writebar>`, and
+  `<writevbar>`.
 - Args: default monitor arguments. `-t`/`--template` is ignored.
 - Default template: none (you must specify a template for each file system).
 - Example:
@@ -945,7 +948,7 @@ more than one battery.
     - `--highd` _number_ High threshold for dB. Defaults to -5.0.
     - `--lowd` _number_ Low threshold for dB. Defaults to -30.0.
 - Variables that can be used with the `-t`/`--template` argument:
-            `volume`, `volumebar`, `dB`, `status`
+            `volume`, `volumebar`, `volumevbar`, `dB`, `status`
 - Note that `dB` might only return 0 on your system. This is known
   to happen on systems with a pulseaudio backend.
 - Default template: `Vol: <volume>% <status>`
@@ -964,7 +967,7 @@ more than one battery.
   The environment variables `MPD_HOST` and `MPD_PORT` are used to configure the
   mpd server to communicate with.
 - Variables that can be used with the `-t`/`--template` argument:
-             `bar`, `state`, `statei`, `volume`, `length`,
+             `bar`, `vbar`, `state`, `statei`, `volume`, `length`,
              `lapsed`, `remaining`,
              `plength` (playlist length), `ppos` (playlist position),
              `name`, `artist`, `composer`, `performer`,
@@ -1071,7 +1074,7 @@ more than one battery.
     - `-M`: file with the maximum brightness (default:
        max_brightness)
 - Variables that can be used with the `-t`/`--template` argument:
-	    `hbar`, `percent`, `bar`
+	    `vbar`, `percent`, `bar`
 - Default template: `<percent>`
 - Example:
 

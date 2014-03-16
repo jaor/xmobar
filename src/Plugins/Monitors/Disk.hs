@@ -27,12 +27,14 @@ import Data.Maybe (catMaybes)
 import System.Directory (canonicalizePath, doesFileExist)
 
 diskIOConfig :: IO MConfig
-diskIOConfig = mkMConfig "" ["total", "read", "write",
-                             "totalbar", "readbar", "writebar"]
+diskIOConfig = mkMConfig "" ["total", "read", "write"
+                            ,"totalbar", "readbar", "writebar"
+                            ,"totalvbar", "readvbar", "writevbar"
+                            ]
 
 diskUConfig :: IO MConfig
 diskUConfig = mkMConfig ""
-              ["size", "free", "used", "freep", "usedp", "freebar", "usedbar"]
+              ["size", "free", "used", "freep", "usedp", "freebar", "freevbar", "usedbar", "usedvbar"]
 
 type DevName = String
 type Path = String
@@ -129,8 +131,9 @@ runDiskIO' :: (String, [Float]) -> Monitor String
 runDiskIO' (tmp, xs) = do
   s <- mapM (showWithColors speedToStr) xs
   b <- mapM (showLogBar 0.8) xs
+  vb <- mapM (showLogVBar 0.8) xs
   setConfigValue tmp template
-  parseTemplate $ s ++ b
+  parseTemplate $ s ++ b ++ vb
 
 runDiskIO :: DevDataRef -> [(String, String)] -> [String] -> Monitor String
 runDiskIO dref disks _ = do
@@ -167,8 +170,10 @@ runDiskU' tmp path = do
   s <- zipWithM showWithColors' strs [100, freep, 100 - freep]
   sp <- showPercentsWithColors [fr, 1 - fr]
   fb <- showPercentBar (fromIntegral freep) fr
+  fvb <- showVerticalBar (fromIntegral freep) fr
   ub <- showPercentBar (fromIntegral $ 100 - freep) (1 - fr)
-  parseTemplate $ s ++ sp ++ [fb, ub]
+  uvb <- showVerticalBar (fromIntegral $ 100 - freep) (1 - fr)
+  parseTemplate $ s ++ sp ++ [fb,fvb,ub,uvb]
   where ign = const (return [0, 0, 0]) :: SomeException -> IO [Integer]
 
 

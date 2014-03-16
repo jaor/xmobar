@@ -19,7 +19,7 @@ import IWlib
 
 wirelessConfig :: IO MConfig
 wirelessConfig =
-  mkMConfig "<essid> <quality>" ["essid", "quality", "qualitybar"]
+  mkMConfig "<essid> <quality>" ["essid", "quality", "qualitybar", "qualityvbar"]
 
 runWireless :: [String] -> Monitor String
 runWireless (iface:_) = do
@@ -33,5 +33,6 @@ runWireless (iface:_) = do
        then showPercentWithColors (qlty / 100)
        else showWithPadding ""
   qb <- showPercentBar qlty (qlty / 100)
-  parseTemplate [ep, q, qb]
+  qvb <- showVerticalBar qlty (qlty / 100)
+  parseTemplate [ep, q, qb, qvb]
 runWireless _ = getConfigValue naString

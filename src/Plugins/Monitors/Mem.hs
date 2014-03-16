@@ -20,7 +20,7 @@ import qualified Data.Map as M
 memConfig :: IO MConfig
 memConfig = mkMConfig
        "Mem: <usedratio>% (<cache>M)" -- template
-       ["usedbar", "freebar", "usedratio", "freeratio", "total",
+       ["usedbar", "usedvbar", "freebar", "freevbar", "usedratio", "freeratio", "total",
         "free", "buffer", "cache", "rest", "used"] -- available replacements
 
 fileMEM :: IO String
@@ -49,11 +49,13 @@ formatMem (r:fr:xs) =
     do let f = showDigits 0
            rr = 100 * r
        ub <- showPercentBar rr r
+       uvb <- showVerticalBar rr r
        fb <- showPercentBar (100 - rr) (1 - r)
+       fvb <- showVerticalBar (100 - rr) ( 1 - r)
        rs <- showPercentWithColors r
        fs <- showPercentWithColors fr
        s <- mapM (showWithColors f) xs
-       return (ub:fb:rs:fs:s)
+       return (ub:uvb:fb:fvb:rs:fs:s)
 formatMem _ = replicate 10 `fmap` getConfigValue naString
 
 runMem :: [String] -> Monitor String

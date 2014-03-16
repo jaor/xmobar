@@ -47,7 +47,9 @@ module Plugins.Monitors.Common (
                        , showPercentWithColors
                        , showPercentsWithColors
                        , showPercentBar
+                       , showVerticalBar
                        , showLogBar
+                       , showLogVBar
                        , showWithUnits
                        , takeDigits
                        , showDigits
@@ -63,6 +65,7 @@ import qualified Data.ByteString.Lazy.Char8 as B
 import Data.IORef
 import qualified Data.Map as Map
 import Data.List
+import Data.Char
 import Numeric
 import Text.ParserCombinators.Parsec
 import System.Console.GetOpt
@@ -449,6 +452,15 @@ showPercentBar v x = do
   s <- colorizeString v (take len $ cycle bf)
   return $ s ++ take (bw - len) (cycle bb)
 
+showVerticalBar :: Float -> Float -> Monitor String
+showVerticalBar v x = colorizeString v [convert $ 100 * x]
+  where convert :: Float -> Char
+        convert val
+          | t <= 9600 = ' '
+          | t > 9608 = chr 9608
+          | otherwise = chr t
+          where t = 9600 + ((round val) `div` 12)
+
 showLogBar :: Float -> Float -> Monitor String
 showLogBar f v = do
   h <- fromIntegral `fmap` getConfigValue high
@@ -459,3 +471,14 @@ showLogBar f v = do
                | x <= ll = 1 / bw
                | otherwise = f + logBase 2 (x / hh) / bw
   showPercentBar v $ choose v
+
+showLogVBar :: Float -> Float -> Monitor String
+showLogVBar f v = do
+  h <- fromIntegral `fmap` getConfigValue high
+  l <- fromIntegral `fmap` getConfigValue low
+  bw <- fromIntegral `fmap` getConfigValue barWidth
+  let [ll, hh] = sort [l, h]
+      choose x | x == 0.0 = 0
+               | x <= ll = 1 / bw
+               | otherwise = f + logBase 2 (x / hh) / bw
+  showVerticalBar v $ choose v

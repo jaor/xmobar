@@ -16,7 +16,6 @@ module Plugins.Monitors.Bright (brightConfig, runBright) where
 
 import Control.Exception (SomeException, handle)
 import qualified Data.ByteString.Lazy.Char8 as B
-import Data.Char
 import System.FilePath ((</>))
 import System.Posix.Files (fileExist)
 import System.Console.GetOpt
@@ -52,7 +51,7 @@ sysDir = "/sys/class/backlight/"
 
 brightConfig :: IO MConfig
 brightConfig = mkMConfig "<percent>" -- template
-                         ["hbar", "percent", "bar"] -- replacements
+                         ["vbar", "percent", "bar"] -- replacements
 
 data Files = Files { fCurr :: String
                    , fMax :: String
@@ -78,7 +77,7 @@ runBright args = do
     NoFiles -> return "hurz"
     _ -> fmtPercent c >>= parseTemplate
   where fmtPercent :: Float -> Monitor [String]
-        fmtPercent c = do r <- showHorizontalBar (100 * c)
+        fmtPercent c = do r <- showVerticalBar (100 * c) c
                           s <- showPercentWithColors c
                           t <- showPercentBar (100 * c) c
                           return [r,s,t]
@@ -92,14 +91,3 @@ readBright files = do
   where grab f = handle handler (fmap (read . B.unpack) $ B.readFile f)
         handler = const (return 0) :: SomeException -> IO Float
 
-showHorizontalBar :: Float -> Monitor String
-showHorizontalBar x = do
-  return $ [convert x]
-  where convert :: Float -> Char
-        convert val
-          | t <= 9600 = ' '
-          | t > 9608 = chr 9608
-          | otherwise = chr t
-          where
-            -- we scale from 0 to 100, we have 8 slots (9 elements), 100/8 = 12
-            t = 9600 + ((round val) `div` 12)

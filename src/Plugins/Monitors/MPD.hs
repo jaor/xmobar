@@ -22,7 +22,7 @@ import Control.Concurrent (threadDelay)
 
 mpdConfig :: IO MConfig
 mpdConfig = mkMConfig "MPD: <state>"
-              [ "bar", "state", "statei", "volume", "length"
+              [ "bar", "vbar", "state", "statei", "volume", "length"
               , "lapsed", "remaining", "plength", "ppos", "file"
               , "name", "artist", "composer", "performer"
               , "album", "title", "track", "genre"
@@ -82,11 +82,12 @@ mopts argv =
 
 parseMPD :: M.Response M.Status -> M.Response (Maybe M.Song) -> MOpts
             -> Monitor [String]
-parseMPD (Left e) _ _ = return $ show e:replicate 18 ""
+parseMPD (Left e) _ _ = return $ show e:replicate 19 ""
 parseMPD (Right st) song opts = do
   songData <- parseSong song
   bar <- showPercentBar (100 * b) b
-  return $ [bar, ss, si, vol, len, lap, remain, plen, ppos] ++ songData
+  vbar <- showVerticalBar (100 * b) b
+  return $ [bar, vbar, ss, si, vol, len, lap, remain, plen, ppos] ++ songData
   where s = M.stState st
         ss = show s
         si = stateGlyph s opts

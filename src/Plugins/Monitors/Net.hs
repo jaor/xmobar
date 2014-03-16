@@ -53,7 +53,7 @@ instance Ord NetDev where
 netConfig :: IO MConfig
 netConfig = mkMConfig
     "<dev>: <rx>KB|<tx>KB"      -- template
-    ["dev", "rx", "tx", "rxbar", "txbar"]     -- available replacements
+    ["dev", "rx", "tx", "rxbar", "rxvbar", "txbar", "txvbar"]     -- available replacements
 
 operstateDir :: String -> FilePath
 operstateDir d = "/sys/class/net" </> d </> "operstate"
@@ -97,22 +97,23 @@ findNetDev dev = do
         isDev (NI d) = d == dev
         isDev NA = False
 
-formatNet :: Float -> Monitor (String, String)
+formatNet :: Float -> Monitor (String, String, String)
 formatNet d = do
     s <- getConfigValue useSuffix
     dd <- getConfigValue decDigits
     let str = if s then (++"Kb/s") . showDigits dd else showDigits dd
     b <- showLogBar 0.9 d
+    vb <- showLogVBar 0.9 d
     x <- showWithColors str d
-    return (x, b)
+    return (x, b, vb)
 
 printNet :: NetDev -> Monitor String
 printNet nd =
   case nd of
     ND d r t -> do
-        (rx, rb) <- formatNet r
-        (tx, tb) <- formatNet t
-        parseTemplate [d,rx,tx,rb,tb]
+        (rx, rb, rvb) <- formatNet r
+        (tx, tb, tvb) <- formatNet t
+        parseTemplate [d,rx,tx,rb,rvb,tb,tvb]
     NI _ -> return ""
     NA -> getConfigValue naString
 

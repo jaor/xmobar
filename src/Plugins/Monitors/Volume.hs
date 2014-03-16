@@ -24,7 +24,7 @@ import System.Console.GetOpt
 
 volumeConfig :: IO MConfig
 volumeConfig = mkMConfig "Vol: <volume>% <status>"
-                         ["volume", "volumebar", "dB","status"]
+                         ["volume", "volumebar", "volumevbar", "dB","status"]
 
 
 data VolumeOpts = VolumeOpts
@@ -76,6 +76,10 @@ formatVolBar :: Integer -> Integer -> Integer -> Monitor String
 formatVolBar lo hi v =
     showPercentBar (100 * x) x where x = percent v lo hi
 
+formatVolVBar :: Integer -> Integer -> Integer -> Monitor String
+formatVolVBar lo hi v =
+    showVerticalBar (100 * x) x where x = percent v lo hi
+
 switchHelper :: VolumeOpts
              -> (VolumeOpts -> Maybe String)
              -> (VolumeOpts -> String)
@@ -119,9 +123,10 @@ runVolume mixerName controlName argv = do
         return (lo, hi, val, db, sw)
     p <- liftMonitor $ liftM3 formatVol lo hi val
     b <- liftMonitor $ liftM3 formatVolBar lo hi val
+    v <- liftMonitor $ liftM3 formatVolVBar lo hi val
     d <- getFormatDB opts db
     s <- getFormatSwitch opts sw
-    parseTemplate [p, b, d, s]
+    parseTemplate [p, b, v, d, s]
 
   where
 

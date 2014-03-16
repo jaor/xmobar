@@ -80,7 +80,7 @@ sysDir = "/sys/class/power_supply"
 battConfig :: IO MConfig
 battConfig = mkMConfig
        "Batt: <watts>, <left>% / <timeleft>" -- template
-       ["leftbar", "left", "acstatus", "timeleft", "watts"] -- replacements
+       ["leftbar", "leftvbar", "left", "acstatus", "timeleft", "watts"] -- replacements
 
 data Files = Files
   { fFull :: String
@@ -174,7 +174,8 @@ runBatt' bfs args = do
           let x' = minimum [1, x]
           p <- showPercentWithColors x'
           b <- showPercentBar (100 * x') x'
-          return [b, p]
+          vb <- showVerticalBar (100 * x') x'
+          return [b, vb, p]
         fmtWatts x o s d = do
           ws <- showWithPadding $ showDigits d x ++ (if s then "W" else "")
           return $ color x o ws

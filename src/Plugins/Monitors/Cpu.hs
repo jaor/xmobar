@@ -22,7 +22,7 @@ import Data.IORef (IORef, newIORef, readIORef, writeIORef)
 cpuConfig :: IO MConfig
 cpuConfig = mkMConfig
        "Cpu: <total>%"
-       ["bar","total","user","nice","system","idle","iowait"]
+       ["bar","vbar","total","user","nice","system","idle","iowait"]
 
 type CpuDataRef = IORef [Float]
 
@@ -43,12 +43,13 @@ parseCpu cref =
        return percent
 
 formatCpu :: [Float] -> Monitor [String]
-formatCpu [] = return $ replicate 6 ""
+formatCpu [] = return $ replicate 8 ""
 formatCpu xs = do
   let t = sum $ take 3 xs
   b <- showPercentBar (100 * t) t
+  v <- showVerticalBar (100 * t) t
   ps <- showPercentsWithColors (t:xs)
-  return (b:ps)
+  return (b:v:ps)
 
 runCpu :: CpuDataRef -> [String] -> Monitor String
 runCpu cref _ =
