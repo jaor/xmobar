@@ -16,7 +16,8 @@ module Plugins.Monitors.Weather where
 
 import Plugins.Monitors.Common
 
-import Control.Exception (catch, IOException)
+import qualified Control.Exception as CE
+
 import Network.HTTP
 
 import Text.ParserCombinators.Parsec
@@ -133,8 +134,8 @@ stationUrl station = defUrl ++ station ++ ".TXT"
 getData :: String -> IO String
 getData station = do
     let request = getRequest (stationUrl station)
-    catch (simpleHTTP request >>= getResponseBody) errHandler
-    where errHandler :: IOException -> IO String
+    CE.catch (simpleHTTP request >>= getResponseBody) errHandler
+    where errHandler :: CE.IOException -> IO String
           errHandler _ = return "<Could not retrieve data>"
 
 formatWeather :: [WeatherInfo] -> Monitor String
@@ -154,8 +155,8 @@ weatherReady :: [String] -> Monitor Bool
 weatherReady str = do
     let station = head str
         request = headRequest (stationUrl station)
-    io $ catch (simpleHTTP request >>= checkResult) errHandler
-    where errHandler :: IOException -> IO Bool
+    io $ CE.catch (simpleHTTP request >>= checkResult) errHandler
+    where errHandler :: CE.IOException -> IO Bool
           errHandler _ = return False
           checkResult result = do
             case result of
