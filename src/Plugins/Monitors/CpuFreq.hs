@@ -36,4 +36,4 @@ runCpuFreq _ = do
       fmt x | x < 1 = (show (round (x * 1000) :: Integer)) ++ "MHz"
             | otherwise = (show x) ++ "GHz"
   failureMessage <- getConfigValue naString
-  checkedDataRetrieval failureMessage path Nothing (/divisor) fmt
+  checkedDataRetrieval failureMessage [path] Nothing (/divisor) fmt

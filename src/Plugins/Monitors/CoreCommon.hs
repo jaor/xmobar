@@ -26,10 +26,11 @@ import Plugins.Monitors.Common
 import System.Directory
 
 checkedDataRetrieval :: (Ord a, Num a)
-                     => String -> [String] -> Maybe (String, String -> Int)
+                     => String -> [[String]] -> Maybe (String, String -> Int)
                      -> (Double -> a) -> (a -> String) -> Monitor String
-checkedDataRetrieval msg path lbl trans fmt = liftM (fromMaybe msg) $
-                                              retrieveData path lbl trans fmt
+checkedDataRetrieval msg paths lbl trans fmt =
+  liftM (fromMaybe msg . listToMaybe . catMaybes) $
+    mapM (\p -> retrieveData p lbl trans fmt) paths
 
 retrieveData :: (Ord a, Num a)
              => [String] -> Maybe (String, String -> Int)
