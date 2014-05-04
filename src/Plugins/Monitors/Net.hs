@@ -67,7 +67,7 @@ existingDevs = getDirectoryContents "/sys/class/net" >>= filterM isDev
 isUp :: String -> IO Bool
 isUp d = do
   operstate <- B.readFile (operstateDir d)
-  return $ "up" == (B.unpack . head . B.lines) operstate
+  return $ "down" /= (B.unpack . head . B.lines) operstate
 
 readNetDev :: [String] -> IO NetDev
 readNetDev (d:x:y:_) = do
