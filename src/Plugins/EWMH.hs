@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -w #-}
-{-# LANGUAGE CPP, RecordWildCards, NamedFieldPuns, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE CPP, NamedFieldPuns, GeneralizedNewtypeDeriving #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -58,7 +58,7 @@ instance Exec EWMH where
             liftIO $ nextEvent' d ep
             e <- liftIO $ getEvent ep
             case e of
-                PropertyEvent { ev_atom = a, ev_window = w } -> do
+                PropertyEvent { ev_atom = a, ev_window = w } ->
                     case lookup a handlers' of
                         Just f -> f w
                         _      -> return ()
@@ -95,7 +95,7 @@ fmt e (Workspaces opts) = sep " "
     attrs = [(n, [s | (s, b) <- stats i, b]) | (i, n) <- zip [0 ..] (desktopNames e)]
     nonEmptys = Set.unions . map desktops . Map.elems $ clients e
 
-modifier :: Modifier -> (String -> String)
+modifier :: Modifier -> String -> String
 modifier Hide = const ""
 modifier (Color fg bg) = \x -> concat ["<fc=", fg, if null bg then "" else "," ++ bg
                                       , ">", x, "</fc>"]
@@ -227,9 +227,9 @@ updateClientList _ = do
                         dels = Map.difference cl cl'
                         new = Map.difference cl' cl
                     modify (\s -> s { clients = Map.union (Map.intersection cl cl') cl'})
-                    mapM_ unmanage (map fst $ Map.toList dels)
-                    mapM_ listen (map fst $ Map.toList cl')
-                    mapM_ update (map fst $ Map.toList new)
+                    mapM_ (unmanage . fst) (Map.toList dels)
+                    mapM_ (listen . fst)   (Map.toList cl')
+                    mapM_ (update . fst)   (Map.toList new)
         _       -> return ()
  where
     unmanage w = asks display >>= \d -> liftIO $ selectInput d w 0

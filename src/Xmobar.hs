@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable, CPP #-}
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Xmobar
@@ -36,13 +36,14 @@ import Graphics.X11.Xinerama
 import Graphics.X11.Xrandr
 
 import Control.Arrow ((&&&))
+import Control.Applicative ((<$>))
 import Control.Monad.Reader
 import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Exception (handle, SomeException(..))
 import Data.Bits
 import Data.Map hiding (foldr, map, filter)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust)
 
 import Bitmap
 import Config
@@ -204,10 +205,11 @@ eventLoop tv xc@(XConf d r w fs is cfg) as signal = do
           case position ocfg of
             OnScreen n o -> do
               srs <- getScreenInfo d
-              if n == length srs then
-                  return (ocfg {position = OnScreen 1 o})
-                else
-                  return (ocfg {position = OnScreen (n+1) o})
+              return (if n == length srs
+                       then
+                        (ocfg {position = OnScreen 1 o})
+                       else
+                        (ocfg {position = OnScreen (n+1) o}))
             o ->
               return (ocfg {position = OnScreen 1 o})
 
@@ -254,7 +256,7 @@ updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
       getCoords (Text s,_,a) = textWidth d fs s >>= \tw -> return (a, 0, fi tw)
       getCoords (Icon s,_,a) = return (a, 0, fi $ iconW s)
       partCoord off xs = map (\(a, x, x') -> (fromJust a, x, x')) $
-                         filter (\(a, _,_) -> a /= Nothing) $
+                         filter (\(a, _,_) -> isJust a) $
                          scanl (\(_,_,x') (a,_,w') -> (a, x', x' + w')) (Nothing, 0, off) xs
 
       totSLen              = foldr (\(_,_,len) -> (+) len) 0
@@ -265,7 +267,7 @@ updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
                                R -> remWidth xs
                                L -> offs
 
-  fmap concat $ mapM (\(a,xs) -> fmap (\xs' -> partCoord (offset a xs') xs') $ strLn xs) $
+  fmap concat $ mapM (\(a,xs) -> (\xs' -> partCoord (offset a xs') xs') <$> strLn xs) $
                 zip [L,C,R] [left,center,right]
 
 -- $print

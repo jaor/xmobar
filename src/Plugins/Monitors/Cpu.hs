@@ -38,8 +38,8 @@ parseCpu cref =
        b <- cpuData
        writeIORef cref b
        let dif = zipWith (-) b a
-           tot = fromIntegral $ foldr (+) 0 dif
-           percent = map (/ tot) (map fromIntegral dif)
+           tot = fromIntegral $ sum dif
+           percent = map ((/ tot) . fromIntegral) dif
        return percent
 
 formatCpu :: [Float] -> Monitor [String]

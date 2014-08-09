@@ -34,7 +34,7 @@ instance Exec StdinReader where
     s <- handle (\(SomeException e) -> do hPrint stderr e; return "")
                 (hGetLineSafe stdin)
     cb $ escape stdinReader s
-    eof <- hIsEOF stdin
+    eof <- isEOF
     if eof
       then exitImmediately ExitSuccess
       else start stdinReader cb

@@ -14,7 +14,7 @@
 
 module Plugins.BufferedPipeReader where
 
-import Control.Monad(forM_, when)
+import Control.Monad(forM_, when, void)
 import Control.Concurrent
 import Control.Concurrent.STM
 import System.IO
@@ -66,7 +66,7 @@ instance Exec BufferedPipeReader where
 
             where
             sfork :: IO () -> IO ()
-            sfork f = forkIO f >> return ()
+            sfork f = void (forkIO f)
 
             update :: IO (Int, Bool, String, TVar Bool)
             update = atomically $ do

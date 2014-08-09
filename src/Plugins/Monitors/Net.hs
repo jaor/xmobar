@@ -22,7 +22,7 @@ import Plugins.Monitors.Common
 
 import Data.IORef (IORef, newIORef, readIORef, writeIORef)
 import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
-import Control.Monad (forM, filterM)
+import Control.Monad (forM, filterM, liftM)
 import System.Directory (getDirectoryContents, doesFileExist)
 import System.FilePath ((</>))
 
@@ -147,11 +147,11 @@ runNet :: NetDevRef -> String -> [String] -> Monitor String
 runNet nref i _ = io (parseNet nref i) >>= printNet
 
 parseNets :: [(NetDevRef, String)] -> IO [NetDev]
-parseNets = mapM $ \(ref, i) -> parseNet ref i
+parseNets = mapM $ uncurry parseNet
 
 runNets :: [(NetDevRef, String)] -> [String] -> Monitor String
 runNets refs _ = io (parseActive refs) >>= printNet
-    where parseActive refs' = parseNets refs' >>= return . selectActive
+    where parseActive refs' = liftM selectActive (parseNets refs') 
           selectActive = maximum
 
 startNet :: String -> [String] -> Int -> (String -> IO ()) -> IO ()

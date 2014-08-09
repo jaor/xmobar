@@ -35,10 +35,10 @@ import Graphics.X11.Xlib
 data DynPixel = DynPixel Bool Pixel
 
 initColor :: Display -> String -> IO DynPixel
-initColor dpy c = handle black $ (initColor' dpy c)
+initColor dpy c = handle black $ initColor' dpy c
   where
     black :: SomeException -> IO DynPixel
-    black = (const . return $ DynPixel False (blackPixel dpy $ defaultScreen dpy))
+    black = const . return $ DynPixel False (blackPixel dpy $ defaultScreen dpy)
 
 type ColorCache = [(String, Color)]
 {-# NOINLINE colorCache #-}

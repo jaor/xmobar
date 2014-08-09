@@ -16,6 +16,7 @@
 module Window where
 
 import Prelude
+import Control.Applicative ((<$>))
 import Control.Monad (when, unless)
 import Graphics.X11.Xlib hiding (textExtents, textWidth)
 import Graphics.X11.Xlib.Extras
@@ -190,5 +191,5 @@ showWindow r c d w = do
     sync d False
 
 isMapped :: Display -> Window -> IO Bool
-isMapped d w = fmap ism $ getWindowAttributes d w
+isMapped d w = ism <$> getWindowAttributes d w
     where ism (WindowAttributes { wa_map_state = wms }) = wms /= waIsUnmapped

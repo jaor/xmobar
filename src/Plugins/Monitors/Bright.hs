@@ -14,6 +14,7 @@
 
 module Plugins.Monitors.Bright (brightConfig, runBright) where
 
+import Control.Applicative ((<$>))
 import Control.Exception (SomeException, handle)
 import qualified Data.ByteString.Lazy.Char8 as B
 import System.FilePath ((</>))
@@ -60,12 +61,12 @@ data Files = Files { fCurr :: String
 
 brightFiles :: BrightOpts -> IO Files
 brightFiles opts = do
-  is_curr <- fileExist $ (fCurr files)
-  is_max  <- fileExist $ (fCurr files)
-  if is_curr && is_max then return files else return NoFiles
-  where prefix = sysDir </> (subDir opts)
-        files = Files { fCurr = prefix </> (currBright opts)
-                      , fMax = prefix </> (maxBright opts)
+  is_curr <- fileExist $ fCurr files
+  is_max  <- fileExist $ fCurr files
+  return (if is_curr && is_max then files else NoFiles)
+  where prefix = sysDir </> subDir opts
+        files = Files { fCurr = prefix </> currBright opts
+                      , fMax = prefix </> maxBright opts
                       }
 
 runBright :: [String] ->  Monitor String
@@ -85,9 +86,9 @@ runBright args = do
 readBright :: Files -> IO Float
 readBright NoFiles = return 0
 readBright files = do
-  currVal<- grab $ (fCurr files)
-  maxVal <- grab $ (fMax files)
-  return $ (currVal / maxVal)
-  where grab f = handle handler (fmap (read . B.unpack) $ B.readFile f)
+  currVal<- grab $ fCurr files
+  maxVal <- grab $ fMax files
+  return (currVal / maxVal)
+  where grab f = handle handler (read . B.unpack <$> B.readFile f)
         handler = const (return 0) :: SomeException -> IO Float
 

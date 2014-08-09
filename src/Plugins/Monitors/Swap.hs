@@ -33,8 +33,8 @@ parseMEM =
                | l /= [] = head l !! i
                | otherwise = B.empty
            fs s l
-               | l == []    = False
-               | otherwise  = head l == B.pack s
+               | null l    = False
+               | otherwise = head l == B.pack s
            get_data s = flip (/) 1024 . read . B.unpack . li 1 . filter (fs s)
            st   = map B.words . B.lines $ file
            tot  = get_data "SwapTotal:" st

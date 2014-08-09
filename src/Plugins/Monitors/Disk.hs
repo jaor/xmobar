@@ -63,10 +63,10 @@ diskDevices req = do
   s <- B.readFile "/proc/diskstats"
   parse `fmap` mapM canon (devs s)
   where
-    canon (d, p) = do {d' <- canonicalizePath (d); return (d', p)}
+    canon (d, p) = do {d' <- canonicalizePath d; return (d', p)}
     devs = map (third . B.words) . B.lines
     parse = map undev . filter isReq
-    third (_:_:c:_) = ("/dev/" ++ (B.unpack c), B.unpack c)
+    third (_:_:c:_) = ("/dev/" ++ B.unpack c, B.unpack c)
     third _ = ("", "")
     isReq (d, p) = p `elem` req || drop 5 d `elem` req
     undev (d, f) = (drop 5 d, f)

@@ -105,7 +105,7 @@ batteryFiles bat =
   do is_charge <- exists "charge_now"
      is_energy <- if is_charge then return False else exists "energy_now"
      is_power <- exists "power_now"
-     plain <- if is_charge then exists "charge_full" else exists "energy_full"
+     plain <- exists (if is_charge then "charge_full" else "energy_full")
      let cf = if is_power then "power_now" else "current_now"
          sf = if plain then "" else "_design"
      return $ case (is_charge, is_energy) of
@@ -150,8 +150,9 @@ readBatteries opts bfs =
            time = if idle then 0 else sum $ map time' bats
            mwatts = if idle then 1 else sign * watts
            time' b = (if ac then full b - now b else now b) / mwatts
-           acstr = if idle then idleString opts else
-                     if ac then onString opts else offString opts
+           acstr | idle      = idleString opts
+                 | ac        = onString opts
+                 | otherwise = offString opts
        return $ if isNaN left then NA else Result left watts time acstr
 
 runBatt :: [String] -> Monitor String

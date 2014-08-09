@@ -41,7 +41,7 @@ data Mail = Mail [(String, FilePath)] String
 instance Exec Mail where
     alias (Mail _ a) = a
 #ifndef INOTIFY
-    start _ _ = do
+    start _ _ =
         hPutStrLn stderr $ "Warning: xmobar is not compiled with -fwith_inotify,"
                         ++ " but the Mail plugin requires it."
 #else

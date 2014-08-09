@@ -68,7 +68,7 @@ pTime = do y <- getNumbersAsString
            char ' '
            (h:hh:mi:mimi) <- getNumbersAsString
            char ' '
-           return (y, m, d ,([h]++[hh]++":"++[mi]++mimi))
+           return (y, m, d ,[h]++[hh]++":"++[mi]++mimi)
 
 pTemp :: Parser (Int, Int)
 pTemp = do let num = digit <|> char '-' <|> char '.'
@@ -76,10 +76,10 @@ pTemp = do let num = digit <|> char '-' <|> char '.'
            manyTill anyChar $ char '('
            c <- manyTill num $ char ' '
            skipRestOfLine
-           return $ (floor (read c :: Double), floor (read f :: Double))
+           return (floor (read c :: Double), floor (read f :: Double))
 
 pRh :: Parser Int
-pRh = do s <- manyTill digit $ (char '%' <|> char '.')
+pRh = do s <- manyTill digit (char '%' <|> char '.')
          return $ read s
 
 pPressure :: Parser Int
@@ -123,7 +123,7 @@ parseData =
        skipTillString "Pressure (altimeter): "
        p <- pPressure
        manyTill skipRestOfLine eof
-       return $ [WI st ss y m d h w v sk tC tF dp rh p]
+       return [WI st ss y m d h w v sk tC tF dp rh p]
 
 defUrl :: String
 defUrl = "http://weather.noaa.gov/pub/data/observations/metar/decoded/"
@@ -139,7 +139,7 @@ getData station = do
           errHandler _ = return "<Could not retrieve data>"
 
 formatWeather :: [WeatherInfo] -> Monitor String
-formatWeather [(WI st ss y m d h w v sk tC tF dp r p)] =
+formatWeather [WI st ss y m d h w v sk tC tF dp r p] =
     do cel <- showWithColors show tC
        far <- showWithColors show tF
        parseTemplate [st, ss, y, m, d, h, w, v, sk, cel, far, dp, show r , show p ]
@@ -158,10 +158,10 @@ weatherReady str = do
     io $ CE.catch (simpleHTTP request >>= checkResult) errHandler
     where errHandler :: CE.IOException -> IO Bool
           errHandler _ = return False
-          checkResult result = do
+          checkResult result =
             case result of
                 Left _ -> return False
-                Right response -> do
+                Right response ->
                     case rspCode response of
                         -- Permission or network errors are failures; anything
                         -- else is recoverable.

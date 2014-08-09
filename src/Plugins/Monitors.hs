@@ -118,7 +118,7 @@ instance Exec Monitors where
     alias (DiskU _ _ _) = "disku"
     alias (DiskIO _ _ _) = "diskio"
     alias (Uptime _ _) = "uptime"
-    alias (CatInt n _ _ _) = "cat" ++ (show n)
+    alias (CatInt n _ _ _) = "cat" ++ show n
 #ifdef IWLIB
     alias (Wireless i _ _) = i ++ "wi"
 #endif

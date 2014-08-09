@@ -27,8 +27,8 @@ import Data.Char (isDigit)
 coreTempConfig :: IO MConfig
 coreTempConfig = mkMConfig
        "Temp: <core0>C" -- template
-       (zipWith (++) (repeat "core") (map show [0 :: Int ..])) -- available
-                                                               -- replacements
+       (map ((++) "core" . show) [0 :: Int ..]) -- available
+                                                -- replacements
 
 -- |
 -- Function retrieves monitor string holding the core temperature
@@ -39,7 +39,7 @@ runCoreTemp _ = do
    failureMessage <- getConfigValue naString
    let path = ["/sys/bus/platform/devices/coretemp.", "/temp", "_input"]
        path' = ["/sys/bus/platform/devices/coretemp.", "/hwmon/hwmon", "/temp", "_input"]
-       lbl  = Just ("_label", read . (dropWhile (not . isDigit)))
+       lbl  = Just ("_label", read . dropWhile (not . isDigit))
        divisor = 1e3 :: Double
        show' = showDigits (max 0 dn)
    checkedDataRetrieval failureMessage [path, path'] lbl (/divisor) show'

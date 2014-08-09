@@ -37,7 +37,7 @@ import System.Exit
 import System.Environment
 import System.FilePath ((</>))
 import System.Posix.Files
-import Control.Monad (unless)
+import Control.Monad (unless, liftM)
 
 import Signal (setupSignalHandler)
 
@@ -94,13 +94,13 @@ xdgConfigDir :: IO String
 xdgConfigDir = do env <- getEnvironment
                   case lookup "XDG_CONFIG_HOME" env of
                        Just val -> return val
-                       Nothing  -> getHomeDirectory >>= return . (</> ".config")
+                       Nothing  -> liftM (</> ".config") getHomeDirectory
 
 xmobarConfigDir :: IO FilePath
-xmobarConfigDir = xdgConfigDir >>= return . (</> "xmobar")
+xmobarConfigDir = liftM (</> "xmobar") xdgConfigDir
 
 getXdgConfigFile :: IO FilePath
-getXdgConfigFile = xmobarConfigDir >>= return . (</> "xmobarrc")
+getXdgConfigFile = liftM (</> "xmobarrc") xmobarConfigDir
 
 -- | Read default configuration file or load the default config
 readDefaultConfig :: IO (Config,[String])

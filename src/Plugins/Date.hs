@@ -21,6 +21,7 @@ module Plugins.Date (Date(..)) where
 import Plugins
 
 import System.Locale
+import Control.Monad (liftM)
 import Data.Time
 
 data Date = Date String String Int
@@ -32,4 +33,4 @@ instance Exec Date where
     rate  (Date _ _ r) = r
 
 date :: String -> IO String
-date format = getZonedTime >>= return . formatTime defaultTimeLocale format
+date format = liftM (formatTime defaultTimeLocale format) getZonedTime

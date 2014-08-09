@@ -15,6 +15,7 @@
 module Plugins.Monitors.MultiCpu (startMultiCpu) where
 
 import Plugins.Monitors.Common
+import Control.Applicative ((<$>))
 import qualified Data.ByteString.Lazy.Char8 as B
 import Data.List (isPrefixOf, transpose, unfoldr)
 import Data.IORef (IORef, newIORef, readIORef, writeIORef)
@@ -52,16 +53,16 @@ parseCpuData cref =
 percent :: [Float] -> [Float] -> [Float]
 percent b a = if tot > 0 then map (/ tot) $ take 4 dif else [0, 0, 0, 0]
   where dif = zipWith (-) b a
-        tot = foldr (+) 0 dif
+        tot = sum dif
 
 formatMultiCpus :: [[Float]] -> Monitor [String]
 formatMultiCpus [] = return []
-formatMultiCpus xs = fmap concat $ mapM formatCpu xs
+formatMultiCpus xs = concat <$> mapM formatCpu xs
 
 formatCpu :: [Float] -> Monitor [String]
 formatCpu xs
   | length xs < 4 = showPercentsWithColors $ replicate vNum 0.0
-  | otherwise = let t = foldr (+) 0 $ take 3 xs
+  | otherwise = let t = sum $ take 3 xs
                 in do b <- showPercentBar (100 * t) t
                       h <- showVerticalBar (100 * t) t
                       ps <- showPercentsWithColors (t:xs)

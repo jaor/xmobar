@@ -71,7 +71,7 @@ data MBox = MBox [(String, FilePath, String)] [String] String
 instance Exec MBox where
   alias (MBox _ _ a) = a
 #ifndef INOTIFY
-  start _ _ = do
+  start _ _ =
     hPutStrLn stderr $ "Warning: xmobar is not compiled with -fwith_inotify" ++
           " but the MBox plugin requires it"
 #else

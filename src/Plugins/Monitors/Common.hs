@@ -60,6 +60,7 @@ module Plugins.Monitors.Common (
                        ) where
 
 
+import Control.Applicative ((<$>))
 import Control.Monad.Reader
 import qualified Data.ByteString.Lazy.Char8 as B
 import Data.IORef
@@ -112,7 +113,7 @@ mods s m =
 
 setConfigValue :: a -> Selector a -> Monitor ()
 setConfigValue v s =
-       mods s (\_ -> v)
+       mods s (const v)
 
 getConfigValue :: Selector a -> Monitor a
 getConfigValue = sel
@@ -342,7 +343,7 @@ combine m ((s,ts,ss):xs) =
     do next <- combine m xs
        str <- case Map.lookup ts m of
          Nothing -> return $ "<" ++ ts ++ ">"
-         Just  r -> let f "" = r; f n = n; in fmap f $ parseTemplate' r m
+         Just  r -> let f "" = r; f n = n; in f <$> parseTemplate' r m
        return $ s ++ str ++ ss ++ next
 
 -- $strings
@@ -459,7 +460,7 @@ showVerticalBar v x = colorizeString v [convert $ 100 * x]
           | t <= 9600 = ' '
           | t > 9608 = chr 9608
           | otherwise = chr t
-          where t = 9600 + ((round val) `div` 12)
+          where t = 9600 + (round val `div` 12)
 
 showLogBar :: Float -> Float -> Monitor String
 showLogBar f v = do

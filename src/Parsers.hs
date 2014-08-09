@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Xmobar.Parsers
@@ -87,7 +87,7 @@ rawParser c a = do
   char ':'
   case reads lenstr of
     [(len,[])] -> do
-      guard ((len :: Integer) <= (fromIntegral (maxBound :: Int)))
+      guard ((len :: Integer) <= fromIntegral (maxBound :: Int))
       s <- count (fromIntegral len) anyChar
       string "/>"
       return [(Text s, c, a)]
@@ -123,7 +123,7 @@ actionParser c act = do
   return (concat s)
 
 toButtons :: String -> [Button]
-toButtons s = map (\x -> read [x]) s
+toButtons = map (\x -> read [x])
 
 -- | Parsers a string wrapped in a color specification.
 colorParser :: Maybe [Action] -> Parser [(Widget, ColorString, Maybe [Action])]

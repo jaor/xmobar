@@ -44,7 +44,7 @@ runIPC mvst = handle printException exportConnection
 
 sendSignalMethod :: TMVar SignalType -> Method
 sendSignalMethod mvst = method interfaceName sendSignalName
-    (signature_ [variantType $ toVariant $ (undefined :: SignalType)])
+    (signature_ [variantType $ toVariant (undefined :: SignalType)])
     (signature_ [])
     sendSignalMethodCall
     where

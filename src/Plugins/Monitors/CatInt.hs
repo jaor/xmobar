@@ -20,6 +20,6 @@ catIntConfig = mkMConfig "<v>" ["v"]
 
 runCatInt :: FilePath -> [String] -> Monitor String
 runCatInt p _ =
-  let failureMessage = "Cannot read: " ++ (show p)
+  let failureMessage = "Cannot read: " ++ show p
       fmt x = show (truncate x :: Int)
   in  checkedDataRetrieval failureMessage [[p]] Nothing id fmt

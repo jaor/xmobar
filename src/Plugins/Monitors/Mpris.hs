@@ -25,6 +25,7 @@ import Text.Printf (printf)
 import DBus
 import qualified DBus.Client as DC
 
+import Control.Arrow ((***))
 import Data.Maybe ( fromJust )
 import Data.Int ( Int32, Int64 )
 import System.IO.Unsafe (unsafePerformIO)
@@ -43,10 +44,10 @@ instance MprisVersion MprisVersion1 where
         { methodCallDestination = Just busName
         }
         where
-        busName       = busName_       $ "org.mpris." ++ p
-        objectPath    = objectPath_    $ "/Player"
-        interfaceName = interfaceName_ $ "org.freedesktop.MediaPlayer"
-        memberName    = memberName_    $ "GetMetadata"
+        busName       = busName_     $ "org.mpris." ++ p
+        objectPath    = objectPath_    "/Player"
+        interfaceName = interfaceName_ "org.freedesktop.MediaPlayer"
+        memberName    = memberName_    "GetMetadata"
 
     fieldsList MprisVersion1 = [ "album", "artist", "arturl", "mtime", "title"
                                , "tracknumber" ]
@@ -58,10 +59,10 @@ instance MprisVersion MprisVersion2 where
         , methodCallBody = arguments
         }
         where
-        busName       = busName_       $ "org.mpris.MediaPlayer2." ++ p
-        objectPath    = objectPath_    $ "/org/mpris/MediaPlayer2"
-        interfaceName = interfaceName_ $ "org.freedesktop.DBus.Properties"
-        memberName    = memberName_    $ "Get"
+        busName       = busName_     $ "org.mpris.MediaPlayer2." ++ p
+        objectPath    = objectPath_    "/org/mpris/MediaPlayer2"
+        interfaceName = interfaceName_ "org.freedesktop.DBus.Properties"
+        memberName    = memberName_    "Get"
         arguments     = map (toVariant::String -> Variant)
                             ["org.mpris.MediaPlayer2.Player", "Metadata"]
 
@@ -98,7 +99,7 @@ fromVar = fromJust . fromVariant
 
 unpackMetadata :: [Variant] -> [(String, Variant)]
 unpackMetadata [] = []
-unpackMetadata xs = ((map (\(k, v) -> (fromVar k, fromVar v))) . unpack . head) xs where
+unpackMetadata xs = (map (fromVar *** fromVar) . unpack . head) xs where
                       unpack v = case variantType v of
                             TypeDictionary _ _ -> dictionaryItems $ fromVar v
                             TypeVariant -> unpack $ fromVar v
