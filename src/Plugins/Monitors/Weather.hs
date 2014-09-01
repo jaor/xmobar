@@ -22,7 +22,6 @@ import Network.HTTP
 
 import Text.ParserCombinators.Parsec
 
-
 weatherConfig :: IO MConfig
 weatherConfig = mkMConfig
        "<station>: <tempC>C, rh <rh>% (<hour>)" -- template
@@ -87,7 +86,7 @@ pWind ::
   )       
 pWind =
   let tospace = manyTill anyChar (char ' ')
-      wind = do string "Wind: from the "
+      wind = do manyTill skipRestOfLine (string "Wind: from the ")
                 cardinal <- tospace
                 char '('
                 azimuth <- tospace
@@ -97,7 +96,7 @@ pWind =
                 knot <- tospace
                 manyTill anyChar newline
                 return (cardinal, azimuth, mph, knot)
-  in wind <|> return ("", "", "", "")
+  in try wind <|> return ("a", "b", "c", "d")
 
 pTemp :: Parser (Int, Int)
 pTemp = do let num = digit <|> char '-' <|> char '.'
