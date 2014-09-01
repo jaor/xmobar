@@ -677,7 +677,8 @@ something like:
 - Args: default monitor arguments
 - Variables that can be used with the `-t`/`--template` argument:
 	    `station`, `stationState`, `year`, `month`, `day`, `hour`,
-	    `wind`, `visibility`, `skyCondition`, `tempC`, `tempF`,
+	    `windCardinal`, `windAzimuth`, `windMph`, `windKnot`, 
+            `visibility`, `skyCondition`, `tempC`, `tempF`,
 	    `dewPointC`, `dewPointF`, `rh`, `pressure`
 - Default template: `<station>: <tempC>C, rh <rh>% (<hour>)`
 - Retrieves weather information from http://weather.noaa.gov.
