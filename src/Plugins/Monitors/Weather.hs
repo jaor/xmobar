@@ -22,7 +22,6 @@ import Network.HTTP
 
 import Text.ParserCombinators.Parsec
 
-
 weatherConfig :: IO MConfig
 weatherConfig = mkMConfig
        "<station>: <tempC>C, rh <rh>% (<hour>)" -- template
@@ -32,7 +31,10 @@ weatherConfig = mkMConfig
        , "month"
        , "day"
        , "hour"
-       , "wind"
+       , "windCardinal"
+       , "windAzimuth"
+       , "windMph"
+       , "windKnots"
        , "visibility"
        , "skyCondition"
        , "tempC"
@@ -50,7 +52,10 @@ data WeatherInfo =
        , month        :: String
        , day          :: String
        , hour         :: String
-       , wind         :: String
+       , windCardinal :: String
+       , windAzimuth  :: String
+       , windMph      :: String
+       , windKnots    :: String
        , visibility   :: String
        , skyCondition :: String
        , tempC        :: Int
@@ -70,7 +75,28 @@ pTime = do y <- getNumbersAsString
            char ' '
            (h:hh:mi:mimi) <- getNumbersAsString
            char ' '
-           return (y, m, d ,[h]++[hh]++":"++[mi]++mimi)
+           return (y, m, d ,h:hh:":"++mi:mimi)
+
+pWind ::
+  Parser (
+    String -- cardinal direction
+  , String -- azimuth direction
+  , String -- speed (MPH)
+  , String -- speed (knot)
+  )       
+pWind =
+  let tospace = manyTill anyChar (char ' ')
+      wind = do manyTill skipRestOfLine (string "Wind: from the ")
+                cardinal <- tospace
+                char '('
+                azimuth <- tospace
+                string "degrees) at "
+                mph <- tospace
+                string "MPH ("
+                knot <- tospace
+                manyTill anyChar newline
+                return (cardinal, azimuth, mph, knot)
+  in try wind <|> return ("a", "b", "c", "d")
 
 pTemp :: Parser (Int, Int)
 pTemp = do let num = digit <|> char '-' <|> char '.'
@@ -114,7 +140,7 @@ parseData =
                    )
        skipRestOfLine >> getAllBut "/"
        (y,m,d,h) <- pTime
-       w <- getAfterString "Wind: "
+       (wc, wa, wm, wk) <- pWind
        v <- getAfterString "Visibility: "
        sk <- getAfterString "Sky conditions: "
        skipTillString "Temperature: "
@@ -126,7 +152,7 @@ parseData =
        skipTillString "Pressure (altimeter): "
        p <- pPressure
        manyTill skipRestOfLine eof
-       return [WI st ss y m d h w v sk tC tF dC dF rh p]
+       return [WI st ss y m d h wc wa wm wk v sk tC tF dC dF rh p]
 
 defUrl :: String
 defUrl = "http://weather.noaa.gov/pub/data/observations/metar/decoded/"
@@ -142,10 +168,10 @@ getData station = do
           errHandler _ = return "<Could not retrieve data>"
 
 formatWeather :: [WeatherInfo] -> Monitor String
-formatWeather [WI st ss y m d h w v sk tC tF dC dF r p] =
+formatWeather [WI st ss y m d h wc wa wm wk v sk tC tF dC dF r p] =
     do cel <- showWithColors show tC
        far <- showWithColors show tF
-       parseTemplate [st, ss, y, m, d, h, w, v, sk, cel, far, show dC, show dF, show r , show p ]
+       parseTemplate [st, ss, y, m, d, h, wc, wa, wm, wk, v, sk, cel, far, show dC, show dF, show r , show p ]
 formatWeather _ = getConfigValue naString
 
 runWeather :: [String] -> Monitor String
