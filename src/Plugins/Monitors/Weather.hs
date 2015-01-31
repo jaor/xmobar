@@ -99,6 +99,12 @@ pWind =
   let tospace = manyTill anyChar (char ' ')
       wind0 = do manyTill skipRestOfLine (string "Wind: Calm:0")
                  return pWind0
+      windVar = do manyTill skipRestOfLine (string "Wind: Variable at ")
+                   mph <- tospace
+                   string "MPH ("
+                   knot <- tospace
+                   manyTill anyChar newline
+                   return ("μ", "μ", mph, knot)
       wind = do manyTill skipRestOfLine (string "Wind: from the ")
                 cardinal <- tospace
                 char '('
@@ -109,7 +115,7 @@ pWind =
                 knot <- tospace
                 manyTill anyChar newline
                 return (cardinal, azimuth, mph, knot)
-  in try wind0 <|> wind
+  in try wind0 <|> try windVar <|> wind
 
 pTemp :: Parser (Int, Int)
 pTemp = do let num = digit <|> char '-' <|> char '.'
