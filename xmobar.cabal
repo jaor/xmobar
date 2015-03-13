@@ -93,7 +93,8 @@ executable xmobar
       Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
       Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
       Plugins.Monitors.Uptime, Plugins.Monitors.Weather,
-      Plugins.Monitors.Bright, Plugins.Monitors.CatInt
+      Plugins.Monitors.Bright, Plugins.Monitors.CatInt,
+      Plugins.Monitors.UVMeter
 
     ghc-prof-options:   -prof -auto-all
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
@@ -111,6 +112,8 @@ executable xmobar
       time,
       filepath,
       transformers,
+      text >= 0.11.0.8,
+      xml-conduit,
       X11 >= 1.6.1,
       mtl >= 2.1 && < 2.3,
       parsec == 3.1.*,

@@ -21,6 +21,7 @@ import Plugins
 
 import Plugins.Monitors.Common (runM, runMD)
 import Plugins.Monitors.Weather
+import Plugins.Monitors.UVMeter
 import Plugins.Monitors.Net
 import Plugins.Monitors.Mem
 import Plugins.Monitors.Swap
@@ -51,6 +52,7 @@ import Plugins.Monitors.Mpris
 #endif
 
 data Monitors = Weather      Station     Args Rate
+              | UVMeter      Station     Args Rate
               | Network      Interface   Args Rate
               | DynNetwork               Args Rate
               | BatteryP     Args        Args Rate
@@ -99,6 +101,7 @@ type DiskSpec  = [(String, String)]
 
 instance Exec Monitors where
     alias (Weather s _ _) = s
+    alias (UVMeter s _ _) = s
     alias (Network i _ _) = i
     alias (DynNetwork _ _) = "dynnetwork"
     alias (Thermal z _ _) = z
@@ -140,6 +143,7 @@ instance Exec Monitors where
     start (TopProc a r) = startTop a r
     start (TopMem a r) = runM a topMemConfig runTopMem r
     start (Weather s a r) = runMD (a ++ [s]) weatherConfig runWeather r weatherReady
+    start (UVMeter s a r) = runM (a ++ [s]) uvConfig runUVMeter r
     start (Thermal z a r) = runM (a ++ [z]) thermalConfig runThermal r
     start (ThermalZone z a r) =
       runM (a ++ [show z]) thermalZoneConfig runThermalZone r
