@@ -74,6 +74,10 @@ flag with_threaded
   description: Use threaded runtime.
   default: False
 
+flag with_uvmeter
+  description: UVMeter only useful to australians.
+  default: False
+
 executable xmobar
     hs-source-dirs:     src
     main-is:            Main.hs
@@ -112,8 +116,6 @@ executable xmobar
       time,
       filepath,
       transformers,
-      text >= 0.11.0.8,
-      xml-conduit,
       X11 >= 1.6.1,
       mtl >= 2.1 && < 2.3,
       parsec == 3.1.*,
@@ -179,3 +181,7 @@ executable xmobar
        extra-libraries: Xpm
        other-modules: XPMFile
        cpp-options: -DXPM
+
+    if flag(with_uvmeter)
+       build-depends: text >= 0.11.0.8, xml-conduit
+       cpp-options: -DUVMETER
