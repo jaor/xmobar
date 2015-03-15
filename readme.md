@@ -1250,14 +1250,14 @@ more than one battery.
 
 - Aliases to `uvmeter`
 - Args: default monitor arguments.
-- Example:
-
-    Run UVMeter "brisbane" [] 900
 
 - *Reminder:* Keep the refresh rate high, to avoid making unnecessary
   requests every time the plug-in is run.
 - Station IDs can be found here:
   http://www.arpansa.gov.au/uvindex/realtime/xml/uvvalues.xml
+- Example:
+
+        Run UVMeter "brisbane" ["-H", "3", "-L", "3", "--low", "green", "--high", "red"] 900
 
 ## Executing External Commands
 
