@@ -157,6 +157,9 @@ Otherwise, you'll need to install them yourself.
 :    Support for xpm image file format. This will allow loading .xpm files in `<icon>`.
      Requires the [libXpm] C library.
 
+`with_uvmeter`
+:    Enables UVMeter plugin. The plugin shows UV data for Australia.
+
 `all_extensions`
 :    Enables all the extensions above.
 
@@ -1242,6 +1245,20 @@ more than one battery.
 - Example:
 
     Run CatInt 0 "/sys/devices/platform/thinkpad_hwmon/fan1_input" [] 50
+
+### `UVMeter`
+
+- Aliases to "uv " + station id. For example: `%uv brisbane%` or `%uv
+  alice springs%`
+- Args: default monitor arguments.
+
+- *Reminder:* Keep the refresh rate high, to avoid making unnecessary
+  requests every time the plug-in is run.
+- Station IDs can be found here:
+  http://www.arpansa.gov.au/uvindex/realtime/xml/uvvalues.xml
+- Example:
+
+        Run UVMeter "brisbane" ["-H", "3", "-L", "3", "--low", "green", "--high", "red"] 900
 
 ## Executing External Commands
 

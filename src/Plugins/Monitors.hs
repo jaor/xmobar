@@ -36,6 +36,9 @@ import Plugins.Monitors.Disk
 import Plugins.Monitors.Top
 import Plugins.Monitors.Uptime
 import Plugins.Monitors.CatInt
+#ifdef UVMETER
+import Plugins.Monitors.UVMeter
+#endif
 #ifdef IWLIB
 import Plugins.Monitors.Wireless
 #endif
@@ -71,6 +74,9 @@ data Monitors = Weather      Station     Args Rate
               | TopMem       Args        Rate
               | Uptime       Args        Rate
               | CatInt       Int FilePath Args Rate
+#ifdef UVMETER
+              | UVMeter      Station     Args Rate
+#endif
 #ifdef IWLIB
               | Wireless Interface  Args Rate
 #endif
@@ -119,6 +125,9 @@ instance Exec Monitors where
     alias (DiskIO {}) = "diskio"
     alias (Uptime _ _) = "uptime"
     alias (CatInt n _ _ _) = "cat" ++ show n
+#ifdef UVMETER
+    alias (UVMeter s _ _) = "uv " ++ s
+#endif
 #ifdef IWLIB
     alias (Wireless i _ _) = i ++ "wi"
 #endif
@@ -155,6 +164,9 @@ instance Exec Monitors where
     start (DiskIO s a r) = startDiskIO s a r
     start (Uptime a r) = runM a uptimeConfig runUptime r
     start (CatInt _ s a r) = runM a catIntConfig (runCatInt s) r
+#ifdef UVMETER
+    start (UVMeter s a r) = runM (a ++ [s]) uvConfig runUVMeter r
+#endif
 #ifdef IWLIB
     start (Wireless i a r) = runM a wirelessConfig (runWireless i) r
 #endif

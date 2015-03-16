@@ -74,6 +74,10 @@ flag with_threaded
   description: Use threaded runtime.
   default: False
 
+flag with_uvmeter
+  description: UVMeter only useful to australians.
+  default: False
+
 executable xmobar
     hs-source-dirs:     src
     main-is:            Main.hs
@@ -93,7 +97,8 @@ executable xmobar
       Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
       Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
       Plugins.Monitors.Uptime, Plugins.Monitors.Weather,
-      Plugins.Monitors.Bright, Plugins.Monitors.CatInt
+      Plugins.Monitors.Bright, Plugins.Monitors.CatInt,
+      Plugins.Monitors.UVMeter
 
     ghc-prof-options:   -prof -auto-all
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
@@ -176,3 +181,7 @@ executable xmobar
        extra-libraries: Xpm
        other-modules: XPMFile
        cpp-options: -DXPM
+
+    if flag(with_uvmeter)
+       build-depends: text >= 0.11, xml-conduit
+       cpp-options: -DUVMETER
