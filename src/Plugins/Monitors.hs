@@ -126,7 +126,7 @@ instance Exec Monitors where
     alias (Uptime _ _) = "uptime"
     alias (CatInt n _ _ _) = "cat" ++ show n
 #ifdef UVMETER
-    alias (UVMeter s _ _) = "uvmeter"
+    alias (UVMeter s _ _) = "uv " ++ s
 #endif
 #ifdef IWLIB
     alias (Wireless i _ _) = i ++ "wi"

@@ -1248,7 +1248,8 @@ more than one battery.
 
 ### `UVMeter`
 
-- Aliases to `uvmeter`
+- Aliases to "uv " + station id. For example: `%uv brisbane%` or `%uv
+  alice springs%`
 - Args: default monitor arguments.
 
 - *Reminder:* Keep the refresh rate high, to avoid making unnecessary
