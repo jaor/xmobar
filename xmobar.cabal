@@ -183,5 +183,5 @@ executable xmobar
        cpp-options: -DXPM
 
     if flag(with_uvmeter)
-       build-depends: text >= 0.11.0.8, xml-conduit
+       build-depends: text >= 0.11, xml-conduit
        cpp-options: -DUVMETER
