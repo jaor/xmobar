@@ -36,7 +36,9 @@ import Data.Time.Format
 import Data.Time.LocalTime.TimeZone.Olson
 import Data.Time.LocalTime.TimeZone.Series
 
+#if ! MIN_VERSION_time(1,5,0)
 import System.Locale (TimeLocale)
+#endif
 #else
 import System.IO
 import Plugins.Date

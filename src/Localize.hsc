@@ -19,7 +19,11 @@ module Localize
     ) where
 
 import Foreign.C
+#if ! MIN_VERSION_time(1,5,0)
 import qualified System.Locale as L
+#else
+import qualified Data.Time.Format as L
+#endif
 
 #ifdef UTF8
 import Codec.Binary.UTF8.String
