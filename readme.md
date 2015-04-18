@@ -2,6 +2,8 @@
 
 # About
 
+[![Join the chat at https://gitter.im/jaor/xmobar](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jaor/xmobar?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 xmobar is a minimalistic, mostly text based, status bar. It was
 originally designed and implemented by Andrea Rossato to work with
 [xmonad], but it's actually usable with any window-manager.
