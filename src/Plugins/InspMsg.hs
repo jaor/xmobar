@@ -1,10 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude  #-}
 module Plugins.InspMsg (InspMsg(..)) where
 
-import Plugins (readFileSafe, tenthSeconds)
+import Plugins (Exec(..), readFileSafe, tenthSeconds)
 
-import Prelude (String, Ing, IO, Show(..),
-               lines, length)
+import Prelude (String, Int, IO, Show(..), Read(..),
+               lines, length, ($))
 import Data.Array (listArray, (!))
 import Control.Monad (forever, liftM)
 import System.Random (randomRIO)
@@ -14,7 +14,7 @@ type File = String
 type Rate = Int
 
 data InspMsg = InspMsg Name File Rate
-     deriving (Show)
+     deriving (Read, Show)
 
 instance Exec InspMsg where
   alias (InspMsg n _ _) = n
