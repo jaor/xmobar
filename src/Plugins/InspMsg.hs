@@ -14,7 +14,8 @@ import Plugins (Exec(..), tenthSeconds)
 import Prelude (Int, IO, String, Show(..), Read(..),
                length, ($))
 --Using Text and Text.IO reduces overhead significantly for large files
-import Data.Text (Text, unpack, lines) 
+import Data.Text (unpack, lines)
+--The use of readFile instead of readFileSafe is justified for large files
 import Data.Text.IO (readFile)
 import Data.Array (listArray, (!))
 import Control.Monad (forever, liftM)
@@ -32,7 +33,7 @@ instance Exec InspMsg where
   alias (InspMsg n _ _) = n
   start (InspMsg _ f r) = runInspMsg f r
 
-runInspMsg :: File -> Rate -> (String -> IO ()) -> IO ()
+runInspMsg :: File -> Rate -> (String -> IO ()) ->  ()
 runInspMsg file runRate callback = do
   --read all data from file and split into lines
   fdata <- liftM lines (readFile file)
