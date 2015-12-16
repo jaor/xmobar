@@ -122,6 +122,7 @@ executable xmobar
       transformers,
       array,
       random,              
+      text,
       X11 >= 1.6.1,
       mtl >= 2.1 && < 2.3,
       parsec == 3.1.*,

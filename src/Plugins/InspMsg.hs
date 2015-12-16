@@ -9,10 +9,13 @@ fun facts, historical quotes...
 
 module Plugins.InspMsg (InspMsg(..)) where
 
-import Plugins (Exec(..), readFileSafe, tenthSeconds)
+import Plugins (Exec(..), tenthSeconds)
 
-import Prelude (String, Int, IO, Show(..), Read(..),
-               lines, length, ($))
+import Prelude (Int, IO, String, Show(..), Read(..),
+               length, ($))
+--Using Text and Text.IO reduces overhead significantly for large files
+import Data.Text (Text, unpack, lines) 
+import Data.Text.IO (readFile)
 import Data.Array (listArray, (!))
 import Control.Monad (forever, liftM)
 import System.Random (randomRIO)
@@ -32,14 +35,14 @@ instance Exec InspMsg where
 runInspMsg :: File -> Rate -> (String -> IO ()) -> IO ()
 runInspMsg file runRate callback = do
   --read all data from file and split into lines
-  fdata <- liftM lines (readFileSafe file)
+  fdata <- liftM lines (readFile file)
   --Put data into array for O(1) accesss
   let len = length fdata
       listData = listArray (1, len) fdata
   --generate index, write data, wait. Repeat
   forever $ do 
     index <- randomRIO (1, len)
-    callback (listData ! index)
+    callback $ unpack $ listData ! index
     tenthSeconds runRate
           
   
