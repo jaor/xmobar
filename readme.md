@@ -394,6 +394,7 @@ xmobar --help):
       -A alpha      --alpha=alpha          The transparency: 0 is transparent, 255 (the default) is opaque
       -o            --top                  Place xmobar at the top of the screen
       -b            --bottom               Place xmobar at the bottom of the screen
+      -p            --position=position    Specificty position, same as in config file
       -d            --dock                 Try to start xmobar as a dock
       -a alignsep   --alignsep=alignsep    Separators for left, center and right text
                                            alignment. Default: '}{'
