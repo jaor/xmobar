@@ -170,7 +170,7 @@ options =
     , Option "x" ["screen"] (ReqArg OnScr "screen")
       "On which X screen number to start"
     , Option "p" ["position"] (ReqArg Position "position")
-      "Specify position of xmobar. This will override -o or -b"
+      "Specify position of xmobar. Same syntax as in config file"
     ]
 
 getOpts :: [String] -> IO ([Opts], [String])
