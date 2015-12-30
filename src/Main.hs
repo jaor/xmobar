@@ -39,7 +39,6 @@ import System.FilePath ((</>))
 import System.Posix.Files
 import Control.Monad (unless, liftM)
 import Text.Read (readMaybe)
-import Data.Maybe (fromMaybe)
 
 import Signal (setupSignalHandler)
 
