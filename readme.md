@@ -1601,7 +1601,7 @@ Copyright &copy; 2007-2010 Andrea Rossato
 [Github]: http://github.com/jaor/xmobar/
 [Github page]: http://github.com/jaor/xmobar
 [Hackage]: http://hackage.haskell.org/package/xmobar/
-[LICENSE]: https://github.com/jaor/xmobar/raw/master/LICENSE
+[LICENSE]: https://github.com/jaor/xmobar/raw/master/license
 [Mailing list]: http://projects.haskell.org/cgi-bin/mailman/listinfo/xmobar
 [MPD]: http://mpd.wikia.com/
 [X11-xft]: http://hackage.haskell.org/package/X11-xft/
