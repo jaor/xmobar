@@ -16,6 +16,7 @@ module Plugins.PipeReader where
 
 import System.IO
 import Plugins
+import Environment
 import System.Posix.Files
 import Control.Concurrent(threadDelay)
 import Control.Exception
@@ -27,7 +28,7 @@ data PipeReader = PipeReader String String
 instance Exec PipeReader where
     alias (PipeReader _ a)    = a
     start (PipeReader p _) cb = do
-        let (def, pipe) = split ':' p
+        (def, pipe) <- split ':' <$> expandEnv p
         unless (null def) (cb def)
         checkPipe pipe
         h <- openFile pipe ReadWriteMode

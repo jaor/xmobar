@@ -20,6 +20,7 @@ import Control.Concurrent.STM
 import System.IO
 import System.IO.Unsafe(unsafePerformIO)
 
+import Environment
 import Plugins
 import Signal
 
@@ -51,7 +52,8 @@ instance Exec BufferedPipeReader where
 
         reader :: (Int, Bool, FilePath) -> TChan (Int, Bool, String) -> IO ()
         reader p@(to, tg, fp) tc = do
-            openFile fp ReadWriteMode >>= hGetLineSafe >>= \dt ->
+            fp' <- expandEnv fp
+            openFile fp' ReadWriteMode >>= hGetLineSafe >>= \dt ->
                 atomically $ writeTChan tc (to, tg, dt)
             reader p tc
 
