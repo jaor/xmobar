@@ -1348,6 +1348,7 @@ can be used in the output template as `%mydate%`
 
 - Reads its displayed output from the given pipe.
 - Prefix an optional default text separated by a colon
+- Expands environment variables in the first argument of syntax '${VAR}' or '$VAR'
 
 <font size="+1">**`MarqueePipeReader "default text:/path/to/pipe" (length, rate, sep) Alias`**</font>
 
@@ -1356,6 +1357,8 @@ can be used in the output template as `%mydate%`
   seconds and separator when it wraps around
 
         Run MarqueePipeReader "/tmp/testpipe" (10, 7, "+") "mpipe"
+
+- Expands environment variables in the first argument
 
 <font size="+1">
 **`BufferedPipeReader Alias [(Timeout, Bool, "/path/to/pipe1"), ..]`**
@@ -1386,6 +1389,7 @@ can be used in the output template as `%mydate%`
   `"/tmp/xmobar_status"` will reveal xmonad for 1.5 seconds and
   temporarily overwrite the window titles.
 - Take a look at [samples/status.sh]
+- Expands environment variables for the pipe path
 
 [samples/status.sh]: http://github.com/jaor/xmobar/raw/master/samples/status.sh
 

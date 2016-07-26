@@ -15,6 +15,7 @@
 module Plugins.MarqueePipeReader where
 
 import System.IO (openFile, IOMode(ReadWriteMode), Handle)
+import Environment
 import Plugins (tenthSeconds, Exec(alias, start), hGetLineSafe)
 import System.Posix.Files (getFileStatus, isNamedPipe)
 import Control.Concurrent(forkIO, threadDelay)
@@ -32,7 +33,7 @@ data MarqueePipeReader = MarqueePipeReader String (Length, Rate, Separator) Stri
 instance Exec MarqueePipeReader where
     alias (MarqueePipeReader _ _ a)    = a
     start (MarqueePipeReader p (len, rate, sep) _) cb = do
-        let (def, pipe) = split ':' p
+        (def, pipe) <- split ':' <$> expandEnv p
         unless (null def) (cb def)
         checkPipe pipe
         h <- openFile pipe ReadWriteMode

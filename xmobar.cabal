@@ -88,6 +88,7 @@ executable xmobar
     other-modules:
       Xmobar, Actions, Bitmap, Config, Parsers, Commands, Localize,
       XUtil, XPMFile, StatFS, Runnable, ColorCache, Window, Signal,
+      Environment,
       Plugins, Plugins.BufferedPipeReader,
       Plugins.CommandReader, Plugins.Date, Plugins.EWMH,
       Plugins.PipeReader, Plugins.MarqueePipeReader,
