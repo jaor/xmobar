@@ -20,7 +20,9 @@ module Plugins.Monitors where
 import Plugins
 
 import Plugins.Monitors.Common (runM, runMD)
+#ifdef WEATHER
 import Plugins.Monitors.Weather
+#endif
 import Plugins.Monitors.Net
 import Plugins.Monitors.Mem
 import Plugins.Monitors.Swap
@@ -53,8 +55,7 @@ import Plugins.Monitors.Volume
 import Plugins.Monitors.Mpris
 #endif
 
-data Monitors = Weather      Station     Args Rate
-              | Network      Interface   Args Rate
+data Monitors = Network      Interface   Args Rate
               | DynNetwork               Args Rate
               | BatteryP     Args        Args Rate
               | BatteryN     Args        Args Rate Alias
@@ -74,6 +75,9 @@ data Monitors = Weather      Station     Args Rate
               | TopMem       Args        Rate
               | Uptime       Args        Rate
               | CatInt       Int FilePath Args Rate
+#ifdef WEATHER
+              | Weather      Station     Args Rate
+#endif
 #ifdef UVMETER
               | UVMeter      Station     Args Rate
 #endif
@@ -104,7 +108,9 @@ type Rate      = Int
 type DiskSpec  = [(String, String)]
 
 instance Exec Monitors where
+#ifdef WEATHER
     alias (Weather s _ _) = s
+#endif
     alias (Network i _ _) = i
     alias (DynNetwork _ _) = "dynnetwork"
     alias (Thermal z _ _) = z
@@ -148,7 +154,9 @@ instance Exec Monitors where
     start (MultiCpu a r) = startMultiCpu a r
     start (TopProc a r) = startTop a r
     start (TopMem a r) = runM a topMemConfig runTopMem r
+#ifdef WEATHER
     start (Weather s a r) = runMD (a ++ [s]) weatherConfig runWeather r weatherReady
+#endif
     start (Thermal z a r) = runM (a ++ [z]) thermalConfig runThermal r
     start (ThermalZone z a r) =
       runM (a ++ [show z]) thermalZoneConfig runThermalZone r

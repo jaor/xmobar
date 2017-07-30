@@ -82,8 +82,12 @@ flag with_uvmeter
   description: UVMeter only useful to australians.
   default: False
 
+flag with_weather
+  description: Enable weather plugin
+  default: False
+
 flag with_conduit
-  description: Use http-conduits for getting weather data
+  description: Use http-conduits for getting weather data, only has an effect if with_weather is set.
   default: False
 
 executable xmobar
@@ -105,7 +109,7 @@ executable xmobar
       Plugins.Monitors.MultiCpu, Plugins.Monitors.Net,
       Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
       Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
-      Plugins.Monitors.Uptime, Plugins.Monitors.Weather,
+      Plugins.Monitors.Uptime,
       Plugins.Monitors.Bright, Plugins.Monitors.CatInt,
       Plugins.Monitors.UVMeter
 
@@ -127,13 +131,7 @@ executable xmobar
       X11 >= 1.6.1,
       mtl >= 2.1 && < 2.3,
       parsec == 3.1.*,
-      HTTP >= 4000.2.4,
       stm >= 2.3 && < 2.5
-
-    if flag(with_conduit)
-       -- use http-conduit  instead of simple-http
-       build-depends: http-conduit, http-types
-       cpp-options: -DHTTP_CONDUIT
 
     if flag(with_threaded)
        -- -threaded is a workaround for 100% CPU busy loop
@@ -194,6 +192,15 @@ executable xmobar
        extra-libraries: Xpm
        other-modules: XPMFile
        cpp-options: -DXPM
+
+    if flag(with_weather) || flag(all_extensions)
+       build-depends: HTTP >= 4000.2.4
+       other-modules: Plugins.Monitors.Weather
+       cpp-options: -DWEATHER
+       if flag(with_conduit)
+          -- use http-conduit  instead of simple-http
+          build-depends: http-conduit, http-types
+          cpp-options: -DHTTP_CONDUIT
 
     if flag(with_uvmeter)
        cpp-options: -DUVMETER
