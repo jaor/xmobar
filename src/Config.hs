@@ -43,6 +43,8 @@ import Plugins.MBox
 
 import Plugins.DateZone
 
+import Plugins.InspMsg
+
 -- $config
 -- Configuration data type and default configuration
 
@@ -150,5 +152,6 @@ infixr :*:
 runnableTypes :: Command :*: Monitors :*: Date :*: PipeReader :*: BufferedPipeReader :*: CommandReader :*: StdinReader :*: XMonadLog :*: EWMH :*: Kbd :*: Locks :*:
                  Mail :*: MBox :*:
                  DateZone :*: MarqueePipeReader :*:
+                 InspMsg :*: 
                  ()
 runnableTypes = undefined
