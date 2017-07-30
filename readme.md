@@ -160,9 +160,13 @@ Otherwise, you'll need to install them yourself.
 `with_uvmeter`
 :    Enables UVMeter plugin. The plugin shows UV data for Australia.
 
+`with_weather`
+:    Support to display weather information. Enables Weather plugin.
+
 `with_conduit`
 :    Use http-conduit for getting weather data enabling support for http proxies.
      Requires [http-conduit] and [http-types].
+     Note that this flag has only an effect if `with_weather` is also set.
 
 `all_extensions`
 :    Enables all the extensions above.
