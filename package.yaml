@@ -1,5 +1,5 @@
 name:               xmobar
-version:            0.25
+version:            "0.25"
 
 homepage:           http://xmobar.org
 github:             jaor/xmobar
