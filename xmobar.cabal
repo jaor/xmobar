@@ -221,7 +221,7 @@ executable xmobar
        cpp-options: -DDATEZONE
 
     if flag(with_mpris) || flag(all_extensions)
-       build-depends: dbus >= 0.10 && < 1.0
+       build-depends: dbus >= 0.10
        other-modules: Plugins.Monitors.Mpris
        cpp-options: -DMPRIS
 

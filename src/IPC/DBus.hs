@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  DBus
@@ -15,8 +16,14 @@
 module IPC.DBus (runIPC) where
 
 import DBus
+#if MIN_VERSION_dbus(1,0,0)
+import DBus.Client hiding (interfaceName)
+import qualified DBus.Client as D (interfaceName)
+#else
 import DBus.Client
+#endif
 import Control.Monad (when)
+import Control.Monad.Trans.Class (lift)
 import Control.Concurrent.STM
 import Control.Exception (handle)
 import System.IO (stderr, hPutStrLn)
@@ -40,22 +47,28 @@ runIPC mvst = handle printException exportConnection
     exportConnection = do
         client <- connectSession
         requestName client busName [ nameDoNotQueue ]
-        export client objectPath [ sendSignalMethod mvst ]
+        export client objectPath $ sendSignalInterface mvst
 
-sendSignalMethod :: TMVar SignalType -> Method
-sendSignalMethod mvst = method interfaceName sendSignalName
-    (signature_ [variantType $ toVariant (undefined :: SignalType)])
-    (signature_ [])
-    sendSignalMethodCall
+sendSignalInterface :: TMVar SignalType -> Interface
+sendSignalInterface mvst = defaultInterface
+        { D.interfaceName = interfaceName
+        , interfaceMethods = [sendSignalMethod]
+        }
     where
     sendSignalName :: MemberName
     sendSignalName = memberName_ "SendSignal"
 
-    sendSignalMethodCall :: MethodCall -> IO Reply
+    sendSignalMethodCall :: MethodCall -> DBusR Reply
     sendSignalMethodCall mc = do
         when ( methodCallMember mc == sendSignalName )
              $ mapM_ (sendSignal . fromVariant) (methodCallBody mc)
-        return ( replyReturn [] )
+        return ( ReplyReturn [] )
 
-    sendSignal :: Maybe SignalType -> IO ()
-    sendSignal = maybe (return ()) (atomically . putTMVar mvst)
+    sendSignal :: Maybe SignalType -> DBusR ()
+    sendSignal = maybe (return ()) (lift . atomically . putTMVar mvst)
+
+    sendSignalMethod :: Method
+    sendSignalMethod = makeMethod sendSignalName
+        (signature_ [variantType $ toVariant (undefined :: SignalType)])
+        (signature_ [])
+        sendSignalMethodCall
