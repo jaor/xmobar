@@ -15,11 +15,13 @@
 module IPC.DBus (runIPC) where
 
 import DBus
-import DBus.Client
+import DBus.Client hiding (interfaceName)
+import qualified DBus.Client as DC
 import Control.Monad (when)
 import Control.Concurrent.STM
 import Control.Exception (handle)
 import System.IO (stderr, hPutStrLn)
+import Control.Monad.IO.Class (liftIO)
 
 import Signal
 
@@ -40,10 +42,13 @@ runIPC mvst = handle printException exportConnection
     exportConnection = do
         client <- connectSession
         requestName client busName [ nameDoNotQueue ]
-        export client objectPath [ sendSignalMethod mvst ]
+        export client objectPath defaultInterface
+          { DC.interfaceName = interfaceName
+          , DC.interfaceMethods = [ sendSignalMethod mvst ]
+          }
 
 sendSignalMethod :: TMVar SignalType -> Method
-sendSignalMethod mvst = method interfaceName sendSignalName
+sendSignalMethod mvst = makeMethod sendSignalName
     (signature_ [variantType $ toVariant (undefined :: SignalType)])
     (signature_ [])
     sendSignalMethodCall
@@ -51,11 +56,11 @@ sendSignalMethod mvst = method interfaceName sendSignalName
     sendSignalName :: MemberName
     sendSignalName = memberName_ "SendSignal"
 
-    sendSignalMethodCall :: MethodCall -> IO Reply
-    sendSignalMethodCall mc = do
+    sendSignalMethodCall :: MethodCall -> DBusR Reply
+    sendSignalMethodCall mc = liftIO $ do
         when ( methodCallMember mc == sendSignalName )
              $ mapM_ (sendSignal . fromVariant) (methodCallBody mc)
-        return ( replyReturn [] )
+        return ( ReplyReturn [] )
 
     sendSignal :: Maybe SignalType -> IO ()
     sendSignal = maybe (return ()) (atomically . putTMVar mvst)
