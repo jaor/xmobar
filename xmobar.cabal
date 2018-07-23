@@ -44,7 +44,9 @@ test-suite XmobarTest
         Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
         Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
         Plugins.Monitors.Uptime,
-        Plugins.Monitors.Bright, Plugins.Monitors.CatInt
+        Plugins.Monitors.Bright, Plugins.Monitors.CatInt,
+        Plugins.DateZone, Plugins.MBox, Plugins.Mail,
+        Plugins.Monitors.CommonSpec
   build-depends:
     base >= 4.9.1.0 && < 4.12,
     hspec == 2.*,
@@ -153,7 +155,9 @@ executable xmobar
       Plugins.Monitors.Swap, Plugins.Monitors.Thermal,
       Plugins.Monitors.ThermalZone, Plugins.Monitors.Top,
       Plugins.Monitors.Uptime,
-      Plugins.Monitors.Bright, Plugins.Monitors.CatInt
+      Plugins.Monitors.Bright, Plugins.Monitors.CatInt,
+      Plugins.DateZone, Plugins.MBox, Plugins.Mail
+
 
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
     extra-libraries: Xrandr Xrender
