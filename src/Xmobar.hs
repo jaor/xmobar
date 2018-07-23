@@ -283,7 +283,7 @@ updateActions conf (Rectangle _ _ wid _) ~[left,center,right] = do
 
 -- | Draws in and updates the window
 drawInWin :: Rectangle -> [[(Widget, String, Int, Maybe [Action])]] -> X ()
-drawInWin wr@(Rectangle _ _ wid ht) ~[left,center,right] = do
+drawInWin (Rectangle _ _ wid ht) ~[left,center,right] = do
   r <- ask
   let (c,d) = (config &&& display) r
       (w,(fs,vs)) = (window &&& fontListS &&& verticalOffsets) r
