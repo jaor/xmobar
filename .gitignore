@@ -13,4 +13,6 @@ cabal.sandbox.config
 /out/
 /cabal.config
 codex.tags
-cabal.project.local
+cabal.project.localtags
+*.swp
+tags
