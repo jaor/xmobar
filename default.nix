@@ -6,6 +6,7 @@
 , timezone-olson, timezone-series, transformers, unix, utf8-string
 , wirelesstools, X11, X11-xft
 }:
+
 mkDerivation {
   pname = "xmobar";
   version = "0.29.5";
