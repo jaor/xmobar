@@ -6,7 +6,6 @@
 , timezone-olson, timezone-series, transformers, unix, utf8-string
 , wirelesstools, X11, X11-xft
 }:
-
 mkDerivation {
   pname = "xmobar";
   version = "0.29.5";
@@ -37,6 +36,7 @@ mkDerivation {
     filepath hspec mtl old-locale parsec parsec-numbers process
     regex-compat stm temporary time transformers unix X11
   ];
+  doCheck = false;
   homepage = "http://xmobar.org";
   description = "A Minimalistic Text Based Status Bar";
   license = stdenv.lib.licenses.bsd3;
