@@ -70,14 +70,14 @@ cleanupThreads vars =
   for_ (concat vars) $ \(asyncs, _) ->
     for_ asyncs cancel
 
-buildLaunch :: Bool -> Bool -> FilePath -> ParseError -> IO ()
-buildLaunch verb force p e = do
+buildLaunch :: Bool -> Bool -> FilePath -> String -> ParseError -> IO ()
+buildLaunch verb force p datadir e = do
   let exec = takeBaseName p
-      dir = takeDirectory p
+      confDir = takeDirectory p
       ext = takeExtension p
   if ext `elem` [".hs", ".hsc", ".lhs"]
-    then recompile dir exec force verb >>
-         executeFile (dir </> exec) False [] Nothing
+    then recompile confDir datadir exec force verb >>
+         executeFile (confDir </> exec) False [] Nothing
     else trace True ("Invalid configuration file: " ++ show e) >>
          trace True "\n(No compilation attempted: \
                     \only .hs, .hsc or .lhs files are compiled)"
@@ -101,7 +101,8 @@ xmobarMain = do
                 (c:_) -> error $ c ++ ": file not found"
                 _ -> doOpts defaultConfig flags >>= xmobar
     Just p -> do r <- readConfig defaultConfig p
+                 dataDir <- xmobarDataDir
                  case r of
                    Left e ->
-                     buildLaunch (verboseFlag flags) (recompileFlag flags) p e
+                     buildLaunch (verboseFlag flags) (recompileFlag flags) p dataDir e
                    Right (c, defs) -> doOpts c flags >>= xmobar' defs

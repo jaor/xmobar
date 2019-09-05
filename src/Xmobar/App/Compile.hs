@@ -131,13 +131,13 @@ trace verb msg = when verb (liftIO $ hPutStrLn stderr msg)
 --
 -- 'False' is returned if there are compilation errors.
 --
-recompile :: MonadIO m => String -> String -> Bool -> Bool -> m Bool
-recompile dir execName force verb = liftIO $ do
-    let bin  = dir </> execName
-        err  = dir </> (execName ++ ".errors")
-        src  = dir </> (execName ++ ".hs")
-        lib  = dir </> "lib"
-        script = dir </> "build"
+recompile :: MonadIO m => String -> String -> String -> Bool -> Bool -> m Bool
+recompile confDir dataDir execName force verb = liftIO $ do
+    let bin  = confDir </> execName
+        err  = dataDir </> (execName ++ ".errors")
+        src  = confDir </> (execName ++ ".hs")
+        lib  = confDir </> "lib"
+        script = confDir </> "build"
     useScript <- checkBuildScript verb script
     sc <- if useScript || force
           then return True
@@ -149,8 +149,8 @@ recompile dir execName force verb = liftIO $ do
                     \errHandle ->
                       waitForProcess =<<
                         if useScript
-                        then runScript script bin dir errHandle
-                        else runGHC bin dir errHandle
+                        then runScript script bin confDir errHandle
+                        else runGHC bin confDir errHandle
         installSignalHandlers
         if status == ExitSuccess
             then trace verb "Xmobar recompilation process exited with success!"
