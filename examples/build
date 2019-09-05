@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+# An example build script that directs ghc to use a temporary directory for its
+# intermediate files instead of writing them into XMOBAR_CONFIG_DIR.  This
+# allows using a read-only XMOBAR_CONFIG_DIR.  To use this script, place it in
+# XMOBAR_CONFIG_DIR and call it "build".
+
+bin=$1
+object_dir=$(mktemp -d)
+
+default_build_args=(--make xmobar.hs -i -ilib -fforce-recomp -main-is main -v0 -o "$bin" -threaded -rtsopts -with-rtsopts -V0) # From src/Xmobar/App/Compile.hs
+extra_build_args=(-odir "$object_dir" -hidir "$object_dir")
+
+ghc "${default_build_args[@]}" "${extra_build_args[@]}"
+status=$?
+rm -r "$object_dir"
+exit $status
