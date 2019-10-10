@@ -99,13 +99,13 @@ parseMPD (Right st) song opts = do
         si = stateGlyph s opts
         vol = int2str $ fromMaybe 0 (M.stVolume st)
         (p, t) = fromMaybe (0, 0) (M.stTime st)
-        [lap, len, remain] = map showTime [floor p, t, max 0 (t - floor p)]
-        b = if t > 0 then realToFrac $ p / fromIntegral t else 0
+        [lap, len, remain] = map showTime [floor p, floor t, max 0 (floor t - floor p)]
+        b = if t > 0 then realToFrac $ p / t else 0
         plen = int2str $ M.stPlaylistLength st
         ppos = maybe "" (int2str . (+1)) $ M.stSongPos st
         flags = playbackMode st
 
-stateGlyph :: M.State -> MOpts -> String
+stateGlyph :: M.PlaybackState -> MOpts -> String
 stateGlyph s o =
   case s of
     M.Playing -> mPlaying o
