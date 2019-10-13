@@ -27,7 +27,7 @@ import Xmobar.System.Kbd
 
 -- 'Bad' prefixes of layouts
 noLaySymbols :: [String]
-noLaySymbols = ["group", "inet", "ctr", "pc", "ctrl"]
+noLaySymbols = ["group", "inet", "ctr", "pc", "ctrl", "terminate"]
 
 
 -- splits the layout string into the actual layouts
