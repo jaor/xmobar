@@ -2,6 +2,12 @@ language: haskell
 
 dist: xenial
 
+apt:
+  update: true
+  sources:
+    - hvr-ghc
+  packages: cabal-install-2.2
+
 ghc:
   - 8.0
   - 8.2
@@ -14,6 +20,7 @@ before_install:
   - sudo apt-get install -y  libiw-dev libasound2-dev libxpm-dev libmpd-dev
   - sudo apt-get install -y libxrandr-dev
   - sudo apt-get install -y happy c2hs
+  - export PATH=/opt/ghc/bin:$PATH
 
 install:
   - cabal install --only-dependencies --enable-tests -fall_extensions
