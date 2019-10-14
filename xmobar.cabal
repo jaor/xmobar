@@ -159,7 +159,7 @@ library
     ghc-options: -funbox-strict-fields -Wall -fno-warn-unused-do-bind
 
     build-depends:
-      base >= 4.9.1.0 && < 4.13,
+      base >= 4.9.1.0 && < 4.14,
       containers,
       regex-compat,
       process,
