@@ -23,7 +23,7 @@ before_install:
   - export PATH=/opt/ghc/bin:$PATH
 
 install:
-  - cabal install --only-dependencies --enable-tests -fall_extensions
+  - travis_wait 30 cabal install --only-dependencies --enable-tests -fall_extensions
   - wget https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh
 
 script:
