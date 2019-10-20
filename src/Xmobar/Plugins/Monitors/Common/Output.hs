@@ -17,6 +17,8 @@
 
 module Xmobar.Plugins.Monitors.Common.Output ( IconPattern
                                              , parseIconPattern
+                                             , DevList
+                                             , parseDevList
                                              , padString
                                              , showWithPadding
                                              , showWithColors
@@ -47,6 +49,7 @@ import Control.Monad (zipWithM)
 import Xmobar.Plugins.Monitors.Common.Types
 
 type IconPattern = Int -> String
+type DevList = [String]
 
 parseIconPattern :: String -> IconPattern
 parseIconPattern path =
@@ -57,6 +60,14 @@ parseIconPattern path =
         splitOnPercent (x:xs) =
             let rest = splitOnPercent xs
             in (x : head rest) : tail rest
+
+parseDevList :: String -> DevList
+parseDevList = splitOnComma
+  where splitOnComma [] = [[]]
+        splitOnComma (',':xs) = [] : splitOnComma xs
+        splitOnComma (x:xs) =
+           let rest = splitOnComma xs
+           in (x : head rest) : tail rest
 
 type Pos = (Int, Int)
 

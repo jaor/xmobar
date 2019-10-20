@@ -34,12 +34,14 @@ import qualified Data.ByteString.Lazy.Char8 as B
 data NetOpts = NetOpts
   { rxIconPattern :: Maybe IconPattern
   , txIconPattern :: Maybe IconPattern
+  , onlyDevList :: Maybe DevList
   }
 
 defaultOpts :: NetOpts
 defaultOpts = NetOpts
   { rxIconPattern = Nothing
   , txIconPattern = Nothing
+  , onlyDevList = Nothing
   }
 
 options :: [OptDescr (NetOpts -> NetOpts)]
@@ -48,6 +50,8 @@ options =
      o { rxIconPattern = Just $ parseIconPattern x }) "") ""
   , Option "" ["tx-icon-pattern"] (ReqArg (\x o ->
      o { txIconPattern = Just $ parseIconPattern x }) "") ""
+  , Option "" ["only-dev-list"] (ReqArg (\x o ->
+     o { onlyDevList = Just $ parseDevList x }) "") ""
   ]
 
 parseOpts :: [String] -> IO NetOpts
@@ -187,10 +191,16 @@ parseNets = mapM $ uncurry parseNet
 
 runNets :: [(NetDevRef, String)] -> [String] -> Monitor String
 runNets refs argv = do
-  dev <- io $ parseActive refs
   opts <- io $ parseOpts argv
+  dev <- io $ parseActive $ filterRefs opts refs
   printNet opts dev
     where parseActive refs' = fmap selectActive (parseNets refs')
+          refInDevList opts' (_, refname') = case onlyDevList opts' of
+            Just theList -> refname' `elem` theList
+            Nothing -> True
+          filterRefs opts' refs' = case filter (refInDevList opts') refs' of
+            [] -> refs'
+            xs -> xs
           selectActive = maximum
 
 startNet :: String -> [String] -> Int -> (String -> IO ()) -> IO ()
