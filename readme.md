@@ -799,7 +799,8 @@ specification, such as `("clear", "<icon=weather-clear.xbm/>")`.
 - Thresholds are expressed in Kb/s
 - Args: default monitor arguments, plus:
   - `--rx-icon-pattern`: dynamic string for reception rate in `rxipat`.
-  - `--tx-icon-pattern`: dynamic string for transmission rate in `txipat`.
+  - `--tx-icon-pattern`: dynamic string for transmission rate in `txipat`
+  - `--devices`: comma-separated list of devices to show.
 - Variables that can be used with the `-t`/`--template` argument:
   `dev`, `rx`, `tx`, `rxbar`, `rxvbar`, `rxipat`, `txbar`, `txvbar`,
   `txipat`. Reception and transmission rates (`rx` and `tx`) are displayed
