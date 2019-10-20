@@ -31,6 +31,16 @@ import System.IO.Error (catchIOError)
 
 import qualified Data.ByteString.Lazy.Char8 as B
 
+type DevList = [String]
+
+parseDevList :: String -> DevList
+parseDevList = splitOnComma
+  where splitOnComma [] = [[]]
+        splitOnComma (',':xs) = [] : splitOnComma xs
+        splitOnComma (x:xs) =
+           let rest = splitOnComma xs
+           in (x : head rest) : tail rest
+
 data NetOpts = NetOpts
   { rxIconPattern :: Maybe IconPattern
   , txIconPattern :: Maybe IconPattern
@@ -50,7 +60,7 @@ options =
      o { rxIconPattern = Just $ parseIconPattern x }) "") ""
   , Option "" ["tx-icon-pattern"] (ReqArg (\x o ->
      o { txIconPattern = Just $ parseIconPattern x }) "") ""
-  , Option "" ["only-dev-list"] (ReqArg (\x o ->
+  , Option "" ["devices"] (ReqArg (\x o ->
      o { onlyDevList = Just $ parseDevList x }) "") ""
   ]
 
