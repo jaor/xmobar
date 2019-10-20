@@ -807,6 +807,7 @@ specification, such as `("clear", "<icon=weather-clear.xbm/>")`.
   in Kbytes per second, and you can set the `-S` to "True" to make them
   displayed with units (the string "Kb/s").
 - Default template: `<dev>: <rx>KB|<tx>KB`
+- Example of usage of `--devices` option: `["--", "--devices", "wlp2s0,enp0s20f41"]`
 
 ### `Wireless Interface Args RefreshRate`
 
