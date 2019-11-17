@@ -28,6 +28,9 @@ import Xmobar.Run.Exec
 import Control.Concurrent.STM
 
 import System.IO.Unsafe
+import System.Environment (lookupEnv)
+
+import Data.Maybe (fromMaybe)
 
 import Data.Time.Format
 import Data.Time.LocalTime
@@ -63,7 +66,8 @@ instance Exec DateZone where
       locale <- getTimeLocale
       atomically $ putTMVar localeLock lock
       if z /= "" then do
-        timeZone <- getTimeZoneSeriesFromOlsonFile ("/usr/share/zoneinfo/" ++ z)
+        tzdir <- lookupEnv "TZDIR"
+        timeZone <- getTimeZoneSeriesFromOlsonFile ((fromMaybe "/usr/share/zoneinfo" tzdir) ++ "/" ++ z)
         go (dateZone f locale timeZone)
        else
         go (date f locale)
