@@ -41,12 +41,6 @@ options =
      o { availableIconPattern = Just $ parseIconPattern x }) "") ""
   ]
 
-parseOpts :: [String] -> IO MemOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-    (o, _, []) -> return $ foldr id defaultOpts o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 memConfig :: IO MConfig
 memConfig = mkMConfig
        "Mem: <usedratio>% (<cache>M)" -- template
@@ -91,6 +85,6 @@ formatMem _ _ = replicate 10 `fmap` getConfigValue naString
 runMem :: [String] -> Monitor String
 runMem argv =
     do m <- io parseMEM
-       opts <- io $ parseOpts argv
+       opts <- io $ parseOptsWith options defaultOpts argv
        l <- formatMem opts m
        parseTemplate l

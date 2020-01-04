@@ -68,12 +68,6 @@ options =
      o { onlyDevList = Just $ parseDevList x }) "") ""
   ]
 
-parseOpts :: [String] -> IO NetOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-    (o, _, []) -> return $ foldr id defaultOpts o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 data UnitPerSec = Bs | KBs | MBs | GBs deriving (Eq,Enum,Ord)
 data NetValue = NetValue Float UnitPerSec deriving (Eq,Show)
 
@@ -188,7 +182,7 @@ parseNet nref nd = do
 runNet :: NetDevRef -> String -> [String] -> Monitor String
 runNet nref i argv = do
   dev <- io $ parseNet nref i
-  opts <- io $ parseOpts argv
+  opts <- io $ parseOptsWith options defaultOpts argv
   printNet opts dev
 
 parseNets :: [(NetDevRef, String)] -> IO [NetDevRate]
@@ -196,7 +190,7 @@ parseNets = mapM $ uncurry parseNet
 
 runNets :: [(NetDevRef, String)] -> [String] -> Monitor String
 runNets refs argv = do
-  opts <- io $ parseOpts argv
+  opts <- io $ parseOptsWith options defaultOpts argv
   dev <- io $ parseActive $ filterRefs opts refs
   printNet opts dev
     where parseActive refs' = fmap selectActive (parseNets refs')

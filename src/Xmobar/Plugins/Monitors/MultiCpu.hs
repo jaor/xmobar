@@ -47,12 +47,6 @@ options =
   , Option "" ["contiguous-icons"] (NoArg (\o -> o {contiguous = True})) ""
   ]
 
-parseOpts :: [String] -> IO MultiCpuOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-    (o, _, []) -> return $ foldr id defaultOpts o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 variables :: [String]
 variables = ["bar", "vbar","ipat","total","user","nice","system","idle"]
 vNum :: Int
@@ -122,7 +116,7 @@ formatAutoCpus opts xs =
 runMultiCpu :: CpuDataRef -> [String] -> Monitor String
 runMultiCpu cref argv =
   do c <- io $ parseCpuData cref
-     opts <- io $ parseOpts argv
+     opts <- io $ parseOptsWith options defaultOpts argv
      l <- formatMultiCpus opts c
      a <- formatAutoCpus opts l
      parseTemplate $ a ++ l

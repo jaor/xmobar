@@ -26,12 +26,7 @@ import qualified Data.ByteString.Lazy.Char8 as B
 import Data.Char (toLower)
 
 import Text.ParserCombinators.Parsec
-import System.Console.GetOpt
-    ( ArgDescr(ReqArg)
-    , ArgOrder(Permute)
-    , OptDescr(Option)
-    , getOpt
-    )
+import System.Console.GetOpt (ArgDescr(ReqArg), OptDescr(Option))
 
 
 -- | Options the user may specify.
@@ -50,13 +45,6 @@ options :: [OptDescr (WeatherOpts -> WeatherOpts)]
 options =
   [ Option "w" ["weathers"] (ReqArg (\s o -> o { weatherString = s }) "") ""
   ]
-
--- | Try to parse arguments from the config file and apply them.
-parseOpts :: [String] -> IO WeatherOpts
-parseOpts argv =
-    case getOpt Permute options argv of
-        (o, _, []  ) -> return $ foldr id defaultOpts o
-        (_, _, errs) -> ioError . userError $ concat errs
 
 weatherConfig :: IO MConfig
 weatherConfig = mkMConfig
@@ -260,7 +248,7 @@ runWeather = runWeather' []
 runWeather' :: [(String, String)] -> [String] -> Monitor String
 runWeather' sks args =
     do d <- io $ getData $ head args
-       o <- io $ parseOpts args
+       o <- io $ parseOptsWith options defaultOpts args
        i <- io $ runP parseData d
        formatWeather o sks i
 

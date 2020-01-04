@@ -101,12 +101,6 @@ options =
     , Option "h" ["highs"] (ReqArg (\x o -> o { highString = x }) "") ""
     ]
 
-parseOpts :: [String] -> IO VolumeOpts
-parseOpts argv =
-    case getOpt Permute options argv of
-        (o, _, []) -> return $ foldr id defaultOpts o
-        (_, _, errs) -> ioError . userError $ concat errs
-
 percent :: Integer -> Integer -> Integer -> Float
 percent v' lo' hi' = (v - lo) / (hi - lo)
   where v = fromIntegral v'
@@ -173,7 +167,7 @@ formatDb opts dbi = do
 
 runVolume :: String -> String -> [String] -> Monitor String
 runVolume mixerName controlName argv = do
-    opts <- io $ parseOpts argv
+    opts <- io $ parseOptsWith options defaultOpts argv
     runVolumeWith opts mixerName controlName
 
 runVolumeWith :: VolumeOpts -> String -> String -> Monitor String

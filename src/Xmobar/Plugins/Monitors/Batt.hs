@@ -103,12 +103,6 @@ options =
   , Option "" ["highs"] (ReqArg (\x o -> o { highString = x }) "") ""
   ]
 
-parseOpts :: [String] -> IO BattOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-    (o, _, []) -> return $ foldr id defaultOpts o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 data Status = Charging | Discharging | Full | Idle | Unknown deriving (Read, Eq)
 
 data Result = Result Float Float Float Status | NA
@@ -245,7 +239,7 @@ runBatt = runBatt' ["BAT", "BAT0", "BAT1", "BAT2"]
 
 runBatt' :: [String] -> [String] -> Monitor String
 runBatt' bfs args = do
-  opts <- io $ parseOpts args
+  opts <- io $ parseOptsWith options defaultOpts args
   let sp = incPerc opts
   c <- io $ readBatteries opts =<< mapM batteryFiles bfs
   suffix <- getConfigValue useSuffix

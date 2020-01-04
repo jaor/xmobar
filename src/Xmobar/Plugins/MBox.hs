@@ -19,6 +19,7 @@ import Prelude
 import Xmobar.Run.Exec
 #ifdef INOTIFY
 
+import Xmobar.Plugins.Monitors.Common (parseOptsWith)
 import Xmobar.System.Utils (changeLoop, expandHome)
 
 import Control.Monad (when)
@@ -63,12 +64,6 @@ options =
   , Option "s" ["suffix"] (ReqArg (\x o -> o { oSuffix = x }) "") ""
   ]
 
-parseOptions :: [String] -> IO Options
-parseOptions args =
-  case getOpt Permute options args of
-    (o, _, []) -> return $ foldr id defaults o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 #else
 import System.IO
 #endif
@@ -86,7 +81,7 @@ instance Exec MBox where
           " but the MBox plugin requires it"
 #else
   start (MBox boxes args _) cb = do
-    opts <- parseOptions args
+    opts <- parseOptsWith options defaults args
     let showAll = oAll opts
         prefix = oPrefix opts
         suffix = oSuffix opts

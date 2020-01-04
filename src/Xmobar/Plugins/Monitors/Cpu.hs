@@ -35,12 +35,6 @@ options =
      o { loadIconPattern = Just $ parseIconPattern x }) "") ""
   ]
 
-parseOpts :: [String] -> IO CpuOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-    (o, _, []) -> return $ foldr id defaultOpts o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 cpuConfig :: IO MConfig
 cpuConfig = mkMConfig
        "Cpu: <total>%"
@@ -77,7 +71,7 @@ formatCpu opts xs = do
 runCpu :: CpuDataRef -> [String] -> Monitor String
 runCpu cref argv =
     do c <- io (parseCpu cref)
-       opts <- io $ parseOpts argv
+       opts <- io $ parseOptsWith options defaultOpts argv
        l <- formatCpu opts c
        parseTemplate l
 

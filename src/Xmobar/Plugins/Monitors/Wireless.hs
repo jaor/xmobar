@@ -34,12 +34,6 @@ options =
      opts { qualityIconPattern = Just $ parseIconPattern d }) "") ""
   ]
 
-parseOpts :: [String] -> IO WirelessOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-       (o, _, []) -> return $ foldr id defaultOpts o
-       (_, _, errs) -> ioError . userError $ concat errs
-
 wirelessConfig :: IO MConfig
 wirelessConfig =
   mkMConfig "<essid> <quality>"
@@ -47,7 +41,7 @@ wirelessConfig =
 
 runWireless :: String -> [String] -> Monitor String
 runWireless iface args = do
-  opts <- io $ parseOpts args
+  opts <- io $ parseOptsWith options defaultOpts args
   iface' <- if "" == iface then io findInterface else return iface
   wi <- io $ getWirelessInfo iface'
   na <- getConfigValue naString

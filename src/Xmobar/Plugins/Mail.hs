@@ -18,6 +18,7 @@ module Xmobar.Plugins.Mail(Mail(..),MailX(..)) where
 import Xmobar.Run.Exec
 #ifdef INOTIFY
 
+import Xmobar.Plugins.Monitors.Common (parseOptsWith)
 import Xmobar.System.Utils (expandHome, changeLoop)
 
 import Control.Monad
@@ -64,13 +65,6 @@ options =
   , Option "s" ["suffix"] (ReqArg (\x o -> o { oSuffix = x }) "") ""
   ]
 
-parseOptions :: [String] -> IO MOptions
-parseOptions args =
-  case getOpt Permute options args of
-    (o, _, []) -> return $ foldr id defaults o
-    (_, _, errs) -> ioError . userError $ concat errs
-
-
 -- | A list of mail box names and paths to maildirs.
 data Mail = Mail [(String, FilePath)] String
     deriving (Read, Show)
@@ -92,7 +86,7 @@ instance Exec MailX where
 #else
     start (MailX ms args _) cb = do
         vs <- mapM (const $ newTVarIO S.empty) ms
-        opts <- parseOptions args
+        opts <- parseOptsWith options defaults args
         let prefix = oPrefix opts
             suffix = oSuffix opts
             dir = oDir opts

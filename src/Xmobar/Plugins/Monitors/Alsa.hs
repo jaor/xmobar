@@ -57,17 +57,12 @@ options =
   where
     modifyVolumeOpts f o = o { aoVolumeOpts = f (aoVolumeOpts o) }
 
-parseOpts :: [String] -> IO AlsaOpts
-parseOpts argv =
-    case getOpt Permute options argv of
-        (o, _, []) -> return $ foldr id defaultOpts o
-        (_, _, errs) -> ioError . userError $ concat errs
-
+-- | Drop generic Monitor args first, then apply 'parseOptsWith' in order to
+-- parse everything.
 parseOptsIncludingMonitorArgs :: [String] -> IO AlsaOpts
 parseOptsIncludingMonitorArgs args =
-    -- Drop generic Monitor args first
     case getOpt Permute [] args of
-      (_, args', _) -> parseOpts args'
+        (_, args', _) -> parseOptsWith options defaultOpts args'
 
 startAlsaPlugin :: String -> String -> [String] -> (String -> IO ()) -> IO ()
 startAlsaPlugin mixerName controlName args cb = do
@@ -80,7 +75,7 @@ startAlsaPlugin mixerName controlName args cb = do
         -- it would have to inline 'runMBD', 'doArgs' and 'parseOpts' to see
         -- it, which probably isn't going to happen with the default
         -- optimization settings).
-        opts2 <- io $ parseOpts args2
+        opts2 <- io $ parseOptsWith options defaultOpts args2
         Volume.runVolumeWith (aoVolumeOpts opts2) mixerName controlName
 
   withMonitorWaiter mixerName (aoAlsaCtlPath opts) cb $ \wait_ ->

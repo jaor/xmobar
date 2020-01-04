@@ -60,12 +60,6 @@ options = [ Option [] ["max-icon-pattern"]
               ""
           ]
 
--- | Parse Arguments and apply them to Options.
-parseOpts :: [String] -> IO CTOpts
-parseOpts argv = case getOpt Permute options argv of
-                   (opts , _ , []  ) -> return $ foldr id defaultOpts opts
-                   (_    , _ , errs) -> ioError . userError $ concat errs
-
 -- | Generate Config with a default template and options.
 cTConfig :: IO MConfig
 cTConfig = mkMConfig cTTemplate cTOptions
@@ -157,7 +151,7 @@ formatCT opts cTs = do let CTOpts { mintemp = minT
 
 runCT :: [String] -> Monitor String
 runCT argv = do cTs <- io parseCT
-                opts <- io $ parseOpts argv
+                opts <- io $ parseOptsWith options defaultOpts argv
                 l <- formatCT opts cTs
                 parseTemplate l
 

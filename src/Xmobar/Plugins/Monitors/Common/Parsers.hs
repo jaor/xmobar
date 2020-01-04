@@ -24,12 +24,14 @@ module Xmobar.Plugins.Monitors.Common.Parsers ( runP
                                               , skipTillString
                                               , parseTemplate
                                               , parseTemplate'
+                                              , parseOptsWith
                                               ) where
 
 import Xmobar.Plugins.Monitors.Common.Types
 
 import Control.Applicative ((<$>))
 import qualified Data.Map as Map
+import System.Console.GetOpt (ArgOrder(Permute), OptDescr, getOpt)
 import Text.ParserCombinators.Parsec
 
 runP :: Parser [a] -> String -> IO [a]
@@ -150,3 +152,14 @@ combine m ((s,ts,ss):xs) =
          Nothing -> return $ "<" ++ ts ++ ">"
          Just  r -> let f "" = r; f n = n; in f <$> parseTemplate' r m
        return $ s ++ str ++ ss ++ next
+
+-- | Try to parse arguments from the config file and apply them to Options.
+parseOptsWith
+    :: [OptDescr (opts -> opts)]  -- ^ Options that are specifiable
+    -> opts                       -- ^ Default options to use as a fallback
+    -> [String]                   -- ^ Actual arguments given
+    -> IO opts
+parseOptsWith options defaultOpts argv =
+    case getOpt Permute options argv of
+        (o, _, []  ) -> pure $ foldr id defaultOpts o
+        (_, _, errs) -> ioError . userError $ concat errs

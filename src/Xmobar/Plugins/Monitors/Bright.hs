@@ -44,13 +44,6 @@ options = [ Option "D" ["device"] (ReqArg (\x o -> o { subDir = x }) "") ""
              o { curBrightIconPattern = Just $ parseIconPattern x }) "") ""
           ]
 
--- from Batt.hs
-parseOpts :: [String] -> IO BrightOpts
-parseOpts argv =
-  case getOpt Permute options argv of
-    (o, _, []) -> return $ foldr id defaultOpts o
-    (_, _, errs) -> ioError . userError $ concat errs
-
 sysDir :: FilePath
 sysDir = "/sys/class/backlight/"
 
@@ -75,7 +68,7 @@ brightFiles opts = do
 
 runBright :: [String] ->  Monitor String
 runBright args = do
-  opts <- io $ parseOpts args
+  opts <- io $ parseOptsWith options defaultOpts args
   f <- io $ brightFiles opts
   c <- io $ readBright f
   case f of
