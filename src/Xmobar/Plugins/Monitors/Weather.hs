@@ -30,7 +30,7 @@ import System.Console.GetOpt (ArgDescr(ReqArg), OptDescr(Option))
 
 
 -- | Options the user may specify.
-data WeatherOpts = WeatherOpts
+newtype WeatherOpts = WeatherOpts
   { weatherString :: String
   }
 

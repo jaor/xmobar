@@ -19,3 +19,4 @@ tags
 /cabal.project.local
 /.ghc.environment.*
 /cabal.project.local~
+/stack.yaml.lock
