@@ -22,6 +22,7 @@ module Xmobar.Plugins.Monitors.Volume
   ) where
 
 import Control.Applicative ( (<$>), liftA3 )
+import Data.Maybe (fromMaybe)
 import Control.Monad ( liftM2, liftM3, mplus )
 import Data.Traversable (sequenceA)
 import Xmobar.Plugins.Monitors.Common
@@ -29,10 +30,19 @@ import Sound.ALSA.Mixer
 import qualified Sound.ALSA.Exception as AE
 import System.Console.GetOpt
 
-volumeConfig :: IO MConfig
-volumeConfig = mkMConfig "Vol: <volume>% <status>"
-                         ["volume", "volumebar", "volumevbar", "dB","status", "volumeipat"]
 
+volumeConfig :: IO MConfig
+volumeConfig =
+    mkMConfig
+        "Vol: <volume>% <status>"
+        [ "volume"
+        , "volumebar"
+        , "volumevbar"
+        , "dB"
+        , "status"
+        , "volumeipat"
+        , "volumestatus"
+        ]
 
 data VolumeOpts = VolumeOpts
     { onString :: String
@@ -135,7 +145,7 @@ switchHelper opts cHelp strHelp vs = return $
     ++ maybe "" (const "</fc>") (cHelp opts)
 
 formatSwitch :: VolumeOpts -> Bool -> VolumeStatus -> Monitor String
-formatSwitch opts True vs = switchHelper opts onColor onString vs
+formatSwitch opts True  vs = switchHelper opts onColor  onString  vs
 formatSwitch opts False _  = switchHelper opts offColor offString VolOff
 
 -- | Convert the current volume status into user defined strings
@@ -183,7 +193,13 @@ runVolumeWith opts mixerName controlName = do
                          (liftA3 percent val lo hi) -- current volume in %
     s <- getFormatSwitch opts sw volStat
     ipat <- liftMonitor $ liftM3 (formatVolDStr $ volumeIconPattern opts) lo hi val
-    parseTemplate [p, b, v, d, s, ipat]
+
+    -- Volume and status in one.
+    let vs = if isVolOff sw
+            then offString opts -- User defined off string
+            else s ++ p         -- Status string, current volume in %
+
+    parseTemplate [p, b, v, d, s, ipat, vs]
 
   where
 
@@ -238,5 +254,9 @@ runVolumeWith opts mixerName controlName = do
     getFormatSwitch _ Nothing _ = unavailable
     getFormatSwitch _ _ Nothing = unavailable
     getFormatSwitch opts' (Just sw) (Just vs) = formatSwitch opts' sw vs
+
+    -- | Determine whether the volume is off based on the value of 'sw' from
+    -- 'runVolumeWith'.
+    isVolOff = not . fromMaybe False
 
     unavailable = getConfigValue naString
