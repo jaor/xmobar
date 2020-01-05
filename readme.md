@@ -1182,7 +1182,8 @@ more than one battery.
           Defaults to "".
         - Long option: `--lows`
 - Variables that can be used with the `-t`/`--template` argument:
-            `volume`, `volumebar`, `volumevbar`, `volumeipat`, `dB`, `status`
+            `volume`, `volumebar`, `volumevbar`, `volumeipat`, `dB`, `status`,
+            `volumestatus`
 - Note that `dB` might only return 0 on your system. This is known
   to happen on systems with a pulseaudio backend.
 - Default template: `Vol: <volume>% <status>`

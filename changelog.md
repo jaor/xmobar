@@ -7,6 +7,10 @@ _New features_
     station (thanks to *slotThe*).
   - New option `--weathers`, for `Weather` to display a default string in
     case the `weather` field is not reported (thanks to *slotThe*).
+  - New template parameter `<volumestatus>` for the `Volume` plugin, combining
+    the effects of `<volume>` and `<status>`.  This will show the volume
+    (possibly prefixed by `onString` or a percentage-based string) if and only
+    if the volume is not muted.  Otherwise it will show the `offString`.
 
 ## Version 0.32 (December, 2019)
 
