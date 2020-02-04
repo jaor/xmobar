@@ -928,7 +928,7 @@ specification, such as `("clear", "<icon=weather-clear.xbm/>")`.
     threshold (default: "")
   - `--mediums`: string for AC "off" status and power lower than the `-H`
     threshold (default: "")
-  - `--high`: string for AC "off" status and power higher than the `-H`
+  - `--highs`: string for AC "off" status and power higher than the `-H`
     threshold (default: "")
 
 
