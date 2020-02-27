@@ -27,5 +27,5 @@ install:
   - wget https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh
 
 script:
-#  - sh ./travis.sh src
+  - sh ./travis.sh src
   - cabal configure --enable-tests -fall_extensions && cabal build && cabal test

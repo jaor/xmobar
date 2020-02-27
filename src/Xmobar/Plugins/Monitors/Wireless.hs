@@ -1,4 +1,7 @@
-{-# LANGUAGE TypeApplications, CPP #-}
+{-# LANGUAGE CPP #-}
+#ifdef USE_NL80211
+{-# LANGUAGE TypeApplications #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Plugins.Monitors.Wireless
@@ -16,7 +19,6 @@
 module Xmobar.Plugins.Monitors.Wireless (wirelessConfig, runWireless)  where
 
 import System.Console.GetOpt
-import Data.Maybe (fromMaybe)
 
 import Xmobar.Plugins.Monitors.Common
 
@@ -26,7 +28,7 @@ import Network.IWlib
 import Control.Exception (bracket)
 import qualified Data.Map as M
 import GHC.Int (Int8)
-import Data.Maybe (listToMaybe)
+import Data.Maybe (listToMaybe, fromMaybe)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
 import Data.ByteString.Char8 (unpack)
@@ -42,12 +44,12 @@ import System.Posix.IO (closeFd)
 data IwData = IwData { wiEssid :: String, wiSignal :: Maybe Int, wiQuality :: Int }
 
 getWirelessInfo :: String -> IO IwData
-getWirelessInfo ifname = do
+getWirelessInfo ifname =
   bracket makeNL80211Socket (closeFd . getFd) (\s -> do
   iflist <- getInterfaceList s
   iwdata <- runMaybeT $ do
     ifidx <- MaybeT . return $ foldr (\(n, i) z ->
-                                       if (ifname == "" || ifname == n) then Just i else z)
+                                       if ifname == "" || ifname == n then Just i else z)
                                      Nothing
                                      iflist
     scanp <- liftIO (getConnectedWifi s ifidx) >>=
@@ -63,13 +65,16 @@ getWirelessInfo ifname = do
                                 return . unpack
         signal = staInfoFromPacket stap >>= staSignalMBM >>=
                  return . fromIntegral @Int8 . fromIntegral
-        qlty   = fromMaybe (-1) (round @Float . (/ 0.7) . (+ 110) .
-                                                clamp (-110) (-40) . fromIntegral <$> signal)
+        qlty   = maybe (-1) (round @Float . (/ 0.7) . (+ 110) .
+                                            clamp (-110) (-40) . fromIntegral) signal
     MaybeT . return $ Just $ IwData ssid signal qlty
   return $ fromMaybe (IwData "" Nothing (-1)) iwdata)
   where
     rightToMaybe = either (const Nothing) Just
-    clamp lb up v = if v < lb then lb else if v > up then up else v
+    clamp lb up v
+      | v < lb = lb
+      | v > up = up
+      | otherwise = v
 #endif
 
 newtype WirelessOpts = WirelessOpts
