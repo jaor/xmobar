@@ -169,7 +169,7 @@ library
       regex-compat,
       process,
       old-locale,
-      bytestring,
+      bytestring >= 0.10.8.2,
       directory,
       unix,
       time,
