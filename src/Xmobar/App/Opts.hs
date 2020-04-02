@@ -106,7 +106,7 @@ info :: String
 info = "xmobar " ++ showVersion version
         ++ "\n (C) 2010 - 2020 Jose A Ortega Ruiz"
         ++ "\n (C) 2007 - 2010 Andrea Rossato\n "
-        ++ mail ++ "\n" ++ license
+        ++ mail ++ "\n" ++ license ++ "\n"
 
 mail :: String
 mail = "<mail@jao.io>"
