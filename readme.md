@@ -1150,7 +1150,7 @@ more than one battery.
 
          Run MultiCoreTemp ["-t", "Temp: <avg>°C | <avgpc>%",
                             "-L", "60", "-H", "80",
-                            "-l", "green", "-n", "yellow", "-h", "red"
+                            "-l", "green", "-n", "yellow", "-h", "red",
                             "--", "--mintemp", "20", "--maxtemp", "100"] 50
 
 ### `Volume Mixer Element Args RefreshRate`
