@@ -4,6 +4,11 @@ _New features_
 
   - New command line option `--add-font` (Ivan Brennan)
 
+_Bug fixes_
+
+  - Fix date plugin not picking up DST and timezone changes
+    (Fixed by reverting the optimization merged in 0.34).
+
 ## Version 0.36 (August, 2020)
 
 _New features_
