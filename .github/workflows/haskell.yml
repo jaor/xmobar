@@ -2,7 +2,6 @@ name: Haskell CI
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -14,10 +13,10 @@ jobs:
     strategy:
       matrix:
         cabal: ["3.2"]
-        ghc: ["8.4", "8.6.5", "8.8.3", "8.10.1"]
+        ghc: ["8.4", "8.6", "8.8.3", "8.10.1"]
     env:
       CONFIG: "--enable-tests --enable-benchmarks -fall_extensions"
-  
+
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-haskell@v1
@@ -38,10 +37,11 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install packages
-      run: | 
+      run: |
+        sudo apt-get install gcc
         sudo apt-get install -y libasound2-dev libxpm-dev libmpd-dev libxrandr-dev
-        sudo apt-get install -y happy c2hs hspec-discover      
-        
+        sudo apt-get install -y happy c2hs hspec-discover
+
     - name: Install dependencies
       run: |
         cabal update
@@ -49,7 +49,7 @@ jobs:
 
     - name: Build
       run: cabal build $CONFIG
-      
+
     - name: Run hlint
       run: |
         wget https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh
