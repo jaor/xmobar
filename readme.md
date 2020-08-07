@@ -1,5 +1,4 @@
 [![Hackage](https://img.shields.io/hackage/v/xmobar.svg)](http://hackage.haskell.org/package/xmobar)
-[![Build Status](https://travis-ci.org/jaor/xmobar.svg?branch=master)](https://travis-ci.org/jaor/xmobar)
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
