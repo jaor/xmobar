@@ -15,13 +15,13 @@ ghc:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y  libiw-dev libasound2-dev libxpm-dev libmpd-dev
-  - sudo apt-get install -y libxrandr-dev
-  - sudo apt-get install -y happy c2hs
+  - sudo apt-get install -y libasound2-dev libxpm-dev libmpd-dev
+  - sudo apt-get install -y libxrandr-dev hspec-discover
   - export PATH=/opt/ghc/bin:$PATH
 
 install:
-  - travis_wait 30 cabal install --only-dependencies --enable-tests -fall_extensions
+  - cabal configure --enable-tests -fall_extensions
+  - travis_wait 30 cabal build --only-dependecies --enable-tests
   - wget https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh
 
 script:
