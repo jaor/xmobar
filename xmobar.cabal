@@ -325,8 +325,7 @@ test-suite XmobarTest
                  stm,
                  async,
                  temporary,
-                 hspec == 2.*,
-                 xmobar
+                 hspec == 2.*
 
   other-modules: Xmobar.Plugins.Monitors.CommonSpec
                  Xmobar.Plugins.Monitors.Common
