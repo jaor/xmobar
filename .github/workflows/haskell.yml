@@ -1,7 +1,8 @@
-name: Haskell CI
+name: Haskell CI (PRs)
 
 on:
   push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
