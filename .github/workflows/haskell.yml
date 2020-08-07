@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         cabal: ["3.2"]
-        ghc: ["8.4", "8.6", "8.8.3", "8.10.1"]
+        ghc: ["8.4"]
     env:
       CONFIG: "--enable-tests --enable-benchmarks -fall_extensions"
 
@@ -38,7 +38,7 @@ jobs:
 
     - name: Install packages
       run: |
-        sudo apt-get install gcc
+        sudo apt-get install -y xorg-dev
         sudo apt-get install -y libasound2-dev libxpm-dev libmpd-dev libxrandr-dev
         sudo apt-get install -y happy c2hs hspec-discover
 
