@@ -8,7 +8,7 @@ addons:
     update: true
     sources:
       - hvr-ghc
-    packages: cabal-install-3.0
+    packages: cabal-install-2.0
 
 ghc:
   - 8.8.3
@@ -20,7 +20,7 @@ before_install:
   - export PATH=/opt/ghc/bin:$PATH
 
 install:
-  - cabal configure --enable-tests -fall_extensions
+  - cabal configure --max-backjumps 1000 --enable-tests -fall_extensions
   - travis_wait 30 cabal build --only-dependecies --enable-tests
   - wget https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh
 
