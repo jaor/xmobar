@@ -31,6 +31,7 @@ data Opts = Help
           | Recompile
           | Version
           | Font       String
+          | AddFont    String
           | BgColor    String
           | FgColor    String
           | Alpha      String
@@ -56,6 +57,7 @@ options =
     , Option "r" ["recompile"] (NoArg Recompile) "Force recompilation"
     , Option "V" ["version"] (NoArg Version) "Show version information"
     , Option "f" ["font"] (ReqArg Font "font name") "Font name"
+    , Option "N" ["add-font"] (ReqArg AddFont "font name") "Add to the list of additional fonts"
     , Option "w" ["wmclass"] (ReqArg WmClass "class") "X11 WM_CLASS property"
     , Option "n" ["wmname"] (ReqArg WmName "name") "X11 WM_NAME property"
     , Option "B" ["bgcolor"] (ReqArg BgColor "bg color" )
@@ -127,6 +129,7 @@ doOpts conf (o:oo) =
     Recompile -> doOpts' conf
     Verbose -> doOpts' (conf {verbose = True})
     Font s -> doOpts' (conf {font = s})
+    AddFont s -> doOpts' (conf {additionalFonts = additionalFonts conf ++ [s]})
     WmClass s -> doOpts' (conf {wmClass = s})
     WmName s -> doOpts' (conf {wmName = s})
     BgColor s -> doOpts' (conf {bgColor = s})
