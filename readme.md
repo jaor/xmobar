@@ -483,6 +483,7 @@ xmobar --help):
       -v            --verbose              Emit verbose debugging messages
       -r            --recompile            Force recompilation (for Haskell FILE)
       -f font name  --font=font name       Font name
+      -N font name  --add-font=font name   Add to the list of additional fonts
       -w class      --wmclass=class        X11 WM_CLASS property
       -n name       --wmname=name          X11 WM_NAME property
       -B bg color   --bgcolor=bg color     Background color. Default black
