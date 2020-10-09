@@ -11,7 +11,7 @@ flags:
 
 extra-deps:
  - netlink-1.1.1.0
-
+ - libmpd-0.9.2.0
 nix:
     packages:
       - alsaLib

@@ -229,7 +229,7 @@ library
        cpp-options: -DUSE_NL80211
 
     if flag(with_mpd) || flag(all_extensions)
-       build-depends: libmpd >= 0.9.0.10
+       build-depends: libmpd >= 0.9.2.0
        other-modules: Xmobar.Plugins.Monitors.MPD
        cpp-options: -DLIBMPD
 
