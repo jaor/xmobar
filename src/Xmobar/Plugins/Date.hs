@@ -32,15 +32,12 @@ data Date = Date String String Int
 instance Exec Date where
     alias (Date _ a _) = a
     rate  (Date _ _ r) = r
-    start (Date f _ r) cb = do
-      t <- getCurrentTime
-      zone <- getTimeZone t
-      go zone
-     where
-      go zone = doEveryTenthSeconds r $ date zone f >>= cb
+    start (Date f _ r) cb =
+      doEveryTenthSeconds r $ date f >>= cb
 
-date :: TimeZone -> String -> IO String
-date timezone format = do
+date :: String -> IO String
+date format = do
   time <- getCurrentTime
-  let zonedTime = utcToZonedTime timezone time
+  zone <- getTimeZone time
+  let zonedTime = utcToZonedTime zone time
   pure $ formatTime defaultTimeLocale format zonedTime
