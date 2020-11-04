@@ -8,6 +8,7 @@ flags:
  xmobar:
    all_extensions: true
    with_threaded: true
+   with_dbus: true
 
 extra-deps:
  - netlink-1.1.1.0
