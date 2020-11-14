@@ -1,3 +1,5 @@
+{-# LANGUAGE ViewPatterns #-}
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Plugins.StdinReader
@@ -22,30 +24,36 @@ import Prelude
 import System.Posix.Process
 import System.Exit
 import System.IO
+import System.IO.Error (isEOFError)
 import Xmobar.Run.Exec
 import Xmobar.X11.Actions (stripActions)
-import Xmobar.System.Utils (onSomeException)
-import Control.Monad (when)
+import Control.Concurrent (threadDelay)
+import Control.Exception
+import Control.Monad (forever)
 
 data StdinReader = StdinReader | UnsafeStdinReader
   deriving (Read, Show)
 
 instance Exec StdinReader where
-  start stdinReader cb = do
-    -- The EOF check is necessary for certain systems
-    -- More details here https://github.com/jaor/xmobar/issues/442
-    eof <- isEOF
-    when eof $
-      do hPrint stderr "xmobar: eof at an early stage"
-         exitImmediately ExitSuccess
-    s <-
-      getLine `onSomeException`
-      (\e -> do
-         let errorMessage = "xmobar: Received exception " <> show e
-         hPrint stderr errorMessage
-         cb errorMessage)
-    cb $ escape stdinReader s
-    start stdinReader cb
+  start stdinReader cb = forever $ (cb . escape stdinReader =<< getLine) `catch` handler
+    where
+      -- rethrow async exceptions like ThreadKilled, etc.
+      handler (fromException -> Just e) = throwIO (e :: SomeAsyncException)
+      -- XMonad.Hooks.DynamicLog.statusBar starts new xmobar on every xmonad
+      -- reload and the old xmobar is only signalled to exit via the pipe
+      -- being closed, so we must unconditionally terminate on EOF, otherwise
+      -- there'd be a pileup of xmobars
+      handler (fromException -> Just e) | isEOFError e = exitImmediately ExitSuccess
+      -- any other exception, like "invalid argument (invalid byte sequence)",
+      -- is logged to both stderr and the bar itself, throttled to avoid
+      -- excessive CPU usage whenever someone pipes garbage into xmobar, and
+      -- then discarded without terminating, so a single charset error doesn't
+      -- break the entire xmobar
+      handler e = do
+        let errorMessage = "xmobar: Received exception " <> show e
+        hPutStrLn stderr errorMessage
+        cb $ stripActions errorMessage
+        threadDelay 1000000
 
 escape :: StdinReader -> String -> String
 escape StdinReader = stripActions
