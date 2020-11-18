@@ -27,7 +27,6 @@ import System.IO
 import System.IO.Error (isEOFError)
 import Xmobar.Run.Exec
 import Xmobar.X11.Actions (stripActions)
-import Control.Concurrent (threadDelay)
 import Control.Exception
 import Control.Monad (forever)
 
@@ -45,15 +44,11 @@ instance Exec StdinReader where
       -- there'd be a pileup of xmobars
       handler (fromException -> Just e) | isEOFError e = exitImmediately ExitSuccess
       -- any other exception, like "invalid argument (invalid byte sequence)",
-      -- is logged to both stderr and the bar itself, throttled to avoid
-      -- excessive CPU usage whenever someone pipes garbage into xmobar, and
-      -- then discarded without terminating, so a single charset error doesn't
-      -- break the entire xmobar
+      -- is logged to both stderr and the bar itself
       handler e = do
         let errorMessage = "xmobar: Received exception " <> show e
         hPutStrLn stderr errorMessage
         cb $ stripActions errorMessage
-        threadDelay 1000000
 
 escape :: StdinReader -> String -> String
 escape StdinReader = stripActions
