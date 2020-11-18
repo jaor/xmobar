@@ -335,6 +335,7 @@ test-suite XmobarTest
                  Xmobar.Plugins.Monitors.Common.Output
                  Xmobar.Plugins.Monitors.Common.Files
                  Xmobar.Plugins.Monitors.Cpu
+                 Xmobar.Plugins.Monitors.CpuSpec
                  Xmobar.Plugins.Monitors.Common.Run
                  Xmobar.Run.Exec
                  Xmobar.App.Timer
@@ -347,7 +348,6 @@ test-suite XmobarTest
       other-modules: Xmobar.Plugins.Monitors.Volume
                      Xmobar.Plugins.Monitors.Alsa
                      Xmobar.Plugins.Monitors.AlsaSpec
-                     Xmobar.Plugins.Monitors.CpuSpec
 
       cpp-options: -DALSA
 

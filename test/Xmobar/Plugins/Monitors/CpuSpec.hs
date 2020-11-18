@@ -23,7 +23,7 @@ spec =
       do let args = ["-L","3","-H","50","--normal","green","--high","red", "-t", "Cpu: <total>% <bar>"]
          cpuArgs <- getArguments args
          cpuValue <- runCpu cpuArgs
-         cpuValue `shouldSatisfy` (\item -> "::" `isSuffixOf` item)
+         cpuValue `shouldSatisfy` (all (`elem` ":#") . last . words)
     it "works with no icon pattern template" $
       do let args = ["-L","3","-H","50","--normal","green","--high","red", "-t", "Cpu: <total>% <bar>", "--", "--load-icon-pattern", "<icon=bright_%%.xpm/>"]
          cpuArgs <- getArguments args
