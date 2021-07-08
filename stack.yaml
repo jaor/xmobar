@@ -1,5 +1,5 @@
 # ghc 8.8.3
-resolver: lts-16.0
+resolver: lts-17.14
 
 packages:
  - .

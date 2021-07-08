@@ -80,9 +80,11 @@ setPosition c p rs ht =
   case p' of
     Top -> Rectangle rx ry rw h
     TopP l r -> Rectangle (rx + fi l) ry (rw - fi l - fi r) h
+    TopH f  -> Rectangle rx ry rw (fi f)
     TopW a i -> Rectangle (ax a i) ry (nw i) h
     TopSize a i ch -> Rectangle (ax a i) ry (nw i) (mh ch)
     Bottom -> Rectangle rx ny rw h
+    BottomH p''' -> Rectangle rx ny rw (fi p''')
     BottomW a i -> Rectangle (ax a i) ny (nw i) h
     BottomP l r -> Rectangle (rx + fi l) ny (rw - fi l - fi r) h
     BottomSize a i ch  -> Rectangle (ax a i) (ny' ch) (nw i) (mh ch)

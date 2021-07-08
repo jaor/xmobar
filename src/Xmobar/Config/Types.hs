@@ -68,10 +68,12 @@ data Config =
            } deriving (Read, Show)
 
 data XPosition = Top
+               | TopH Int
                | TopW Align Int
                | TopSize Align Int Int
                | TopP Int Int
                | Bottom
+               | BottomH Int
                | BottomP Int Int
                | BottomW Align Int
                | BottomSize Align Int Int
