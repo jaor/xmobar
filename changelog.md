@@ -2,6 +2,8 @@
 
 _New features_
 
+  - New constructors for only controlling bar height:
+    TopH and BottomH for Top and Bottom respectively
   - New monitor: k10temp (Sam Kirby)
   - Better handling of command line arguments for Haskell-based
     configuration keys (see #553 and #554)

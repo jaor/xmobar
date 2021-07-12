@@ -29,8 +29,8 @@ the =Config= block in your configuration.
 
 - =alpha= The transparency. 0 is transparent, 255 is opaque.
 
-- =position= Top, TopP, TopW, TopSize, Bottom, BottomP, BottomW,
-  BottomSize or Static (with x, y, width and height).
+- =position= Top, TopH, TopP, TopW, TopSize, Bottom, BottomH,
+  BottomP, BottomW, BottomSize or Static (with x, y, width and height).
 
   TopP and BottomP take 2 arguments: left padding and right padding.
 
@@ -42,7 +42,21 @@ the =Config= block in your configuration.
   integer for the percentage width, and an integer for the minimum pixel
   height that the xmobar window will have.
 
+  TopH and BottomH take one argument (Int) which adjusts the bar height.
+
   For example:
+
+  #+begin_src haskell
+    position = TopH 30
+  #+end_src
+
+  to make a 30 tall bar on the top, or
+
+  #+begin_src haskell
+    position = BottomH 30
+  #+end_src
+
+  to make a 30 tall bar on the bottom of the screen.
 
   #+begin_src haskell
     position = BottomW C 75
